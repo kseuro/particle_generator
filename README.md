@@ -1,4 +1,4 @@
-# particle_generator
+# Particle Generator
 Deep generative models applied to 2D particle interaction image generation.
 
 This repository contains PyTorch implementations of generative models applied to liquid Argon computer vision 1 (LArCV1) datasets.
