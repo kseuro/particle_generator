@@ -4,11 +4,11 @@
 # Organization: Tufts University
 # Department: Physics
 # Date: 10.08.2019
-# Purpose: This python script is designed to provide model-agnostic command 
-#          line argument parsing capabilities for PyTorch models associated
-#          with the particle generator project.
-#          Functionality includes instantiation of argument parser objects
-#          both for training and deploying PyTorch models.
+# Purpose: - This python script is designed to provide model-agnostic command 
+#            line argument parsing capabilities for PyTorch models associated
+#            with the particle generator project.
+#          - Functionality includes instantiation of argument parser objects
+#            both for training and deploying PyTorch models.
 ############################################################################
 
 # System Imports
