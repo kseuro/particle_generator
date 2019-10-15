@@ -64,7 +64,8 @@ class Discriminator(nn.Module):
     '''
         Discriminator model class
         Does: initializes a D model using the provided arch specs.
-        Args: - n_features: dimension of the input layer, calculated based on                       the dimension of the input data images
+        Args: - n_features: dimension of the input layer, calculated based on                       
+                            the dimension of the input data images
               - n_layers: number of layers in Discriminator model   
               - n_hidden: number of hidden units in each layer
         Returns: Probability of model input belonging to real image space
