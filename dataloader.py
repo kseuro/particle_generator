@@ -18,9 +18,6 @@
 import os
 import PIL
 import torch
-import pandas as pd
-import numpy as np
-from skimage import io, transform
 from PIL import Image
 from torchvision import transforms, utils
 from torch.utils.data import Dataset, DataLoader
