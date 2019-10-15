@@ -42,13 +42,16 @@ class Generator(nn.Module):
         ## First layers
         self.front = nn.Sequential(nn.Linear(self.in_features, self.n_hidden),
                                              self.activation)
+
         ## Middle layers
         self.layers = []
         for _ in range(self.n_layers - 2):
             self.layers += nn.Sequential(nn.Linear(self.n_hidden, self.n_hidden)
                                                   ,self.activation)
+                                                  
         ## Convert self.layers to ModuleList so that it registers properly
         self.layers = nn.ModuleList([nn.ModuleList(layer) for layer in self.layers])
+
         ## Output layer
         self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features), 
                                            self.out_activ)
@@ -84,14 +87,17 @@ class Discriminator(nn.Module):
         ## First layer
         self.front = nn.Sequential(nn.Linear(self.in_features, self.n_hidden),
                                              self.activation)
+
         ## Middle layers
         self.layers = []
         for _ in range(self.n_layers - 2):
             self.layers += nn.Sequential(nn.Linear(self.n_hidden, self.n_hidden)
                                                   ,self.activation)
+
         ## Convert self.layers to ModuleList so that it registers properly
         self.layers = nn.ModuleList([nn.ModuleList(layer)
                                      for layer in self.layers])
+
         ## Output layer
         self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features),
                                            self.out_activ)

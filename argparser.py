@@ -18,8 +18,8 @@ from argparse import ArgumentParser
 def train_parser():
     '''
         Argument Parser Function for model training
-        Does: function that prepares a command line argument parser object with
-              the desired functionality for training a generative model
+        Does: prepares a command line argument parser object with
+              functionality for training a generative model
         Args: None
         Returns: argument parser object
     '''
@@ -144,9 +144,8 @@ def train_parser():
 def deploy_parser():
     '''
         Argument Parser Function for model training
-        Does: function that prepares a command line argument parser object with
-              the desired functionality for deploying a trained particle 
-              generator model.
+        Does: prepares a command line argument parser object with
+              functionality for deploying a trained generative model.
         Args: None
         Returns: argument parser object
     '''
