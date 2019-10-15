@@ -20,12 +20,13 @@ import torchvision
 class Generator(nn.Module):
     '''
         Generator model class
-        Does: initializes a generator model using the provided architecture           specifications. 
+        Does: initializes a G model using the provided arch specs. 
         Args: - z_dim: dimension of the input vector
               - n_layers: number of layers in Generator model   
               - n_hidden: number of hidden units in each layer
               - n_out: dimension of model output layer. Should correspond
-                       to the square of the input image dimension (e.g. [512x512] = 262144)
+                       to the square of the input image dimension 
+                       - (e.g. [512x512] = 262144)
         Returns: Generator model
     '''
     def __init__(self, z_dim, n_layers, n_hidden, n_out):
@@ -39,15 +40,18 @@ class Generator(nn.Module):
 
         # Prepare model
         ## First layers
-        self.front = nn.Sequential(nn.Linear(self.in_features, self.n_hidden),                             self.activation)
+        self.front = nn.Sequential(nn.Linear(self.in_features, self.n_hidden),
+                                             self.activation)
         ## Middle layers
         self.layers = []
         for _ in range(self.n_layers - 2):
-            self.layers += nn.Sequential(nn.Linear(self.n_hidden, self.n_hidden)                            ,self.activation)
+            self.layers += nn.Sequential(nn.Linear(self.n_hidden, self.n_hidden)
+                                                  ,self.activation)
         ## Convert self.layers to ModuleList so that it registers properly
-        self.layers = nn.ModuleList([nn.ModuleList(layer) for layer in                                       self.layers])
+        self.layers = nn.ModuleList([nn.ModuleList(layer) for layer in self.layers])
         ## Output layer
-        self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features),                            self.out_activ)
+        self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features), 
+                                           self.out_activ)
 
     def forward(self, x):
         x = self.front(x)
@@ -59,7 +63,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     '''
         Discriminator model class
-        Does: initializes a discriminator model using the provided architecture       specifications
+        Does: initializes a D model using the provided arch specs.
         Args: - n_features: dimension of the input layer, calculated based on                       the dimension of the input data images
               - n_layers: number of layers in Discriminator model   
               - n_hidden: number of hidden units in each layer
@@ -77,16 +81,19 @@ class Discriminator(nn.Module):
 
         # Prepare model
         ## First layer
-        self.front = nn.Sequential(nn.Linear(self.in_features, self.n_hidden),                             self.activation)
+        self.front = nn.Sequential(nn.Linear(self.in_features, self.n_hidden),
+                                             self.activation)
         ## Middle layers
         self.layers = []
         for _ in range(self.n_layers - 2):
-            self.layers += nn.Sequential(nn.Linear(self.n_hidden, self.n_hidden)                                      ,self.activation)
+            self.layers += nn.Sequential(nn.Linear(self.n_hidden, self.n_hidden)
+                                                  ,self.activation)
         ## Convert self.layers to ModuleList so that it registers properly
         self.layers = nn.ModuleList([nn.ModuleList(layer)
                                      for layer in self.layers])
         ## Output layer
-        self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features),                            self.out_activ)
+        self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features),
+                                           self.out_activ)
 
     def forward(self, x):
         x = self.front(x)
