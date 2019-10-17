@@ -23,8 +23,8 @@ def train_parser():
         Args: None
         Returns: argument parser object
     '''
-    usage = "Command line arguement parser for set up of PyTorch \
-            particle generator models."
+    usage = "Command line arguement parser for set up " + \
+            "of PyTorch particle generator model training."
     parser = ArgumentParser(description=usage)
 
     ################## Data Loading ######################
@@ -149,9 +149,8 @@ def deploy_parser():
         Args: None
         Returns: argument parser object
     '''
-    usage = "Command line arguement parser for deploying trained PyTorch \
-            particle generator models."
-
+    usage = "Command line arguement parser for deploying " + \
+            "trained PyTorch particle generator models."
     parser = ArgumentParser(description=usage)
 
     # TODO: Write the parser arguments after deciding on a convention for how 

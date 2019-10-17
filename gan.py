@@ -1,4 +1,4 @@
-############################################################################
+################################################################################
 # gan.py
 # Author: Kai Kharpertian
 # Organization: Tufts University
@@ -8,7 +8,7 @@
 #            discriminator network models as multi-layer perceptrons
 #          - Model architecture is decided at run-time based on the
 #            provided command line arguments,
-############################################################################
+################################################################################
 
 # Torch Imports
 import torch
@@ -167,5 +167,3 @@ class Discriminator(nn.Module):
         for _ , layer in enumerate(self.layers):
             x = layer(x)
         return self.out(x)
-
-
