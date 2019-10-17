@@ -21,6 +21,7 @@
 # Update config with D in_features based on image size
 
 # Instantiate desired model (GAN or VAE)
+# Perform weight initialization
 # G_D should be None type if not parallel
 
 # Update config based on model selection
