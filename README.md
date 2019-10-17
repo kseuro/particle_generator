@@ -14,9 +14,12 @@ Our working hypothesis is that the non-zero pixels in LArCV1 monte carlo data im
 Instead, we propose to use a VAE to learn a compact representation of the LArCV1 data, and use the latent space learned by the model as inputs to a generative model. The generative model will then be trained to reproduce images in data space using a non-adversarial approache.
 
 ### Repo work in progress:
-- model agnostic argparser
-- data loading class
+- model agnostic argparser (Done)
+- data loading class (Done)
 - data loading function
+- training routine
+- model specific training functions
+- sampling, output, and saving
 
 #### Launch functionality
 - Training scripts
@@ -24,7 +27,7 @@ Instead, we propose to use a VAE to learn a compact representation of the LArCV1
 - Evaluation scripts
 
 #### GAN
-- linear GAN model class
+- linear GAN model class (Done)
 - linear GAN training function
 - linear GAN deploy function
 
