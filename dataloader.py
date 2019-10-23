@@ -104,7 +104,7 @@ def pil_loader(image_path, conv_flag):
         img = Image.open(f)
         return img.convert(conv_flag)
 
-# Dataset Class
+# Dataset Class - batch-to-batch loading of training images
 class LArCV_loader(Dataset):
     ''' 
         Liquid Argon Computer Vision dataloader class
@@ -153,4 +153,3 @@ class LArCV_loader(Dataset):
             image = self.transforms(image)
         
         return image
-
