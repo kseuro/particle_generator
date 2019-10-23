@@ -5,7 +5,7 @@
 # Department: Physics
 # Date: 10.15.2019
 # Purpose: - This file provides training functions for both the GAN model
-#            and the VAE model. The desired training funcion is chosen at
+#            and the AE model. The desired training funcion is chosen at
 #            runtime. 
 ###############################################################################
 
@@ -105,6 +105,26 @@ def GAN_train_fn(G, D, G_D, z_fixed, loss_fn, config):
         return metrics
     return train
 
-# VAE training function
-def VAE_train_fn():
+# EWM training function (TODO: Finish this function)
+def EWM_train_fn():
+    '''
+        EWM_train_fn
+        Does: initilizes training function for EWM algorithm.
+        Args: 
+        Returns: training function for training a generative model
+                 using explicit wasserstein minimization
+        Algorithm 1 (OTS):
+            - Input: Feed-forward distribution from G and entire training set
+            - Output: Psi (Optimal transport solver - OTS)
+            This algorithm operates over the entire dataset and is O(n) complex
+        Algorithm 2 (FTS):
+            - Input: Sampling distribution, Old Generator function, Transport plan
+            - Output: Updated generator function
+    '''
+    def train(x):
+        return 0
+    return train
+
+# AE training function (TODO: Write this function)
+def AE_train_fn():
     return 0
