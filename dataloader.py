@@ -28,7 +28,7 @@ IMG_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm',
 VALID_DSETS = ('larcv_png_512', 'larcv_png_256', 'larcv_png_128', 'larcv_png_64')
 CONV_FLAGS = ('RGB', 'L')
 
-# Object constructor functions
+# Dataloader object constructor functions
 def verify_image(image_path):
     '''
         Does: verifies that a training image is an image (e.g. not corrupt)

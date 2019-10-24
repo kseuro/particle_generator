@@ -26,7 +26,21 @@ def train_parser():
     usage = "Command line arguement parser for set up " + \
             "of PyTorch particle generator model training."
     parser = ArgumentParser(description=usage)
-
+    
+    # model: string that selects the type of model to be trained
+    #        options: GAN, AE, EWM
+    parser.add_argument('--model', type=str, default='GAN',
+                        help='String that selects the model - options: \
+                            GAN, AE, EWM | (default: &(default)s)')
+    # checkpoint: string path to saved model checkpoint. If used with
+    #             train function, model will resume training from checkpoint
+    #             If used with deploy function, model will used saved weights.
+    parser.add_argument('--checkpoint', type=str, default='',
+                        help='String path to saved model checkpoint. If used \
+                            with training function, model will resume trainig \
+                                from that checkpoint. If used with deploy \
+                                    function, model will deploy with save weights. \
+                                        | (default: &(default)s) ')
     ################## Data Loading ######################
     ######################################################
     # data_root: path to training data folder (top level)
@@ -93,10 +107,6 @@ def train_parser():
 
     ################# Model settings #####################
     ######################################################
-    # model: which model to use in the training routine
-    parser.add_argument('--model', type=str, default='gan',
-                        help='Select which model to train - choices: \
-                            gan, vae | (default: &(default)s)')
     ## Linear GAN Model
     # n_hidden: number of hidden units in each network
     parser.add_argument('--n_hidden', type=int, default=512,
@@ -132,12 +142,17 @@ def train_parser():
                             choices: adam, sgd | (default: &(default)s)')
 
     ######################################################
-    ## VAE Model
+    ## AE Model
 
     ### Encoder Network
 
     ### Decoder network
 
+
+    ######################################################
+    ## EWM Model
+    # ewm_optim: optimizer function for EWM model training
+    
     return parser
 
 # Deploy model argument parser function

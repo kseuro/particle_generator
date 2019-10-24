@@ -11,25 +11,81 @@
 ###############################################################################
 
 # Imports
+import os
+import torch
 
-# Load state dict (optional)
+# My stuff
+import utils
+from argparser import train_parser
 
-# Create dataloader parameter dictionary
-# Create dataloader
+def train(config):
+    '''
+        Model agnostic training function
+        Does: - Takes a configuration dictionary and sets up training
+                routine for GAN, AE, or EWM.
+              - Writes model outputs, checkpoints, and metrics to disk during
+                and after training.
+        Args: config (dictionary): config dict of parsed command line params.
+        Returns: Nothing
+    '''
+    # Import the selected model
+    model = __import__(config['model']) # GAN, AE, or EWM
 
-# Create optimizer parameter dictionary
-# Update config with D in_features based on image size
+    # Instantiate the model and corresponding optimizer
+    # May leave option open to model parallelization later
+    if (config['model'] == 'GAN'):
+        g_kwargs, d_kwargs = utils.gan_kwargs(config)
+        G = model.Generator(**g_kwargs).to(config['device'])
+        D = model.Discriminator(**d_kwargs).to(config['device'])
+        model_params = {'g_params': G.parameters(),
+                        'd_params': D.parameters()}
+        G_optim, D_optim = utils.get_optim(config, model_params)
+    elif (config['model'] == 'AE'):
+        enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
+        E = model.Encoder(**enc_kwargs).to(config['device'])
+        D = model.Encoder(**dec_kwargs).to(config['device'])
+        model_params = {'e_params': E.parameters(),
+                        'd_params': D.parameters()}
+        E_optim, D_optim = utils.get_optim(config, model_params)
+    elif (config['model'] == 'EWM'):
+        emw_kwargs = utils.ewm_kwargs(config)
+        G = model.Generator(emw_kwargs).to(config['device'])
+        model_params = {'g_params': G.parameters()}
+        G_optim = utils.get_optim(config, model_params)
+    else:
+        raise Exception("No model selected!")
 
-# Instantiate desired model (GAN or VAE)
-# Perform weight initialization
-# G_D should be None type if not parallel
+    # Check if resuming from checkpoint
+    if config['checkpoint']:
+        '''
+            This functionality can be written after state_dict saving
+            conventions have been established for all three model training
+            routines.
+        '''
+        pass
 
-# Update config based on model selection
+    # Create dataloader object - either batch-to-batch or full
+    if (config['model'] != 'EWM'):
+        dataloader = utils.get_LArCV_dataloader(config)
+    else:
+        dataloader = utils.get_full_dataloader(config)
 
-# Generate key word arguments dict for training function
-# G, D, G_D, z_fixed, loss_fn
+    # Create optimizer parameter dictionary
+    # Update config with D in_features based on image size
 
-# Setup training function (pass config as well)
+    # Generate key word arguments dict for training function
+    # G, D, G_D, z_fixed, loss_fn
 
-# Train model for specified number of epochs
+    # Setup training function (pass config as well)
 
+    # Train model for specified number of epochs
+
+    return 0
+
+def main():
+    parser = train_parser()
+    config = vars(parser.parse_args())
+    train(config)
+
+if __name__ == '__main__':
+    main()
