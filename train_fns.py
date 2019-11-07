@@ -38,7 +38,7 @@ from   torchvision      import datasets as dset
 #  Training Functions  #
 ########################
 # GAN training function
-def GAN_train_fn(G, D, G_D, z_fixed, loss_fn, config):
+def GAN_train_fn(G, D, G_D, G_optim, D_optim, loss_fn, config):
     '''
         GAN training function
         Does: Initializes the training function for the GAN model.
@@ -56,8 +56,15 @@ def GAN_train_fn(G, D, G_D, z_fixed, loss_fn, config):
             Args: x (Torch tensor): Real data input image
             Returns: list of training metrics
         '''
-        G.optim.zero_grad()
-        D.optim.zero_grad()
+        # Make sure models are in training mode and that
+        # optimizers are zeroed, just in case.
+        G.train()
+        D.train()
+        D_optim.zero_grad()
+        G_optim.zero_grad()
+
+        # Move data to GPU if not there already
+        x = x.to(config['device'])
 
         # Set up 'real' and 'fake' targets
         real_target = torch.ones(config['out_features']).to(config['device'])
@@ -75,16 +82,16 @@ def GAN_train_fn(G, D, G_D, z_fixed, loss_fn, config):
 
         ## 1.1 Train on real data
         real_pred  = D(x)
-        real_error = loss_fn(real_pred, real_target) # Calculate error
+        real_error = loss_fn(real_pred, real_target) # Calculate BCE
         real_error.backward() # Backprop
 
         ## 1.2 Train on fake data
-        fake_pred = D(fake)
-        fake_error = loss_fn(fake_pred, fake_target) # Calculate error
+        fake_pred  = D(fake)
+        fake_error = loss_fn(fake_pred, fake_target) # Calculate BCE
         fake_error.backward() # Backprop
 
         ## Update D weights
-        D.optim.step()
+        D_optim.step()
 
         # Train G
         ## Generate fake data
@@ -92,13 +99,13 @@ def GAN_train_fn(G, D, G_D, z_fixed, loss_fn, config):
 
         ## Pass fake data through D
         G_pred = D((G(fake)))
-        G_error = loss_fn(G_pred, real_target) # Calculate error
+        G_error = loss_fn(G_pred, real_target) # Calculate BCE
         G_error.backward() # Backprop
 
         # Update G weights
-        G.optim.step()
+        G_optim.step()
 
-        # Return training metric
+        # Return training metrics
         metrics = {'g_loss'     : float(G_error.item()),
                    'd_loss_real': float(real_error.item()),
                    'd_loss_fake': float(fake_error.item())}

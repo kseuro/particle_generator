@@ -22,7 +22,7 @@ Instead, we propose to use a AE to learn a compact representation of the LArCV1 
 ### Repo work in progress:
 - model agnostic argparser (Done)
 - data loading class - batch-to-batch (Done)
-- data loading class - EWM
+- data loading class - EWM single batch
 - data loading function
 - training routine
 - model specific training functions

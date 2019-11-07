@@ -22,23 +22,36 @@ import torchvision
 #   self.dropout = nn.Dropout(0.3)
 # add dropout to sequential layers
 
+class Print(nn.Module):
+    '''
+        Outputs the shape of convolutional layers in model.
+        Call Print() inbetween layers to get shape output to
+            the terminal.
+    '''
+    def __init__(self):
+        super(Print, self).__init__()
+
+    def forward(self, x):
+        print(x.shape)
+        return x
+
 class Generator(nn.Module):
     '''
         Generator model class
-        Does: initializes a G model using the provided arch specs. 
+        Does: initializes a G model using the provided arch specs.
         Args: - z_dim (int): dimension of the input vector
-              - n_layers (int): number of layers in Generator model   
+              - n_layers (int): number of layers in Generator model
               - n_hidden (int): number of hidden units in each layer
               - n_out (int): dimension of model output layer. Should correspond
-                       to the square of the input image dimension 
+                       to the square of the input image dimension
                        - (e.g. [512x512] = 262144)
               - optimizer (string): string specifying G's optimizer (adam, sgd)
               - optim_kwargs (dict): dict of optimizer parameters. See docs for
-                                     parameter details: 
+                                     parameter details:
                                      https://pytorch.org/docs/stable/optim.html
         Returns: Generator model
     '''
-    def __init__(self, z_dim, n_layers, n_hidden, n_out, optimizer, optim_kwargs):
+    def __init__(self, z_dim, n_layers, n_hidden, n_out):
         super(Generator, self).__init__()
         self.in_features  = z_dim
         self.n_layers     = n_layers
@@ -46,8 +59,6 @@ class Generator(nn.Module):
         self.out_features = n_out
         self.activation   = nn.LeakyReLU(0.2)
         self.out_activ    = nn.Tanh()
-        self.optimizer    = optimizer
-        self.optim_kwargs = optim_kwargs
 
         # Prepare model
         ## First layers
@@ -59,22 +70,14 @@ class Generator(nn.Module):
         for _ in range(self.n_layers - 2):
             self.layers += nn.Sequential(nn.Linear(self.n_hidden, self.n_hidden)
                                                   ,self.activation)
-                                                  
+
         ## Convert self.layers to ModuleList so that it registers properly
         self.layers = nn.ModuleList([nn.ModuleList(layer) for layer in self.layers])
 
         ## Output layer
-        self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features), 
+        self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features),
                                            self.out_activ)
-    
-        # Set up optimizer
-        if 'adam' in self.optimizer:
-            self.optimizer = optim.Adam(**self.optim_kwargs)
-        elif 'sgd' in self.optimizer:
-            self.optimizer = optim.SGD(**self.optim_kwargs)
-        else:
-            raise RuntimeError('Optimizer not specified!')
-    
+
     # Initialize the weights
     def weights_init(self):
         '''
@@ -99,17 +102,17 @@ class Discriminator(nn.Module):
     '''
         Discriminator model class
         Does: initializes a D model using the provided arch specs.
-        Args: - in_features (int): dimension of the input layer, calculated based 
+        Args: - in_features (int): dimension of the input layer, calculated based
                                    on the dimension of the input data images
-              - n_layers (int): number of layers in Discriminator model   
+              - n_layers (int): number of layers in Discriminator model
               - n_hidden (int): number of hidden units in each layer
               - optimizer (string): string specifying G's optimizer (adam, sgd)
               - optim_kwargs (dict): dict of optimizer parameters. See docs for
-                                     parameter details: 
+                                     parameter details:
                                      https://pytorch.org/docs/stable/optim.html
         Returns: Probability of model input belonging to real image space
     '''
-    def __init__(self, in_features, n_layers, n_hidden, optimizer, optim_kwargs):
+    def __init__(self, in_features, n_layers, n_hidden):
         super(Discriminator, self).__init__()
         self.in_features  = in_features
         self.n_layers     = n_layers
@@ -118,8 +121,6 @@ class Discriminator(nn.Module):
         self.dropout      = nn.Dropout(0.3)
         self.out_features = 1
         self.out_activ    = nn.Sigmoid()
-        self.optimizer    = optimizer
-        self.optim_kwargs = optim_kwargs
 
         # Prepare model
         ## First layer
@@ -140,14 +141,6 @@ class Discriminator(nn.Module):
         self.out = nn.Sequential(nn.Linear(self.n_hidden, self.out_features),
                                            self.out_activ)
 
-        # Set up optimizer
-        if 'adam' in self.optimizer:
-            self.optimizer = optim.Adam(**self.optim_kwargs)
-        elif 'sgd' in self.optimizer:
-            self.optimizer = optim.SGD(**self.optim_kwargs)
-        else:
-            raise RuntimeError('Optimizer not specified!')
-    
     # Initialize the weights
     def weights_init(self):
         '''

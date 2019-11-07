@@ -43,6 +43,13 @@ def train_parser():
                                         | (default: &(default)s) ')
     ################## Data Loading ######################
     ######################################################
+    # MNIST: For proof-of-concept purposes. Overrides other data loading
+    #        options and uses the built-in torch MNIST dataset loading function
+    parser.add_argument('--MNSIT', type=bool, default=False,
+                        help='Toggle to train model on MNIST dataset. Overrides \
+                            other data loading options and uses the built-in \
+                                torch MNIST dataset loading functionality | \
+                                    (default: &(default)s)')
     # data_root: path to training data folder (top level)
     parser.add_argument('--data_root', type=str, default='', 
                         help='Full path to training data folder \

@@ -19,7 +19,9 @@ from torchvision import transforms
 from dataloader import LArCV_loader
 
 
-# Model agnostic functionality
+#################################
+#     Logging Functionality     #
+#################################
 def make_dir(dir):
     '''
         Simple utility function for creating directories
@@ -31,6 +33,19 @@ def make_dir(dir):
     except OSError as E:
         if E.errno != errno.EEXIST:
             raise
+
+def train_logger(history, metrics):
+    '''
+        Function for tracking training metrics as a dictionay of lists.
+    '''
+    # Check if history dict is empty
+    if not history:
+        for key in metrics:
+            history.update({ key: [metrics[key]] })
+    else:
+        for key in metrics:
+            history[key].append(metrics[key])
+    return history
 
 #################################
 # Optimizer selection functions #
@@ -94,6 +109,33 @@ def get_loader_kwargs(config):
                           'drop_last'  : config['drop_last']})
     return loader_kwargs
 
+def select_dataset(config):
+    '''
+        Function that appends the appropriate path suffix to the data_root
+        based on dataset value. This is necessary because of the folder
+        structure expected by the torch ImageFolder class.
+    '''
+    if (config['dataset'] == 512):
+        config['data_root'] += 'larcv_png_512/'
+    elif (config['dataset'] == 256):
+        config['data_root'] += 'larcv_png_256/'
+    elif (config['dataset'] == 128):
+        config['data_root'] += 'larcv_png_128/'
+    elif (config['dataset'] == 64):
+        config['data_root'] += 'larcv_png_64/'
+    else:
+        raise Exception('Dataset not specified -- unable to set data_root')
+    return config
+
+def MNIST(config):
+    transform = transforms.Compose( [transforms.ToTensor(),
+                                     transforms.Normalize((.5, .5, .5),
+                                                          (.5, .5, .5))])
+    data = datasets.MNIST(root='./data', train=True, download=True, 
+                          transform=transform)
+    dataloader = DataLoader(data, **get_loader_kwargs(config))
+    return dataloader
+
 def get_LArCV_dataloader(config, loader_kwargs=None):
     '''
         Function that centralizes the setup of the dataloader.
@@ -101,6 +143,9 @@ def get_LArCV_dataloader(config, loader_kwargs=None):
     train_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
                                           transforms.ToTensor(),
                                           transforms.Normalize([0.5],[0.5])])
+    # Select the appropriate dataset
+    config = select_dataset(config)
+
     train_dataset = LArCV_loader(root=config['data_root'], transforms=train_transform)
     if loader_kwargs is None:
         dataloader = DataLoader(train_dataset, **get_loader_kwargs(config))
@@ -125,8 +170,17 @@ def get_full_dataloader(config)
 #####################
 # GAN Functionality #
 #####################
-def gan_kwargs(config): # TODO: Write this function!
+def gan_kwargs(config):
     g_kwargs, d_kwargs = {}, {}
+    if (config['MNIST']):
+        config['dataset'] = 28
+    g_kwargs.update({ 'z_dim'    : config['z_dim'],
+                      'n_layers' : config['n_layers'],
+                      'n_hidden' : config['n_hidden'],
+                      'n_out'    : config['dataset']**2})
+    d_kwargs.update({'in_features': config['dataset']**2,
+                     'n_layers'   : config['n_layers'],
+                     'n_hidden'   : config['n_hidden']})
     return g_kwargs, d_kwargs
 
 #####################
