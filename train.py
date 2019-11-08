@@ -95,8 +95,8 @@ def train(config):
     # Empty dict for tracking training metrics
     history = {}
 
-    # Set up directory for saving training stats and outputs
-    # TODO: write funtion that creates an output directory
+    # Set up directories for saving training stats and outputs
+    config = utils.directories(config)
 
     # Train model for specified number of epochs
     for epoch in range(config['num_epochs']):
@@ -113,6 +113,8 @@ def train(config):
         # train
 
 
+    # Save and process training history
+    # TODO: Write function that processes the history dict
     print("Training Complete")
     
     return

@@ -14,6 +14,8 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
+import time
+from datetime import datetime
 
 # My stuff
 from dataloader import LArCV_loader
@@ -46,6 +48,51 @@ def train_logger(history, metrics):
         for key in metrics:
             history[key].append(metrics[key])
     return history
+
+def directories(config):
+    '''
+        Function that generates a label for the experiement based on the date,
+            time, and training dataset.
+        Directories for saving weight, samples, and other outputs are
+            also created.
+    '''
+    dirs = []
+    # Date and time labelling
+    now  = datetime.now()
+    date = now.strftime("%m-%d-%Y")
+    time = now.strftime("%H-%M-%S")
+
+    # Create a label for the current experiment
+    prefix = '{}_{}_{}'.format(date, time, config['model'])
+    config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
+
+    assert not config['save_root'], "No save_root specified!"
+
+    # Create path for experiment
+    out_dir = config['save_root'] + config['exp_label']
+    dirs.append(out_dir)
+
+    # Create path for saving weights
+    dirs.append(out_dir + '/weights/')
+
+    # Sample saving
+    dirs.append(out_dir + '/training_samples/')
+
+    # Random samples
+    dirs.append(out_dir + '/training_samples/' + 'random_samples/')
+
+    # Fixed samples
+    dirs.append(out_dir + '/training_samples/' + 'fixed_samples/')
+
+    # OTS Histograms
+    if (config['model'] == 'EWM' or config['model'] == 'ewm'):
+        dirs.append(out_dir + '/histograms/')
+
+    # Make directories for saving
+    for i in range(len(dirs)):
+        make_dir(dirs[i])
+    
+    return config
 
 #################################
 # Optimizer selection functions #
