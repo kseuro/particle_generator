@@ -19,6 +19,13 @@ Our working hypothesis is that the non-zero pixels in LArCV1 monte carlo data im
 
 Instead, we propose to use a AE to learn a compact representation of the LArCV1 data distribution, and subsequently use the model's learned latent as input to a generative model. The generative model will then be trained to reproduce images in data space using a non-adversarial approach.
 
+### Short-term goal(s):
+- Train for single iteration using MNIST and save outputs
+- Resume training of a saved model for a single iteration 
+- GAN proof-of-concept using MNIST
+- AE proof-of-concept using MNIST
+- EWM proof-of-concept using MNIST
+
 ### Repo work in progress:
 - model agnostic argparser (Done)
 - data loading class - batch-to-batch (Done)
