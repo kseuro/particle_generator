@@ -10,7 +10,7 @@ CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --drop_last True \
 --num_workers 8 \
 # Model Settings
---model GAN \
+--model gan \
 --n_hidden 512 \
 --n_layers 4 \
 --g_lr 1e-4 \

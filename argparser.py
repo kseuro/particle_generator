@@ -29,9 +29,9 @@ def train_parser():
 
     # model: string that selects the type of model to be trained
     #        options: GAN, AE, EWM
-    parser.add_argument('--model', type=str, default='GAN',
+    parser.add_argument('--model', type=str, default='gan',
                         help='String that selects the model - options: \
-                            GAN, AE, EWM | (default: &(default)s)')
+                            gan, ae, ewm | (default: &(default)s)')
     # checkpoint: string path to saved model checkpoint. If used with
     #             train function, model will resume training from checkpoint
     #             If used with deploy function, model will used saved weights.
