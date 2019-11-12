@@ -67,7 +67,7 @@ def train_parser():
                         help='Size of data batches to use during model training\
                              | (default: &(default)s')
     # num_epochs: number of epochs to train model(s)
-    parser.add_argument('--num_epoch', type=int, default=1,
+    parser.add_argument('--num_epochs', type=int, default=1,
                         help='Number of epochs over which to train the model(s)\
                              | (default: &(default)s)')
     # sample_size: number of samples to generate during training
