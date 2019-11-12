@@ -9,10 +9,10 @@
 #            GAN and AE. Each model's respective training function is loaded
 #            at runtime from train_fns.py
 ###############################################################################
-
 # Imports
 import os
 import torch
+import torch.nn as nn
 from tqdm import tqdm, trange
 
 # My stuff
@@ -52,8 +52,8 @@ def train(config):
         loss_fn = nn.BCELoss().to(config['device'])
 
         # Set up training function
-        train_GAN = train_fns.GAN_train_fn(G, D, G_D=None, G_optim, D_optim, 
-                                           loss_fn, config)
+        train_GAN = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn, 
+                                           config, G_D=None)
     elif (config['model'] == 'AE'):
         enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
         E = model.Encoder(**enc_kwargs).to(config['device'])
@@ -123,7 +123,7 @@ def train(config):
             
         # Save Generator output using fixed vector at end of epoch
         sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
-        utils.save_sample(sample, epoch, itr, config['fixed_samples']))
+        utils.save_sample(sample, epoch, itr, config['fixed_samples'])
     
     # Save training history and model architecture for evaluation and deploy
 

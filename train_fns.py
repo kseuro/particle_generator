@@ -38,7 +38,9 @@ from   torchvision      import datasets as dset
 #  Training Functions  #
 ########################
 # GAN training function
-def GAN_train_fn(G, D, G_D, G_optim, D_optim, loss_fn, config):
+
+
+def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
     '''
         GAN training function
         Does: Initializes the training function for the GAN model.

@@ -12,8 +12,10 @@
 # Imports
 import os
 import torch
+import torchvision
+from torchvision      import datasets
+from torchvision      import transforms
 from torch.utils.data import DataLoader
-from torchvision import transforms
 import time
 from datetime import datetime
 
@@ -132,7 +134,7 @@ def get_checkpoint(iter, epoch, model, optim):
         Function for generating a model checkpoint dictionary
     '''
     dict = {}
-    dict.update({'iter'      : fit_iter,
+    dict.update({'iter'      : iter,
                  'epoch'     : epoch,
                  'state_dict': model.state_dict(),
                  'optimizer' : optim.state_dict()
@@ -275,7 +277,7 @@ def get_LArCV_dataloader(config, loader_kwargs=None):
         dataloader = DataLoader(train_dataset, **loader_kwargs)
     return dataloader
 
-def get_full_dataloader(config)
+def get_full_dataloader(config):
     '''
         Returns a dataloader containing 10000 training images.
         10000 is safe to load onto a Nvidia Titan 1080x with a single
