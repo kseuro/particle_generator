@@ -45,7 +45,7 @@ def train_parser():
     ######################################################
     # MNIST: For proof-of-concept purposes. Overrides other data loading
     #        options and uses the built-in torch MNIST dataset loading function
-    parser.add_argument('--MNSIT', type=bool, default=False,
+    parser.add_argument('--MNIST', type=bool, default=False,
                         help='Toggle to train model on MNIST dataset. Overrides \
                             other data loading options and uses the built-in \
                                 torch MNIST dataset loading functionality | \
