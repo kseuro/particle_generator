@@ -6,7 +6,7 @@
 # Date: 10.15.2019
 # Purpose: - This file provides a model agnostic training routine. Training is
 #            carried out as standard batch-to-batch training for both the
-#            GAN and VAE. Each model's respective training function is loaded
+#            GAN and AE. Each model's respective training function is loaded
 #            at runtime from train_fns.py
 ###############################################################################
 
@@ -75,7 +75,7 @@ def train(config):
     # Check if resuming from checkpoint
     if config['checkpoint']:
         '''
-            This functionality can be written after state_dict saving
+            This functionality should be written after state_dict saving
             conventions have been established for all three model training
             routines.
         '''
@@ -87,27 +87,47 @@ def train(config):
     elif (config['model'] != 'EWM'):
         dataloader = utils.get_LArCV_dataloader(config)
     else:
+        # TODO: This may need to be modified after AE training is complete
         dataloader = utils.get_full_dataloader(config)
 
-    # Set up progress bar for terminal output and enumaeration
+    # Set up progress bar for terminal output and enumeration
     prog_bar = tqdm(dataloader)
 
-    # Empty dict for tracking training metrics
-    history = {}
+    # Empty dicts for tracking training metrics and best stats
+    history, best_stats = {}, {}
 
     # Set up directories for saving training stats and outputs
     config = utils.directories(config)
 
     # Train model for specified number of epochs
     for epoch in range(config['num_epochs']):
-        # TODO: Set up training loop for MNIST data
-        for i, (x, _) in enumerate(prog_bar):
+        # MNIST training loop
+        for itr, (x, _) in enumerate(prog_bar):
             metrics = train_GAN(x)
-            history = utils.train_logger(history, metrics)
+            history, best_stats, best = utils.train_logger(history, 
+                                                           metrics, 
+                                                           best_stats)
+            # Save checkpoint periodically
+            if (itr % 2000 == 0):
+                 chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
+                 utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
+                 chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
+                 utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
 
-            # Save periodically
-            # TODO: Write function that saves training history
+            # Save Generator output periodically
+            if (itr % 1000 == 0):
+                z_rand = torch.randn(config['batch_size'], 
+                                     config['z_dim'], device=config['device'])
+                sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
+                utils.save_sample(sample, epoch, itr, config['random_samples'])
+            
+        # Save Generator output using fixed vector at end of epoch
+        sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
+        utils.save_sample(sample, epoch, itr, config['fixed_samples']))
     
+    # Save training history and model architecture for evaluation and deploy
+
+
         # TODO: Set up training loop for LArCV data
         # for i, x in enumerate(prog_bar):
         # train

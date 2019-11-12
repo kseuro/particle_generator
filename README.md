@@ -3,7 +3,7 @@ Deep generative models applied to 2D particle interaction image generation.
 
 This repository contains PyTorch implementations of generative models applied to liquid Argon computer vision 1 (LArCV1) datasets.
 
-**Models under construction at this time:**
+**Models and scripts under construction at this time:**
 
 ### Generative-Adversarial Network (GAN)
 GAN as two separate multi-layer perceptron models. This model implementation will provide a base-line for hypothesis testing, iterative development, benchmarking of model performance, and overall proof-of-concept (PoC) demonstrations. PoC will be carried out using the MNIST dataset of handwritten digits, as this dataset most closely mimmicks the LArCV1 dataset. 
@@ -30,7 +30,7 @@ Instead, we propose to use a AE to learn a compact representation of the LArCV1 
 - model agnostic argparser (Done)
 - data loading class - batch-to-batch (Done)
 - data loading class - EWM single batch
-- data loading function
+- data loading function (Done)
 - training routine
 - model specific training functions
   - GAN
@@ -43,13 +43,12 @@ Instead, we propose to use a AE to learn a compact representation of the LArCV1 
 - training script for running VAE on MNIST dataset
 
 #### Launch functionality
-- Training scripts
 - Deploy scripts
 - Evaluation scripts
 
 #### GAN
 - linear GAN model class (Done)
-- linear GAN training function
+- linear GAN training function (Done)
 - linear GAN deploy function
 
 #### EWM

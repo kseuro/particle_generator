@@ -36,25 +36,47 @@ def make_dir(dir):
         if E.errno != errno.EEXIST:
             raise
 
-def train_logger(history, metrics):
+def train_logger(history, metrics, best_stats):
     '''
-        Function for tracking training metrics as a dictionay of lists.
+        Function for tracking training metrics. Determines with each update
+        to the training history if that update represents the best model
+        performance.
+        Args: history (dict): dictionary of training history as lists of floats
+              metrics (dict): most recent loss values as three floats
+              best_stats (dict): dictionary of best loss values
+        Does: updates history dict with most recent metrics. Checks if
+              that update is the best yet.
+        Returns: history, best_stats, True/False
     '''
-    # Check if history dict is empty
+    # Check if history is empty before appending data
     if not history:
         for key in metrics:
             history.update({ key: [metrics[key]] })
     else:
         for key in metrics:
             history[key].append(metrics[key])
-    return history
+
+    check = []
+    # Check if best_stats is empty before appending data
+    if not best_stats:
+        for key in history:
+            best_stats.update({key: history[key][len(history[key]) - 1]})
+            check.append(True)
+    else:
+        for key in history:
+            threshold = best_stats[key] - round(best_stats[key] * 0.5, 3)
+            if (history[key][len(history[key]) - 1]) < threshold:
+                best_stats[key] = history[key][len(history[key]) - 1]
+                check.append(True)
+            else:
+                check.append(False)
+    return history, best_stats, all(check)
 
 def directories(config):
     '''
         Function that generates a label for the experiement based on the date,
             time, and training dataset.
-        Directories for saving weight, samples, and other outputs are
-            also created.
+        Creates directories for saving weights, samples, and other outputs.
     '''
     dirs = []
     # Date and time labelling
@@ -66,33 +88,86 @@ def directories(config):
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
 
-    assert not config['save_root'], "No save_root specified!"
+    assert not config['save_root'], "No save_root specified in config!"
 
     # Create path for experiment
-    out_dir = config['save_root'] + config['exp_label']
-    dirs.append(out_dir)
+    save_dir = config['save_root'] + config['exp_label']
+    config.update({'save_dir' : save_dir})
+    dirs.append(config['save_dir'])
 
     # Create path for saving weights
-    dirs.append(out_dir + '/weights/')
+    config.update({'weights_save' : config['save_dir'] + '/weights/'})
+    dirs.append(config['weights_save'])
 
     # Sample saving
-    dirs.append(out_dir + '/training_samples/')
+    dirs.append(save_dir + '/training_samples/')
 
     # Random samples
-    dirs.append(out_dir + '/training_samples/' + 'random_samples/')
+    config.update( {'random_samples' : 
+                    config['save_dir'] + 
+                    '/training_samples/' + 
+                    'random_samples/'})
+    dirs.append(config['random_samples'])
 
     # Fixed samples
-    dirs.append(out_dir + '/training_samples/' + 'fixed_samples/')
+    config.update({'fixed_samples':
+                   config['save_dir'] +
+                   '/training_samples/' +
+                   'fixed_samples/'})
+    dirs.append(config['fixed_samples'])
 
     # OTS Histograms
     if (config['model'] == 'EWM' or config['model'] == 'ewm'):
-        dirs.append(out_dir + '/histograms/')
+        config.update( {'histograms' : config['save_dir'] + '/histograms/'})
+        dirs.append(config['histograms'])
 
     # Make directories for saving
     for i in range(len(dirs)):
         make_dir(dirs[i])
     
     return config
+
+def get_checkpoint(iter, epoch, model, optim):
+    '''
+        Function for generating a model checkpoint dictionary
+    '''
+    dict = {}
+    dict.update({'iter'      : fit_iter,
+                 'epoch'     : epoch,
+                 'state_dict': model.state_dict(),
+                 'optimizer' : optim.state_dict()
+                })
+    return dict
+
+def save_checkpoint(checkpoint, best, model_name, save_dir):
+    '''
+        Function for saving model and optimizer weights
+        Args: checkpoint (dict): dictionary of model weights
+              best (bool): boolean corresponding to best checkpoint
+              save_dir (str): full path to save location
+    '''
+    if best:
+        filename = save_dir + 'best_chkpt_{}_{}.tar'.format(model_name, 
+                                                            checkpoint['epoch'])
+    else:
+        filename = save_dir + 'chkpt_{}_it_{}_ep_{}.tar'.format(model_name, 
+                                                                checkpoint['epoch'], 
+                                                                checkpoint['iter'])
+    torch.save(checkpoint, filename)
+
+def save_sample(sample, epoch, iter, save_dir):
+    '''
+        Function for saving periodic samples from the Generator
+        function, using either with a fixed or random noise vector.
+    '''
+    # Un-normalize the sample and boost ADC values for better viz.
+    sample = ((sample * 0.5) + 0.5) * 10
+    if 'fixed' in save_dir:
+        im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
+        torchvision.utils.save_image(sample[0], im_out)
+    else:
+        im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
+        torchvision.utils.save_image(sample, im_out)
 
 #################################
 # Optimizer selection functions #
