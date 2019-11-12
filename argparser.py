@@ -4,7 +4,7 @@
 # Organization: Tufts University
 # Department: Physics
 # Date: 10.08.2019
-# Purpose: - This python script is designed to provide model-agnostic command 
+# Purpose: - This python script is designed to provide model-agnostic command
 #            line argument parsing capabilities for PyTorch models associated
 #            with the particle generator project.
 #          - Functionality includes instantiation of argument parser objects
@@ -26,7 +26,7 @@ def train_parser():
     usage = "Command line arguement parser for set up " + \
             "of PyTorch particle generator model training."
     parser = ArgumentParser(description=usage)
-    
+
     # model: string that selects the type of model to be trained
     #        options: GAN, AE, EWM
     parser.add_argument('--model', type=str, default='GAN',
@@ -51,7 +51,7 @@ def train_parser():
                                 torch MNIST dataset loading functionality | \
                                     (default: &(default)s)')
     # data_root: path to training data folder (top level)
-    parser.add_argument('--data_root', type=str, default='', 
+    parser.add_argument('--data_root', type=str, default='',
                         help='Full path to training data folder \
                             | (default: &(default)s)')
     # save_root: path where training output is saved
@@ -70,9 +70,8 @@ def train_parser():
     parser.add_argument('--num_epoch', type=int, default=1,
                         help='Number of epochs over which to train the model(s)\
                              | (default: &(default)s)')
-    # sample_batch: number of samples to generate during 
-    #               training
-    parser.add_argument('--sample_batch', type=int, default=8,
+    # sample_size: number of samples to generate during training
+    parser.add_argument('--sample_size', type=int, default=8,
                         help='Number of image samples to be generated during\
                              training (progress check) | (default: &(default)s)')
     # gpu: which GPU to train the model(s) on
@@ -89,7 +88,7 @@ def train_parser():
     parser.add_argument('--shuffle', type=bool, default=True,
                         help='Toggle dataloader batch shuffle on/off \
                             | (default: &(default)s)')
-    # drop_last: toggle drop last batch on/off if dataset 
+    # drop_last: toggle drop last batch on/off if dataset
     #            size not divisible by batch size
     parser.add_argument('--drop_last', type=bool, default=False,
                         help='Toggle whether the dataloader should drop \
@@ -99,17 +98,6 @@ def train_parser():
     # num_workers: number of worker threads for data io
     parser.add_argument('--num_workers', type=int, default=8,
                         help='Set number of worker threads for data io \
-                            | (default: &(default)s)')
-
-    ################# Shared Settings ####################
-    ######################################################
-    # beta: beta value (for Adam optimizer only)
-    parser.add_argument('--beta', type=float, default=0.5,
-                        help='Beta value for Adam optimizer \
-                            | (default: &(default)s)')
-    # momentum: momentum value (for SGD optimizer only)
-    parser.add_argument('--p', type=float, default=0.9,
-                        help='Momentum value for SGD optimizer \
                             | (default: &(default)s)')
 
     ################# Model settings #####################
@@ -148,6 +136,16 @@ def train_parser():
                         help='Discriminator network optimizer function - \
                             choices: adam, sgd | (default: &(default)s)')
 
+    ################# Shared Settings ####################
+    ######################################################
+    # beta: beta value (for Adam optimizer only)
+    parser.add_argument('--beta', type=float, default=0.5,
+                        help='Beta value for Adam optimizer \
+                            | (default: &(default)s)')
+    # momentum: momentum value (for SGD optimizer only)
+    parser.add_argument('--p', type=float, default=0.9,
+                        help='Momentum value for SGD optimizer \
+                            | (default: &(default)s)')
     ######################################################
     ## AE Model
 
@@ -159,7 +157,7 @@ def train_parser():
     ######################################################
     ## EWM Model
     # ewm_optim: optimizer function for EWM model training
-    
+
     return parser
 
 # Deploy model argument parser function
@@ -175,7 +173,7 @@ def deploy_parser():
             "trained PyTorch particle generator models."
     parser = ArgumentParser(description=usage)
 
-    # TODO: Write the parser arguments after deciding on a convention for how 
+    # TODO: Write the parser arguments after deciding on a convention for how
     # model outputs, checkpoints, and experiments will be saved.
 
     return parser

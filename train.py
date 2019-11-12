@@ -83,7 +83,8 @@ def train(config):
 
     # Create dataloader object - either batch-to-batch, full, or MNSIT
     if (config['MNIST']):
-        dataloader = utils.MNIST(config)
+        dataloader = utils.MNIST(config) # Get MNIST data (DL if not available)
+        config.update({'dataset' : 28})  # Set image dimension
     elif (config['model'] != 'EWM'):
         dataloader = utils.get_LArCV_dataloader(config)
     else:
@@ -116,7 +117,7 @@ def train(config):
 
             # Save Generator output periodically
             if (itr % 1000 == 0):
-                z_rand = torch.randn(config['batch_size'], 
+                z_rand = torch.randn(config['sample_size'], 
                                      config['z_dim'], device=config['device'])
                 sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
                 utils.save_sample(sample, epoch, itr, config['random_samples'])
