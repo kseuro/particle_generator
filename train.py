@@ -35,7 +35,7 @@ def train(config):
 
     # Instantiate the model and corresponding optimizer
     # May leave option open to model parallelization later (G_D)
-    if (config['model'] == 'GAN'):
+    if (config['model'] == 'gan'):
         # Get G and D kwargs based on command line inputs
         g_kwargs, d_kwargs = utils.gan_kwargs(config)
         
@@ -54,14 +54,14 @@ def train(config):
         # Set up training function
         train_GAN = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn, 
                                            config, G_D=None)
-    elif (config['model'] == 'AE'):
+    elif (config['model'] == 'ae'):
         enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
         E = model.Encoder(**enc_kwargs).to(config['device'])
         D = model.Encoder(**dec_kwargs).to(config['device'])
         model_params = {'e_params': E.parameters(),
                         'd_params': D.parameters()}
         E_optim, D_optim = utils.get_optim(config, model_params)
-    elif (config['model'] == 'EWM'):
+    elif (config['model'] == 'ewm'):
         emw_kwargs = utils.ewm_kwargs(config)
         G = model.Generator(emw_kwargs).to(config['device'])
         model_params = {'g_params': G.parameters()}
@@ -85,7 +85,7 @@ def train(config):
     if (config['MNIST']):
         dataloader = utils.MNIST(config) # Get MNIST data (DL if not available)
         config.update({'dataset' : 28})  # Set image dimension
-    elif (config['model'] != 'EWM'):
+    elif (config['model'] != 'ewm'):
         dataloader = utils.get_LArCV_dataloader(config)
     else:
         # TODO: This may need to be modified after AE training is complete
