@@ -69,14 +69,14 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
         x = x.to(config['device'])
 
         # Set up 'real' and 'fake' targets
-        real_target = torch.ones(config['out_features']).to(config['device'])
-        fake_target = torch.zeros(config['out_features']).to(config['device'])
+        real_target = torch.ones(config['dataset']**2).to(config['device'])
+        fake_target = torch.zeros(config['dataset']**2).to(config['device'])
 
         # Train D
-        ## Move real batch onto GPU
-        x = x.view(config['in_features']).to(config['device'])
+        ## Flatten the training images
+        x = x.view(config['batch_size'], -1)
 
-        ## Generate fake data
+        ## Generate fake data using G
         fake = torch.randn(config['batch_size'], config['z_dim'], device=config['device'])
         
         ## Detach so that gradients are not calc'd for G
@@ -100,7 +100,7 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
         fake = torch.randn(config['batch_size'], config['z_dim'], device=config['device'])
 
         ## Pass fake data through D
-        G_pred = D((G(fake)))
+        G_pred  = D((G(fake)))
         G_error = loss_fn(G_pred, real_target) # Calculate BCE
         G_error.backward() # Backprop
 

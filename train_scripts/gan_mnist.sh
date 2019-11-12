@@ -20,4 +20,5 @@ CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --d_opt adam \
 # Shared model settings
 --beta 0.5 \
+# Directories
 --save_root /media/disk1/kai/particle_generator/

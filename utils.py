@@ -22,7 +22,6 @@ from datetime import datetime
 # My stuff
 from dataloader import LArCV_loader
 
-
 #################################
 #     Logging Functionality     #
 #################################
