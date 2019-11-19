@@ -194,13 +194,13 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
                               index=False)
     # Save histogram if using EWM algorithm
     if histogram is not None:
-        DataFrame(histogram).to_csv(config['save_dir'] + '/histogram.csv', 
+        DataFrame(histogram).to_csv(config['save_dir'] + '/histogram.csv',
                                     header=True, index=False)
     # Save config dict for reference
-    DataFrame(config).to_csv(config['save_dir'] + '/config.csv', header=True,
-                             index=True)
-    
-    
+    df = DataFrame.from_dict(config, orient='index')
+    df.to_csv(config['save_dir'] + '/config.csv')
+
+
 #################################
 # Optimizer selection functions #
 #################################
