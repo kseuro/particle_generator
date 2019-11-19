@@ -129,7 +129,7 @@ class Discriminator(nn.Module):
             if isinstance(m, nn.Linear):
                 m.weight.data.normal_(0, 0.02)
             if hasattr(m, 'bias') and m.bias is not None:
-                m.bias.data.zero()
+                m.bias.data.zero_()
 
     def forward(self, x):
         return self.out(self.fc(x))
