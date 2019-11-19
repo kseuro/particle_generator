@@ -172,6 +172,19 @@ def save_sample(sample, epoch, iter, save_dir):
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
         torchvision.utils.save_image(sample, im_out)
 
+def shrink_lists(dict):
+    '''
+        Function that ensures lists in stats dicts are the same length
+        for saving with pandas.
+    '''
+    idx = []
+    for key in dict:
+        idx.append(len(dict[key]))
+    idx = min(idx)
+    for key in dict:
+        dict[key] = [dict[key][i] for i in range(idx)]
+    return dict
+
 def save_train_hist(history, best_stats, times, config, histogram=None):
     '''
         Function for saving network training history and
@@ -186,14 +199,14 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
                                           histogram values representing the probability
                                           density distribution of the generator function.
     '''
-
-    # Save times
+    # Save times - arrays must all be the same length, otherwise
+    # Pandas will thrown an error!
     times_csv = config['save_root'] + '/times.csv'
-    DataFrame(times).to_csv(times_csv, header=True, index=False)
+    DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
 
     # Save losses
     loss_csv = config['save_root'] + '/losses.csv'
-    DataFrame(history).to_csv(loss_csv, header=True, index=False)
+    DataFrame(shrink_lists(history)).to_csv(loss_csv, header=True, index=False)
 
     # Save histogram if using EWM algorithm
     if histogram is not None:
