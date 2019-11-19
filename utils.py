@@ -201,21 +201,21 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
     '''
     # Save times - arrays must all be the same length, otherwise
     # Pandas will thrown an error!
-    times_csv = config['save_root'] + '/times.csv'
+    times_csv = config['save_dir'] + '/times.csv'
     DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
 
     # Save losses
-    loss_csv = config['save_root'] + '/losses.csv'
+    loss_csv = config['save_dir'] + '/losses.csv'
     DataFrame(shrink_lists(history)).to_csv(loss_csv, header=True, index=False)
 
     # Save histogram if using EWM algorithm
     if histogram is not None:
-        hist_csv = config['save_root'] + '/histogram.csv'
+        hist_csv = config['save_dir'] + '/histogram.csv'
         DataFrame(histogram).to_csv(hist_csv, header=True, index=False)
 
     # Save config dict for reference
     df = DataFrame.from_dict(config, orient='index')
-    df.to_csv(config['save_root'] + '/config.csv')
+    df.to_csv(config['save_dir'] + '/config.csv')
 
 
 #################################

@@ -154,7 +154,6 @@ def train(config):
         utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
     # Save training history and model architecture for evaluation and deploy
-    # TODO: test saving functionality
     utils.save_train_hist(history, best_stats, times, config)
 
         # TODO: Set up training loop for LArCV data
