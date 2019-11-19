@@ -38,21 +38,25 @@ def train(config):
     if (config['model'] == 'gan'):
         # Get G and D kwargs based on command line inputs
         g_kwargs, d_kwargs = utils.gan_kwargs(config)
-        
+
         # Set up models on GPU
         G = model.Generator(**g_kwargs).to(config['device'])
         D = model.Discriminator(**d_kwargs).to(config['device'])
-        
+
+        # Initialize model weights
+        G.weights_init()
+        D.weights_init()
+
         # Set up model optimizer functions
         model_params = {'g_params': G.parameters(),
                         'd_params': D.parameters()}
         G_optim, D_optim = utils.get_optim(config, model_params)
-        
+
         # Set up loss function
         loss_fn = nn.BCELoss().to(config['device'])
 
         # Set up training function
-        train_GAN = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn, 
+        train_fn = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn,
                                            config, G_D=None)
     elif (config['model'] == 'ae'):
         enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
@@ -84,7 +88,6 @@ def train(config):
     # Create dataloader object - either batch-to-batch, full, or MNSIT
     if (config['MNIST']):
         dataloader = utils.MNIST(config) # Get MNIST data (DL if not available)
-        config.update({'dataset' : 28})  # Set image dimension
     elif (config['model'] != 'ewm'):
         dataloader = utils.get_LArCV_dataloader(config)
     else:
@@ -104,10 +107,10 @@ def train(config):
     for epoch in range(config['num_epochs']):
         # MNIST training loop
         for itr, (x, _) in enumerate(prog_bar):
-            metrics = train_GAN(x)
-            history, best_stats, best = utils.train_logger(history, 
-                                                           metrics, 
-                                                           best_stats)
+            metrics = train_fn(x)
+            history, best_stats, best = utils.train_logger(history,
+                                                           best_stats,
+                                                           metrics)
             # Save checkpoint periodically
             if (itr % 2000 == 0):
                  chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
@@ -117,15 +120,15 @@ def train(config):
 
             # Save Generator output periodically
             if (itr % 1000 == 0):
-                z_rand = torch.randn(config['sample_size'], 
+                z_rand = torch.randn(config['sample_size'],
                                      config['z_dim'], device=config['device'])
                 sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
                 utils.save_sample(sample, epoch, itr, config['random_samples'])
-            
+
         # Save Generator output using fixed vector at end of epoch
         sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
         utils.save_sample(sample, epoch, itr, config['fixed_samples'])
-    
+
     # Save training history and model architecture for evaluation and deploy
 
 
@@ -137,7 +140,7 @@ def train(config):
     # Save and process training history
     # TODO: Write function that processes the history dict
     print("Training Complete")
-    
+
     return
 
 def main():

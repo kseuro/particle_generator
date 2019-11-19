@@ -37,14 +37,14 @@ def make_dir(dir):
         if E.errno != errno.EEXIST:
             raise
 
-def train_logger(history, metrics, best_stats):
+def train_logger(history, best_stats, metrics):
     '''
         Function for tracking training metrics. Determines with each update
         to the training history if that update represents the best model
         performance.
         Args: history (dict): dictionary of training history as lists of floats
-              metrics (dict): most recent loss values as three floats
               best_stats (dict): dictionary of best loss values
+              metrics (dict): most recent loss values as three floats
         Does: updates history dict with most recent metrics. Checks if
               that update is the best yet.
         Returns: history, best_stats, True/False
@@ -294,16 +294,20 @@ def get_full_dataloader(config):
 # GAN Functionality #
 #####################
 def gan_kwargs(config):
+    '''
+        Create two dictionaries of key word arguments for
+        generator and discriminator model from config dict.
+    '''
     g_kwargs, d_kwargs = {}, {}
     if (config['MNIST']):
         config['dataset'] = 28
-    g_kwargs.update({ 'z_dim'    : config['z_dim'],
-                      'n_layers' : config['n_layers'],
-                      'n_hidden' : config['n_hidden'],
-                      'n_out'    : config['dataset']**2})
-    d_kwargs.update({'in_features': config['dataset']**2,
-                     'n_layers'   : config['n_layers'],
-                     'n_hidden'   : config['n_hidden']})
+    im_size  = config['dataset']**2
+    fc_sizes = [config['n_hidden']] * config['n_layers']
+    g_kwargs.update({ 'z_dim'      : config['z_dim'],
+                      'fc_sizes'   : fc_sizes,
+                      'n_out'      : im_size})
+    d_kwargs.update({'in_features' : im_size,
+                     'fc_sizes'    : fc_sizes})
     return g_kwargs, d_kwargs
 
 #####################
