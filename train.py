@@ -141,7 +141,7 @@ def train(config):
                                               train_fn, history, best_stats,
                                               times, config, epoch, epoch_start,
                                               z_fixed)
-        elif (config['model'] == 'ae']):
+        elif (config['model'] == 'ae'):
             pass
         elif (config['model'] == 'ewm'):
             pass
