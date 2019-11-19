@@ -94,9 +94,10 @@ def train(config):
         # TODO: This may need to be modified after AE training is complete
         dataloader = utils.get_full_dataloader(config)
 
-    # Set up progress bar for terminal output and enumeration
+    # Set up progress bars for terminal output and enumeration
     prog_bar = tqdm(dataloader)
-
+    epoch_bar = tqdm([i for i in range(config['num_epochs'])])
+    
     # Empty dicts for tracking training metrics and best stats
     history, best_stats = {}, {}
 
@@ -107,7 +108,7 @@ def train(config):
     z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
 
     # Train model for specified number of epochs
-    for epoch in range(config['num_epochs']):
+    for epoch, _ in enumerate(epoch_bar):
         print("Epoch_{}".format(epoch))
         # MNIST training loop
         for itr, (x, _) in enumerate(prog_bar):
