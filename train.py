@@ -14,6 +14,7 @@ import os
 import torch
 import torch.nn as nn
 from tqdm import tqdm, trange
+import time
 
 # My stuff
 import utils
@@ -98,8 +99,8 @@ def train(config):
     prog_bar = tqdm(dataloader)
     epoch_bar = tqdm([i for i in range(config['num_epochs'])])
 
-    # Empty dicts for tracking training metrics and best stats
-    history, best_stats = {}, {}
+    # Empty dicts for tracking training metrics, best stats, and times
+    history, best_stats, times = {}, {}, {}
 
     # Set up directories for saving training stats and outputs
     config = utils.directories(config)
@@ -109,18 +110,25 @@ def train(config):
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
+        epoch_start = time.time()
+
         # MNIST training loop
         for itr, (x, _) in enumerate(prog_bar):
+            tr_loop_start = time.time()
+
             metrics = train_fn(x)
             history, best_stats, best = utils.train_logger(history,
                                                            best_stats,
                                                            metrics)
             # Save checkpoint periodically
             if (itr % 2000 == 0):
-                 chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
-                 utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
-                 chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
-                 utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
+                # G Checkpoint
+                chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
+                utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
+
+                # D Checkpoint
+                chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
+                utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
 
             # Save Generator output periodically
             if (itr % 1000 == 0):
@@ -128,12 +136,19 @@ def train(config):
                 sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
                 utils.save_sample(sample, epoch, itr, config['random_samples'])
 
+            # Log the time at the end of training loop
+            times.update({'tr_loop_time' : time.time() - tr_loop_start})
+
+        # Log the time at the end of the training epoch
+        times.update({'epoch_time' : time.time() - epoch_start})
+
         # Save Generator output using fixed vector at end of epoch
         sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
         utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
     # Save training history and model architecture for evaluation and deploy
-
+    # TODO: test saving functionality
+    utils.save_train_hist(history, best_stats, times, config)
 
         # TODO: Set up training loop for LArCV data
         # for i, x in enumerate(prog_bar):

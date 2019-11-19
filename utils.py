@@ -18,6 +18,7 @@ from torchvision      import transforms
 from torch.utils.data import DataLoader
 import time
 from datetime import datetime
+from pandas import DataFrame
 
 # My stuff
 from dataloader import LArCV_loader
@@ -152,8 +153,8 @@ def save_checkpoint(checkpoint, best, model_name, save_dir):
                                                             checkpoint['epoch'])
     else:
         filename = save_dir + 'chkpt_{}_it_{}_ep_{}.tar'.format(model_name,
-                                                                checkpoint['epoch'],
-                                                                checkpoint['iter'])
+                                                                checkpoint['iter'],
+                                                                checkpoint['epoch'])
     torch.save(checkpoint, filename)
 
 def save_sample(sample, epoch, iter, save_dir):
@@ -170,6 +171,36 @@ def save_sample(sample, epoch, iter, save_dir):
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
         torchvision.utils.save_image(sample, im_out)
 
+def save_train_hist(history, best_stats, times, config, histogram=None):
+    '''
+        Function for saving network training history and
+        best performance stats.
+        Args: history (dict): dictionary of network training metrics
+              best_stats (dict): dictionary of floating point numbers
+                                 representing the best network performance
+                                 (i.e. lowest loss)
+              times (dict): dictionary of floats representing the training times
+              histogram (dict, optional): If training model using EWM algo,
+                                          training will produce a dict of
+                                          histogram values representing the probability
+                                          density distribution of the generator function.
+    '''
+
+    # Save times
+    DataFrame(times).to_csv(config['save_dir'] + '/times.csv', header=True,
+                            index=False)
+    # Save losses
+    DataFrame(history).to_csv(config['save_dir'] + '/losses.csv', header=True,
+                              index=False)
+    # Save histogram if using EWM algorithm
+    if histogram is not None:
+        DataFrame(histogram).to_csv(config['save_dir'] + '/histogram.csv', 
+                                    header=True, index=False)
+    # Save config dict for reference
+    DataFrame(config).to_csv(config['save_dir'] + '/config.csv', header=True,
+                             index=False)
+    
+    
 #################################
 # Optimizer selection functions #
 #################################
@@ -251,7 +282,7 @@ def select_dataset(config):
 
 def MNIST(config):
     transform = transforms.Compose( [transforms.ToTensor(),
-                                     transforms.Normalize([0.5],[0.5])]) 
+                                     transforms.Normalize([0.5],[0.5])])
     data = datasets.MNIST(root='./data', train=True, download=True,
                           transform=transform)
     dataloader = DataLoader(data, **get_loader_kwargs(config))

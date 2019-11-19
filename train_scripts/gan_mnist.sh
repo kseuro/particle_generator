@@ -4,7 +4,7 @@ CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --MNIST True \
 --batch_size 32 \
 --num_epochs 100 \
---sample_size 8 \
+--sample_size 16 \
 --shuffle True \
 --drop_last True \
 --num_workers 8 \
