@@ -307,7 +307,7 @@ def MNIST(config):
 
 def get_LArCV_dataloader(config, loader_kwargs=None):
     '''
-        Function that centralizes the setup of the dataloader.
+        Function that centralizes the setup of the LArCV dataloader.
     '''
     train_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
                                           transforms.ToTensor(),
@@ -317,7 +317,7 @@ def get_LArCV_dataloader(config, loader_kwargs=None):
 
     train_dataset = LArCV_loader(root=config['data_root'], transforms=train_transform)
     if loader_kwargs is None:
-        dataloader = DataLoader(train_dataset, **get_loader_kwargs(config))
+        dataloader = DataLoader(train_dataset, **(get_loader_kwargs(config)))
     else:
         dataloader = DataLoader(train_dataset, **loader_kwargs)
     return dataloader
@@ -343,12 +343,21 @@ def gan_kwargs(config):
     '''
         Create two dictionaries of key word arguments for
         generator and discriminator model from config dict.
+        
+        - 'dataset' key corresponds to the integer size of one
+          data image dimension. i.e. 64 corresponds to the LArCV_PNG_64
+          dataset
     '''
     g_kwargs, d_kwargs = {}, {}
     if (config['MNIST']):
         config['dataset'] = 28
     im_size  = config['dataset']**2
+
+    # Creat list of sizes corresponding to the individual
+    # fully connected layers in the model(s)
+    # e.g. n_hidden = 10, nlayers = 4, fc_sizes = [10,10,10,10]
     fc_sizes = [config['n_hidden']] * config['n_layers']
+
     g_kwargs.update({ 'z_dim'      : config['z_dim'],
                       'fc_sizes'   : fc_sizes,
                       'n_out'      : im_size})

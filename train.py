@@ -67,7 +67,7 @@ def train(config):
     elif (config['model'] == 'ae'):
         enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
         E = model.Encoder(**enc_kwargs).to(config['gpu'])
-        D = model.Encoder(**dec_kwargs).to(config['gpu'])
+        D = model.Decoder(**dec_kwargs).to(config['gpu'])
         model_params = {'e_params': E.parameters(),
                         'd_params': D.parameters()}
         E_optim, D_optim = utils.get_optim(config, model_params)
@@ -109,6 +109,23 @@ def train(config):
     dataloader = tqdm(dataloader)
     epoch_bar = tqdm([i for i in range(config['num_epochs'])])
 
+    # Select appropriate training loop
+    if (config['model'] == 'gan'):
+        if (config['MNIST']):
+            from train_fns import MNIST_GAN as loop
+        else:
+            from train_fns import LARCV_GAN as loop
+    elif (config['model'] == 'ae'):
+        if (config['MNIST']):
+            from train_fns import MNIST_AE as loop
+        else:
+            from train_fns import LARCV_AE as loop
+    elif (config['model'] == 'ewm'):
+        if (config['MNIST']):
+            from train_fns import MNIST_EWM as loop
+        else:
+            from train_fns import LARCV_EWM as loop
+
     # Set up directories for saving training stats and outputs
     config = utils.directories(config)
 
@@ -119,55 +136,36 @@ def train(config):
     for epoch, _ in enumerate(epoch_bar):
         epoch_start = time.time()
 
-        # MNIST training loop
-        history, best_stats, times = train_fns.MNIST_GAN(G, G_optim, D, D_optim,
-                                                         dataloader, train_fn,
-                                                         history, best_stats,
-                                                         times, config, epoch,
-                                                         epoch_start, z_fixed)
-        # for itr, (x, _) in enumerate(dataloader):
-        #     tr_loop_start = time.time()
-        #
-        #     metrics = train_fn(x)
-        #     history, best_stats, best = utils.train_logger(history,
-        #                                                    best_stats,
-        #                                                    metrics)
-        #     # Save checkpoint periodically
-        #     if (itr % 2000 == 0):
-        #         # G Checkpoint
-        #         chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
-        #         utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
-        #
-        #         # D Checkpoint
-        #         chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
-        #         utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
-        #
-        #     # Save Generator output periodically
-        #     if (itr % 1000 == 0):
-        #         z_rand = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
-        #         sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
-        #         utils.save_sample(sample, epoch, itr, config['random_samples'])
-        #
-        #     # Log the time at the end of training loop
-        #     times['tr_loop_times'].append(time.time() - tr_loop_start)
-        #
-        # # Log the time at the end of the training epoch
-        # times['epoch_times'].append(time.time() - epoch_start)
-        #
-        # # Save Generator output using fixed vector at end of epoch
-        # sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
-        # utils.save_sample(sample, epoch, itr, config['fixed_samples'])
+        if (config['model'] == 'gan'):
+            history, best_stats, times = loop(G, G_optim, D, D_optim, dataloader,
+                                              train_fn, history, best_stats,
+                                              times, config, epoch, epoch_start,
+                                              z_fixed)
+        elif (config['model'] == 'ae']):
+            pass
+        elif (config['model'] == 'ewm'):
+            pass
+        else:
+            raise Exception("Error in training loop!")
+
+        # if config["MNIST"] and (config['model'] == 'gan'):
+        #     # MNIST training loop
+        #     history, best_stats, times = train_fns.MNIST_GAN(G, G_optim, D, D_optim,
+        #                                                     dataloader, train_fn,
+        #                                                     history, best_stats,
+        #                                                     times, config, epoch,
+        #                                                     epoch_start, z_fixed)
+        # elif (config['model'] == 'gan'):
+        #     # Run LArCV1 training loop
+        #     history, best_stats, times = train_fns.LARCV_GAN(G, G_optim, D, D_optim,
+        #                                                     dataloader, train_fn,
+        #                                                     history, best_stats,
+        #                                                     times, config, epoch,
+        #                                                     epoch_start, z_fixed)
 
     # Save training history and model architecture for evaluation and deploy
     utils.save_train_hist(history, best_stats, times, config)
-
-        # TODO: Set up training loop for LArCV data
-        # for i, x in enumerate(prog_bar):
-        # train
-
     print("Training Complete")
-
-    return
 
 def main():
     parser = train_parser()
