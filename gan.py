@@ -17,24 +17,9 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision
 
-# TODO: add optional dropout functionality
-# if self.dropout:
-#   self.dropout = nn.Dropout(0.3)
-# add dropout to sequential layers
-
-class Print(nn.Module):
-    '''
-        Outputs the shape of convolutional layers in model.
-        Call Print() inbetween layers to get shape output to
-            the terminal.
-    '''
-    def __init__(self):
-        super(Print, self).__init__()
-
-    def forward(self, x):
-        print(x.shape)
-        return x
-
+############################
+# Layer creation functions #
+############################
 def FullyConnected(in_f, out_f):
     '''
         Fully connected layers used by both G and D
@@ -61,6 +46,21 @@ def D_out(in_f, out_f):
         nn.Linear(in_f, out_f),
         nn.Sigmoid()
     )
+############################
+#       Model Classes      #
+############################
+class Print(nn.Module):
+    '''
+        Outputs the shape of convolutional layers in model.
+        Call Print() inbetween layers to get shape output to
+            the terminal.
+    '''
+    def __init__(self):
+        super(Print, self).__init__()
+
+    def forward(self, x):
+        print(x.shape)
+        return x
 
 class Generator(nn.Module):
     '''
