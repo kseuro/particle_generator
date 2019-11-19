@@ -147,7 +147,7 @@ def train(config):
             times['tr_loop_times'].append(time.time() - tr_loop_start)
 
         # Log the time at the end of the training epoch
-        times['epoch_times'].append(time.time() - epoch_start')
+        times['epoch_times'].append(time.time() - epoch_start)
 
         # Save Generator output using fixed vector at end of epoch
         sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
