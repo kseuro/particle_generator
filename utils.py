@@ -183,17 +183,17 @@ def get_optim(config, model_params):
 
 def gan_optim(config, model_params):
     # G Optimizer
-    if ('adam' in config['g_optim']):
+    if ('adam' in config['g_opt']):
         g_optim = torch.optim.Adam(model_params['g_params'], lr=config['g_lr'])
-    elif ('sgd' in config['g_optim']):
+    elif ('sgd' in config['g_opt']):
         g_optim = torch.optim.SGD(model_params['g_params'], lr=config['g_lr'],
                                   momentum=config['p'])
     else:
         raise Exception('G optimizer not selected!')
     # D optimizer
-    if ('adam' in config['d_optim']):
+    if ('adam' in config['d_opt']):
         d_optim = torch.optim.Adam(model_params['d_params'], lr=config['d_lr'])
-    elif ('sgd' in config['d_optim']):
+    elif ('sgd' in config['d_opt']):
         d_optim = torch.optim.SGD(model_params['d_params'], lr=config['d_lr'],
                                   momentum=config['p'])
     else:
