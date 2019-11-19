@@ -69,7 +69,7 @@ class Generator(nn.Module):
         Args: - z_dim (int): dimension of the input vector
               - fc_sizes (list): list of layers sizes to add to model
                 - example: fc_sizes = [32, 64, 128] is a 3 layer model
-                           with sizes 32, 64, and 128. 
+                           with sizes 32, 64, and 128.
               - n_out (int): dimension of model output layer. Should correspond
                        to the square of the input image dimension
                        - (e.g. [512x512] = 262144)
@@ -95,7 +95,7 @@ class Generator(nn.Module):
             if isinstance(m, nn.Linear):
                 m.weight.data.normal_(0, 0.02)
             if hasattr(m, 'bias') and m.bias is not None:
-                m.bias.data.zero()
+                m.bias.data.zero_()
 
     def forward(self, x):
         return self.out(self.fc(x))
@@ -108,7 +108,7 @@ class Discriminator(nn.Module):
                                    on the dimension of the input data images
               - fc_sizes (list): list of layers sizes to add to model
                 - example: fc_sizes = [32, 64, 128] is a 3 layer model
-                           with sizes 32, 64, and 128. 
+                           with sizes 32, 64, and 128.
         Returns: Probability of model input belonging to real image space
     '''
     def __init__(self, in_features, fc_sizes):
