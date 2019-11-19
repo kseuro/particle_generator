@@ -106,7 +106,7 @@ def train(config):
         dataloader = utils.get_full_dataloader(config)
 
     # Set up progress bars for terminal output and enumeration
-    prog_bar = tqdm(dataloader)
+    dataloader = tqdm(dataloader)
     epoch_bar = tqdm([i for i in range(config['num_epochs'])])
 
     # Set up directories for saving training stats and outputs
@@ -120,38 +120,43 @@ def train(config):
         epoch_start = time.time()
 
         # MNIST training loop
-        for itr, (x, _) in enumerate(prog_bar):
-            tr_loop_start = time.time()
-
-            metrics = train_fn(x)
-            history, best_stats, best = utils.train_logger(history,
-                                                           best_stats,
-                                                           metrics)
-            # Save checkpoint periodically
-            if (itr % 2000 == 0):
-                # G Checkpoint
-                chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
-                utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
-
-                # D Checkpoint
-                chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
-                utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
-
-            # Save Generator output periodically
-            if (itr % 1000 == 0):
-                z_rand = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
-                sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
-                utils.save_sample(sample, epoch, itr, config['random_samples'])
-
-            # Log the time at the end of training loop
-            times['tr_loop_times'].append(time.time() - tr_loop_start)
-
-        # Log the time at the end of the training epoch
-        times['epoch_times'].append(time.time() - epoch_start)
-
-        # Save Generator output using fixed vector at end of epoch
-        sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
-        utils.save_sample(sample, epoch, itr, config['fixed_samples'])
+        history, best_stats, times = train_fns.MNIST_GAN(G, G_optim, D, D_optim,
+                                                         dataloader, train_fn,
+                                                         history, best_stats,
+                                                         times, config, epoch,
+                                                         epoch_start)
+        # for itr, (x, _) in enumerate(dataloader):
+        #     tr_loop_start = time.time()
+        #
+        #     metrics = train_fn(x)
+        #     history, best_stats, best = utils.train_logger(history,
+        #                                                    best_stats,
+        #                                                    metrics)
+        #     # Save checkpoint periodically
+        #     if (itr % 2000 == 0):
+        #         # G Checkpoint
+        #         chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
+        #         utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
+        #
+        #         # D Checkpoint
+        #         chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
+        #         utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
+        #
+        #     # Save Generator output periodically
+        #     if (itr % 1000 == 0):
+        #         z_rand = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
+        #         sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
+        #         utils.save_sample(sample, epoch, itr, config['random_samples'])
+        #
+        #     # Log the time at the end of training loop
+        #     times['tr_loop_times'].append(time.time() - tr_loop_start)
+        #
+        # # Log the time at the end of the training epoch
+        # times['epoch_times'].append(time.time() - epoch_start)
+        #
+        # # Save Generator output using fixed vector at end of epoch
+        # sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
+        # utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
     # Save training history and model architecture for evaluation and deploy
     utils.save_train_hist(history, best_stats, times, config)
@@ -160,9 +165,6 @@ def train(config):
         # for i, x in enumerate(prog_bar):
         # train
 
-
-    # Save and process training history
-    # TODO: Write function that processes the history dict
     print("Training Complete")
 
     return

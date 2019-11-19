@@ -34,12 +34,64 @@ from   torch.utils.data import DataLoader
 from   torchvision      import transforms
 from   torchvision      import datasets as dset
 
+import utils
+
+def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats, times, config, epoch, epoch_start):
+    '''
+        MNIST dataset training loop for GAN model. Used to train GAN as a
+        proof-of-concept, i.e. that the linear GAN model is able to reproduce
+        MNIST data, and is therefore (possibly) suited to reproducing the
+        LArCV1 dataset. Hopefully this will extend to other datasets.
+        - Args: G (Torch model): Generator model
+                G_optim (function): G optimizer (either adam or sgd)
+                D (Torch model): Discriminator model
+                D_optim (function): D optimizer (either adam or sgd)
+                Dataloader (iterable): Torch dataloader object wrapped up as
+                                       tqdm progress bar for terminal output
+                train_fn (function): GAN training function selected in train.py
+                history, best_stats, times, config (dicts): dictionaries
+                epoch, epoch_start (ints)
+    '''
+    for itr, (x, _) in enumerate(dataloader):
+            tr_loop_start = time.time()
+
+            metrics = train_fn(x)
+            history, best_stats, best = utils.train_logger(history, best_stats, metrics)
+
+            # Save checkpoint periodically
+            if (itr % 2000 == 0):
+                # G Checkpoint
+                chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
+                utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
+
+                # D Checkpoint
+                chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
+                utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
+
+            # Save Generator output periodically
+            if (itr % 1000 == 0):
+                z_rand = torch.randn(
+                    config['sample_size'], config['z_dim']).to(config['gpu'])
+                sample = G(z_rand).view(-1, 1,
+                           config['dataset'], config['dataset'])
+                utils.save_sample(sample, epoch, itr, config['random_samples'])
+
+            # Log the time at the end of training loop
+            times['tr_loop_times'].append(time.time() - tr_loop_start)
+
+    # Log the time at the end of the training epoch
+    times['epoch_times'].append(time.time() - epoch_start)
+
+    # Save Generator output using fixed vector at end of epoch
+    sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
+    utils.save_sample(sample, epoch, itr, config['fixed_samples'])
+    
+    return history, best_stats, times
+
 ########################
 #  Training Functions  #
 ########################
 # GAN training function
-
-
 def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
     '''
         GAN training function
