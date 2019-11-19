@@ -1,7 +1,6 @@
 #!/bin/bash
 CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --gpu 0 \
---MNIST False \
 --dataset 64 \
 --batch_size 32 \
 --num_epochs 1 \

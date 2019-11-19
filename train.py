@@ -109,6 +109,12 @@ def train(config):
     dataloader = tqdm(dataloader)
     epoch_bar = tqdm([i for i in range(config['num_epochs'])])
 
+    # Set up directories for saving training stats and outputs
+    config = utils.directories(config)
+
+    # Set fixed random vector for sampling at the end of each epoch
+    z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
+    
     # Select appropriate training loop
     if (config['model'] == 'gan'):
         if (config['MNIST']):
@@ -125,12 +131,6 @@ def train(config):
             from train_fns import MNIST_EWM as loop
         else:
             from train_fns import LARCV_EWM as loop
-
-    # Set up directories for saving training stats and outputs
-    config = utils.directories(config)
-
-    # Set fixed random vector for sampling at the end of each epoch
-    z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
