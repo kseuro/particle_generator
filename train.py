@@ -40,8 +40,8 @@ def train(config):
         g_kwargs, d_kwargs = utils.gan_kwargs(config)
 
         # Set up models on GPU
-        G = model.Generator(**g_kwargs).to(config['device'])
-        D = model.Discriminator(**d_kwargs).to(config['device'])
+        G = model.Generator(**g_kwargs).to(config['gpu'])
+        D = model.Discriminator(**d_kwargs).to(config['gpu'])
 
         # Initialize model weights
         G.weights_init()
@@ -53,26 +53,26 @@ def train(config):
         G_optim, D_optim = utils.get_optim(config, model_params)
 
         # Set up loss function
-        loss_fn = nn.BCELoss().to(config['device'])
+        loss_fn = nn.BCELoss().to(config['gpu'])
 
         # Set up training function
         train_fn = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn,
                                            config, G_D=None)
     elif (config['model'] == 'ae'):
         enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
-        E = model.Encoder(**enc_kwargs).to(config['device'])
-        D = model.Encoder(**dec_kwargs).to(config['device'])
+        E = model.Encoder(**enc_kwargs).to(config['gpu'])
+        D = model.Encoder(**dec_kwargs).to(config['gpu'])
         model_params = {'e_params': E.parameters(),
                         'd_params': D.parameters()}
         E_optim, D_optim = utils.get_optim(config, model_params)
     elif (config['model'] == 'ewm'):
         emw_kwargs = utils.ewm_kwargs(config)
-        G = model.Generator(emw_kwargs).to(config['device'])
+        G = model.Generator(emw_kwargs).to(config['gpu'])
         model_params = {'g_params': G.parameters()}
         G_optim = utils.get_optim(config, model_params)
         # Set up fixed noise vector
         z_fixed = torch.randn(config['batch_size'],
-                              config['z_dim'], device=config['device'])
+                              config['z_dim'], gpu=config['gpu'])
     else:
         raise Exception("No model selected!")
 
@@ -121,7 +121,7 @@ def train(config):
             # Save Generator output periodically
             if (itr % 1000 == 0):
                 z_rand = torch.randn(config['sample_size'],
-                                     config['z_dim'], device=config['device'])
+                                     config['z_dim'], gpu=config['gpu'])
                 sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
                 utils.save_sample(sample, epoch, itr, config['random_samples'])
 

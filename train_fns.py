@@ -66,15 +66,15 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
         G_optim.zero_grad()
 
         # Move data to GPU (if not there already) and flatten into vector
-        x = x.view(config['batch_size'], -1).to(config['device'])
+        x = x.view(config['batch_size'], -1).to(config['gpu'])
 
         # Set up 'real' and 'fake' targets
-        real_target = torch.ones(config['dataset']**2).to(config['device'])
-        fake_target = torch.zeros(config['dataset']**2).to(config['device'])
+        real_target = torch.ones(config['dataset']**2).to(config['gpu'])
+        fake_target = torch.zeros(config['dataset']**2).to(config['gpu'])
 
         # Train D
         ## Generate fake data using G
-        fake = torch.randn(config['batch_size'], config['z_dim'], device=config['device'])
+        fake = torch.randn(config['batch_size'], config['z_dim'], gpu=config['gpu'])
         fake = G(fake).detach() # Detach so that gradients are not calc'd for G
 
         ## 1.1 Train D on real data
@@ -92,7 +92,7 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
 
         # Train G
         ## Generate fake data and pass through D
-        fake = torch.randn(config['batch_size'], config['z_dim'], device=config['device'])
+        fake = torch.randn(config['batch_size'], config['z_dim'], gpu=config['gpu'])
         G_pred  = D(G(fake))
         G_error = loss_fn(G_pred, real_target) # Calculate BCE
         G_error.backward() # Backprop
