@@ -108,7 +108,7 @@ def train(config):
 
     # Train model for specified number of epochs
     for epoch in range(config['num_epochs']):
-        print("Epoch_{}").format(epoch)
+        print("Epoch_{}".format(epoch))
         # MNIST training loop
         for itr, (x, _) in enumerate(prog_bar):
             metrics = train_fn(x)
