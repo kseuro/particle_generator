@@ -198,7 +198,7 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
                                     header=True, index=False)
     # Save config dict for reference
     DataFrame(config).to_csv(config['save_dir'] + '/config.csv', header=True,
-                             index=False)
+                             index=True)
     
     
 #################################
