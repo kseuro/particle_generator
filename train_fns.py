@@ -69,8 +69,8 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
         x = x.view(config['batch_size'], -1).to(config['gpu'])
 
         # Set up 'real' and 'fake' targets
-        real_target = torch.ones(config['batch_size']).to(config['gpu'])
-        fake_target = torch.zeros(config['batch_size']).to(config['gpu'])
+        real_target = torch.ones(config['batch_size'], 1).to(config['gpu'])
+        fake_target = torch.zeros(config['batch_size'], 1).to(config['gpu'])
 
         # Train D
         ## Generate fake data using G
