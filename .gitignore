@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Sandbox stuff
+dynamic_model_alloc.py
+test_model.py
+
 # Visual Studio Files
 *.vscode
 
