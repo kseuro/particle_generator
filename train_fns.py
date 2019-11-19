@@ -79,9 +79,6 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
 
         ## 1.1 Train D on real data
         real_pred  = D(x)
-
-        print(real_pred.shape, real_target.shape)
-
         real_error = loss_fn(real_pred, real_target) # Calculate BCE
         real_error.backward() # Backprop
 
