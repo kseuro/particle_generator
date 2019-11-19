@@ -124,7 +124,7 @@ def train(config):
                                                          dataloader, train_fn,
                                                          history, best_stats,
                                                          times, config, epoch,
-                                                         epoch_start)
+                                                         epoch_start, z_fixed)
         # for itr, (x, _) in enumerate(dataloader):
         #     tr_loop_start = time.time()
         #

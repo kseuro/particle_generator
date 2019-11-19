@@ -36,7 +36,8 @@ from   torchvision      import datasets as dset
 
 import utils
 
-def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats, times, config, epoch, epoch_start):
+def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats, 
+              times, config, epoch, epoch_start, z_fixed):
     '''
         MNIST dataset training loop for GAN model. Used to train GAN as a
         proof-of-concept, i.e. that the linear GAN model is able to reproduce
@@ -51,6 +52,8 @@ def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
                 train_fn (function): GAN training function selected in train.py
                 history, best_stats, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
+                z_fixed (Torch tensor): Fixed vector for sampling G at the
+                                        end of a training epoch
     '''
     for itr, (x, _) in enumerate(dataloader):
             tr_loop_start = time.time()
