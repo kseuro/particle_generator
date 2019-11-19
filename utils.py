@@ -89,7 +89,7 @@ def directories(config):
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
 
-    assert not config['save_root'], "No save_root specified in config!"
+    assert config['save_root'], "No save_root specified in config!"
 
     # Create path for experiment
     save_dir = config['save_root'] + config['exp_label']
