@@ -226,7 +226,7 @@ def ewm_optim(config, model_params):
 def get_loader_kwargs(config):
     loader_kwargs = {}
     loader_kwargs.update({'num_workers': config['num_workers'],
-                          'batch_size' : config['data_limit'],
+                          'batch_size' : config['batch_size'],
                           'shuffle'    : config['shuffle'],
                           'drop_last'  : config['drop_last']})
     return loader_kwargs
