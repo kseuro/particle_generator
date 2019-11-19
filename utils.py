@@ -51,6 +51,7 @@ def train_logger(history, best_stats, metrics):
         Returns: history, best_stats, True/False
     '''
     # Check if history is empty before appending data
+    # Append most recent training history to loss lists
     if not history:
         for key in metrics:
             history.update({ key: [metrics[key]] })
@@ -179,7 +180,7 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
               best_stats (dict): dictionary of floating point numbers
                                  representing the best network performance
                                  (i.e. lowest loss)
-              times (dict): dictionary of floats representing the training times
+              times (dict): dictionary of lists containing the training times
               histogram (dict, optional): If training model using EWM algo,
                                           training will produce a dict of
                                           histogram values representing the probability
@@ -188,7 +189,7 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
 
     # Save times
     times_csv = config['save_root'] + '/times.csv'
-    DataFrame(times).to_csv(times_csv, header=True, index=True)
+    DataFrame(times).to_csv(times_csv, header=True, index=False)
 
     # Save losses
     loss_csv = config['save_root'] + '/losses.csv'

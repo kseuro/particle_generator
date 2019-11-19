@@ -59,6 +59,11 @@ def train(config):
         # Set up training function
         train_fn = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn,
                                            config, G_D=None)
+
+        # Set up dicts for tracking progress
+        history, best_stats = {}, {}
+        times = {'epoch_times' : [], 'tr_loop_times' : []}
+
     elif (config['model'] == 'ae'):
         enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
         E = model.Encoder(**enc_kwargs).to(config['gpu'])
@@ -66,6 +71,9 @@ def train(config):
         model_params = {'e_params': E.parameters(),
                         'd_params': D.parameters()}
         E_optim, D_optim = utils.get_optim(config, model_params)
+
+        # Set up dicts for tracking progress
+
     elif (config['model'] == 'ewm'):
         emw_kwargs = utils.ewm_kwargs(config)
         G = model.Generator(emw_kwargs).to(config['gpu'])
@@ -74,6 +82,8 @@ def train(config):
         # Set up fixed noise vector
         z_fixed = torch.randn(config['batch_size'],
                               config['z_dim'], gpu=config['gpu'])
+
+        # Set up dicts for tracking progress
     else:
         raise Exception("No model selected!")
 
@@ -98,9 +108,6 @@ def train(config):
     # Set up progress bars for terminal output and enumeration
     prog_bar = tqdm(dataloader)
     epoch_bar = tqdm([i for i in range(config['num_epochs'])])
-
-    # Empty dicts for tracking training metrics, best stats, and times
-    history, best_stats, times = {}, {}, {}
 
     # Set up directories for saving training stats and outputs
     config = utils.directories(config)
@@ -137,10 +144,10 @@ def train(config):
                 utils.save_sample(sample, epoch, itr, config['random_samples'])
 
             # Log the time at the end of training loop
-            times.update({'tr_loop_time' : time.time() - tr_loop_start})
+            times['tr_loop_times'].append(time.time() - tr_loop_start)
 
         # Log the time at the end of the training epoch
-        times.update({'epoch_time' : time.time() - epoch_start})
+        times['epoch_times'].append(time.time() - epoch_start']
 
         # Save Generator output using fixed vector at end of epoch
         sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
