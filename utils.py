@@ -251,7 +251,7 @@ def select_dataset(config):
 
 def MNIST(config):
     transform = transforms.Compose( [transforms.ToTensor(),
-                                     transforms.Normalize([0.5],[0.5]] )
+                                     transforms.Normalize([0.5],[0.5]))
     data = datasets.MNIST(root='./data', train=True, download=True,
                           transform=transform)
     dataloader = DataLoader(data, **get_loader_kwargs(config))
