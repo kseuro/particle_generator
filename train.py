@@ -50,6 +50,8 @@ def train(config):
         # Set up model optimizer functions
         model_params = {'g_params': G.parameters(),
                         'd_params': D.parameters()}
+        print(type(config))
+        print(type(model_params))
         G_optim, D_optim = utils.get_optim(config, model_params)
 
         # Set up loss function

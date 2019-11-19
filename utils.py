@@ -104,9 +104,9 @@ def directories(config):
     dirs.append(save_dir + '/training_samples/')
 
     # Random samples
-    config.update( {'random_samples' : 
-                    config['save_dir'] + 
-                    '/training_samples/' + 
+    config.update( {'random_samples' :
+                    config['save_dir'] +
+                    '/training_samples/' +
                     'random_samples/'})
     dirs.append(config['random_samples'])
 
@@ -125,7 +125,7 @@ def directories(config):
     # Make directories for saving
     for i in range(len(dirs)):
         make_dir(dirs[i])
-    
+
     return config
 
 def get_checkpoint(iter, epoch, model, optim):
@@ -148,11 +148,11 @@ def save_checkpoint(checkpoint, best, model_name, save_dir):
               save_dir (str): full path to save location
     '''
     if best:
-        filename = save_dir + 'best_chkpt_{}_{}.tar'.format(model_name, 
+        filename = save_dir + 'best_chkpt_{}_{}.tar'.format(model_name,
                                                             checkpoint['epoch'])
     else:
-        filename = save_dir + 'chkpt_{}_it_{}_ep_{}.tar'.format(model_name, 
-                                                                checkpoint['epoch'], 
+        filename = save_dir + 'chkpt_{}_it_{}_ep_{}.tar'.format(model_name,
+                                                                checkpoint['epoch'],
                                                                 checkpoint['iter'])
     torch.save(checkpoint, filename)
 
@@ -174,11 +174,11 @@ def save_sample(sample, epoch, iter, save_dir):
 # Optimizer selection functions #
 #################################
 def get_optim(config, model_params):
-    if (config['model'] == 'GAN'):
+    if (config['model'] == 'gan'):
         return gan_optim(config, model_params)
-    elif (config['model'] == 'AE'):
+    elif (config['model'] == 'ae'):
         return ae_optim(config, model_params)
-    elif (config['model'] == 'EWM'):
+    elif (config['model'] == 'ewm'):
         return ewm_optim(config, model_params)
 
 def gan_optim(config, model_params):
@@ -190,7 +190,6 @@ def gan_optim(config, model_params):
                                   momentum=config['p'])
     else:
         raise Exception('G optimizer not selected!')
-    
     # D optimizer
     if ('adam' in config['d_optim']):
         d_optim = torch.optim.Adam(model_params['d_params'], lr=config['d_lr'])
@@ -218,7 +217,7 @@ def ewm_optim(config, model_params):
                                     momentum=config['p'])
     else:
         raise Exception('EWM optimizer not selected!')
-    
+
     return ewm_optim
 
 ############################
@@ -254,7 +253,7 @@ def MNIST(config):
     transform = transforms.Compose( [transforms.ToTensor(),
                                      transforms.Normalize((.5, .5, .5),
                                                           (.5, .5, .5))])
-    data = datasets.MNIST(root='./data', train=True, download=True, 
+    data = datasets.MNIST(root='./data', train=True, download=True,
                           transform=transform)
     dataloader = DataLoader(data, **get_loader_kwargs(config))
     return dataloader
@@ -280,7 +279,7 @@ def get_full_dataloader(config):
     '''
         Returns a dataloader containing 10000 training images.
         10000 is safe to load onto a Nvidia Titan 1080x with a single
-        model also loaded. 20000 may also work, but the operating system may 
+        model also loaded. 20000 may also work, but the operating system may
         squash the thread at a higher number.
     '''
     loader_kwargs = get_loader_kwargs(config)
