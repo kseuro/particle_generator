@@ -105,9 +105,10 @@ def train(config):
 
     # Set fixed random vector for sampling at the end of each epoch
     z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
-    
+
     # Train model for specified number of epochs
     for epoch in range(config['num_epochs']):
+        print("Epoch_{}").format(epoch)
         # MNIST training loop
         for itr, (x, _) in enumerate(prog_bar):
             metrics = train_fn(x)
