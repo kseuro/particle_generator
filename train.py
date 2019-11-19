@@ -120,8 +120,7 @@ def train(config):
 
             # Save Generator output periodically
             if (itr % 1000 == 0):
-                z_rand = torch.randn(config['sample_size'],
-                                     config['z_dim'], gpu=config['gpu'])
+                z_rand = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
                 sample = G(z_rand).view(-1, 1, config['dataset'], config['dataset'])
                 utils.save_sample(sample, epoch, itr, config['random_samples'])
 
