@@ -121,7 +121,7 @@ def LARCV_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
                 history, best_stats, metrics)
 
             # Save checkpoint periodically
-            if (itr % 2000 == 0):
+            if (itr % 4000 == 0):
                 # G Checkpoint
                 chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
                 utils.save_checkpoint(chkpt_G, best, 'G',

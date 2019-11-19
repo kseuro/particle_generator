@@ -38,43 +38,6 @@ def make_dir(dir):
         if E.errno != errno.EEXIST:
             raise
 
-def train_logger(history, best_stats, metrics):
-    '''
-        Function for tracking training metrics. Determines with each update
-        to the training history if that update represents the best model
-        performance.
-        Args: history (dict): dictionary of training history as lists of floats
-              best_stats (dict): dictionary of best loss values
-              metrics (dict): most recent loss values as three floats
-        Does: updates history dict with most recent metrics. Checks if
-              that update is the best yet.
-        Returns: history, best_stats, True/False
-    '''
-    # Check if history is empty before appending data
-    # Append most recent training history to loss lists
-    if not history:
-        for key in metrics:
-            history.update({ key: [metrics[key]] })
-    else:
-        for key in metrics:
-            history[key].append(metrics[key])
-
-    check = []
-    # Check if best_stats is empty before appending data
-    if not best_stats:
-        for key in history:
-            best_stats.update({key: history[key][len(history[key]) - 1]})
-            check.append(True)
-    else:
-        for key in history:
-            threshold = best_stats[key] - round(best_stats[key] * 0.5, 3)
-            if (history[key][len(history[key]) - 1]) < threshold:
-                best_stats[key] = history[key][len(history[key]) - 1]
-                check.append(True)
-            else:
-                check.append(False)
-    return history, best_stats, all(check)
-
 def directories(config):
     '''
         Function that generates a label for the experiement based on the date,
@@ -90,7 +53,8 @@ def directories(config):
     # Create a label for the current experiment
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
-
+    config['exp_label'] += '_LArCV_{}_dataset'.format(config['dataset'])
+    
     assert config['save_root'], "No save_root specified in config!"
 
     # Create path for experiment
@@ -129,6 +93,43 @@ def directories(config):
         make_dir(dirs[i])
 
     return config
+
+def train_logger(history, best_stats, metrics):
+    '''
+        Function for tracking training metrics. Determines with each update
+        to the training history if that update represents the best model
+        performance.
+        Args: history (dict): dictionary of training history as lists of floats
+              best_stats (dict): dictionary of best loss values
+              metrics (dict): most recent loss values as three floats
+        Does: updates history dict with most recent metrics. Checks if
+              that update is the best yet.
+        Returns: history, best_stats, True/False
+    '''
+    # Check if history is empty before appending data
+    # Append most recent training history to loss lists
+    if not history:
+        for key in metrics:
+            history.update({ key: [metrics[key]] })
+    else:
+        for key in metrics:
+            history[key].append(metrics[key])
+
+    check = []
+    # Check if best_stats is empty before appending data
+    if not best_stats:
+        for key in history:
+            best_stats.update({key: history[key][len(history[key]) - 1]})
+            check.append(True)
+    else:
+        for key in history:
+            threshold = best_stats[key] - round(best_stats[key] * 0.5, 3)
+            if (history[key][len(history[key]) - 1]) < threshold:
+                best_stats[key] = history[key][len(history[key]) - 1]
+                check.append(True)
+            else:
+                check.append(False)
+    return history, best_stats, all(check)
 
 def get_checkpoint(iter, epoch, model, optim):
     '''
