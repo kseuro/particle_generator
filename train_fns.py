@@ -142,7 +142,7 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
 
         # Save output periodically
         if (itr % 1000 == 0):
-            x = x[:config['sample_size'], :, :, :]
+            x = x[:config['sample_size'], :, :, :].to(config['gpu'])
             sample = AE(x).view(-1, 1, config['dataset'], config['dataset'])
             utils.save_sample(sample, epoch, itr, config['random_samples'])
 
@@ -154,9 +154,9 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
 
     # Save output at end of epoch
     if (x.shape[0] > config['sample_size']):
-        x = x[:config['sample_size'], :, :, :]
-    sample = AE(x).view(-1, 1, config['dataset'], config['dataset']).detach()
-    utils.save_sample(sample, epoch, itr, config['fixed_samples'])
+        x = x[:config['sample_size'], :, :, :].to(config['gpu'])
+        sample = AE(x).view(-1, 1, config['dataset'], config['dataset'])
+        utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
     return history, best_stats, times
 
