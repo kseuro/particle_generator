@@ -34,7 +34,27 @@ from   torch.utils.data import DataLoader
 from   torchvision      import transforms
 from   torchvision      import datasets as dset
 
+# My Stuff
 import utils
+
+def get_train_loop(config):
+    '''
+        Function for selection of appropriate training loop
+    '''
+    if config['MNIST']:
+        if (config['model'] == 'gan'):
+            return MNIST_GAN
+        elif (config['model'] == 'ae'):
+            return MNIST_AE
+        elif (config['model'] == 'ewm'):
+            return MNIST_EWM
+    else:
+        if (config['model'] == 'gan'):
+            return LARCV_GAN
+        elif (config['model'] == 'ae'):
+            return LARCV_AE
+        elif (config['model'] == 'ewm'):
+            return LARCV_EWM
 
 ############################
 #  Training Loops - MNIST  #
@@ -94,6 +114,16 @@ def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
     
     return history, best_stats, times
 
+
+def MNIST_AE(E, E_optim, D, D_optim, dataloader, train_fn, history, best_stats,
+             times, config, epoch, epoch_start, z_fixed):
+    pass
+
+
+def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times, 
+              config, epoch, epoch_start, z_fixed):
+    pass
+
 ############################
 #  Training Loops - LARCV  #
 ############################
@@ -152,10 +182,17 @@ def LARCV_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
 
     return history, best_stats, times
 
+def LARCV_AE(E, E_optim, D, D_optim, dataloader, train_fn, history, best_stats,
+             times, config, epoch, epoch_start, z_fixed):
+    pass
+
+def LARCV_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
+              config, epoch, epoch_start, z_fixed):
+    pass
+
 ########################
 #  Training Functions  #
 ########################
-# GAN training function
 def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
     '''
         GAN training function
@@ -223,6 +260,46 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
         return metrics
     return train
 
+def AE_train_fn(AE, AE_optim, loss_fn, config):
+    '''
+        AE training function
+        Does: Initializes the training function for the AE model.
+        Args: - AE (Torch neural network): Autoencoder Model
+              - AE_optim (Torch optimizer function): AE optimizer (Adam or SGD)
+              - loss_fn (Torch loss function): AE loss function
+              - config (dict): config dictionary of parameters
+    '''
+    def train(x):
+        '''
+            AE training function
+            Does: Trains the AE model
+            Args: x (Torch tensor): Real data input image
+            Returns: list of training metrics
+        '''
+        # Make sure model is in training mode and that
+        # optimizer is zeroed, just in case.
+        AE.train()
+        AE_optim.zero_grad()
+
+        # Move data to GPU (if not there already) and flatten into vector
+        x = x.view(config['batch_size'], -1).to(config['gpu'])
+
+        # Forward pass
+        output = AE(x)
+        
+        # Compare output to real data
+        loss = loss_fn(output, x)
+
+        # Backprop and update weights
+        loss.backward()
+        AE_optim.step()
+
+        # Return training metrics
+        metrics = { 'ae_loss' : float(loss.item()) }
+
+        return metrics
+    return train
+
 # EWM training function (TODO: Finish this function)
 def EWM_train_fn():
     '''
@@ -243,6 +320,4 @@ def EWM_train_fn():
         return 0
     return train
 
-# AE training function (TODO: Write this function)
-def AE_train_fn():
-    return 0
+

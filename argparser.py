@@ -147,12 +147,20 @@ def train_parser():
                         help='Momentum value for SGD optimizer \
                             | (default: &(default)s)')
     ######################################################
+
     ## AE Model
-
-    ### Encoder Network
-
-    ### Decoder network
-
+    # l_dim: dimension of the encoders latent representation of the data
+    parser.add_argument('--l_dim', type=int, default=20,
+                        help='Dimension of the AE encoder latent space \
+                            | (default: &(default)s)')
+    # AE optimization function
+    parser.add_argument('--ae_opt', type=str, default='adam', 
+                        help='Autoencoder optimization function - \
+                            choices: adam, sgd | (default: &(default)s)')
+    # AE learning rate
+    parser.add_argument('--ae_lr', type=float, default=1e-4, 
+                        help='Autoencoder learning rate \
+                            | (default: &(default)s)')
 
     ######################################################
     ## EWM Model

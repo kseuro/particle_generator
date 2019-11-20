@@ -251,11 +251,13 @@ def gan_optim(config, model_params):
     return g_optim, d_optim
 
 def ae_optim(config, model_params):
-    # Encoder optimizer
-    e_optim = 0
-    # Decoder optimizer
-    d_optim = 0
-    return e_optim, d_optim
+    if ('adam' in config['ae_opt']):
+        return torch.optim.Adam(model_params['ae_params'], lr = config['ae_lr'])
+    elif ('sgd' in config['ae_opt']):
+        return torch.optim.SGD(model_params['ae_params'], lr=config['ae_lr'],
+                               momentum=config['p'])
+    else:
+        raise Exception('AE optimizer not selected!')
 
 def ewm_optim(config, model_params):
     # Generator optimizer
@@ -376,6 +378,23 @@ def ewm_kwargs(config): # TODO: Write this function!
 ####################
 # AE Functionality #
 ####################
-def ae_kwargs(config):  # TODO: Write this function!
-    enc_kwargs, dec_kwargs = {}, {}
-    return enc_kwargs, dec_kwargs
+def ae_kwargs(config):
+    kwargs = {}
+
+    # Check if MNIST - set image size
+    if (config['MNIST']):
+        config['dataset'] = 28
+    im_size = config['dataset']**2 # Input dimension
+    l_dim = config['l_dim']        # Encoder output dimension
+
+    # Compute encoder sizes
+    # Decoder is the reverse of the encoder
+    # Example output structure: [l_dim, 32*1, 32*2, ... , 32*(2^(n-1)), im_size]
+    sizes = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
+    enc_sizes = [32] * config['n_layers']
+    enc_sizes = [im_size] + [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1] + [l_dim]
+
+    # Update kwarg dicts
+    kwargs.update({'enc_sizes' : enc_sizes,
+                   'dec_sizes' : enc_sizes[::-1]})
+    return kwargs

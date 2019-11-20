@@ -34,6 +34,9 @@ def train(config):
     # Import the selected model
     model = __import__(config['model']) # GAN, AE, or EWM
 
+    # Import appropriate training loop
+    loop = train_fns.get_train_loop(config)
+
     # Instantiate the model and corresponding optimizer
     # May leave option open to model parallelization later (G_D)
     if (config['model'] == 'gan'):
@@ -64,27 +67,27 @@ def train(config):
         history, best_stats = {}, {}
         times = {'epoch_times' : [], 'tr_loop_times' : []}
 
-        # Select training loop
-        if (config['MNIST']):
-            from train_fns import MNIST_GAN as loop
-        else:
-            from train_fns import LARCV_GAN as loop
-
     elif (config['model'] == 'ae'):
-        enc_kwargs, dec_kwargs = utils.ae_kwargs(config)
-        E = model.Encoder(**enc_kwargs).to(config['gpu'])
-        D = model.Decoder(**dec_kwargs).to(config['gpu'])
-        model_params = {'e_params': E.parameters(),
-                        'd_params': D.parameters()}
-        E_optim, D_optim = utils.get_optim(config, model_params)
+        # Get model kwargs
+        ae_kwargs = utils.ae_kwargs(config)
+
+        # Set up model on GPU
+        AE = model.AutoEncoder(**ae_kwargs).to(config['gpu'])
+
+        # Initialize the weights
+        AE.weights_init()
+
+        # Set up model optimizer function
+        model_params = {'ae_params' : AE.parameters()}
+        AE_optim = utils.get_optim(config, model_params)
+
+        # Set up loss function
+        loss_fn = nn.MSELoss().to(config['gpu'])
+
+        # Set up training function
+        train_fn = train_fns.AE_train_fn(AE, AE_optim, loss_fn, config)
 
         # Set up dicts for tracking progress
-
-        # Select training loop
-        if (config['MNIST']):
-            from train_fns import MNIST_AE as loop
-        else:
-            from train_fns import LARCV_AE as loop
 
     elif (config['model'] == 'ewm'):
         emw_kwargs = utils.ewm_kwargs(config)
@@ -99,8 +102,6 @@ def train(config):
             from train_fns import MNIST_EWM as loop
         else:
             from train_fns import LARCV_EWM as loop
-    else:
-        raise Exception("No model selected!")
 
     # Check if resuming from checkpoint
     if config['checkpoint']:
@@ -151,7 +152,7 @@ def train(config):
         else:
             raise Exception("Error in training loop!")
 
-    # Save training history and model architecture for evaluation and deploy
+    # Save training history and experiment config for evaluation and deploy
     utils.save_train_hist(history, best_stats, times, config)
     print("Training Complete")
 
