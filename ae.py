@@ -62,8 +62,10 @@ class Decoder(nn.Module):
 class AutoEncoder(nn.Module):
     def __init__(self, enc_sizes, l_dim, dec_sizes, im_size):
         super().__init__()
-        self.encoder = Encoder([*enc_sizes], l_dim)
-        self.decoder = Decoder([*dec_sizes], im_size)
+        self.enc_sizes = [im_size] + [*enc_sizes]
+        self.dec_sizes = [l_dim] + [*dec_sizes]
+        self.encoder = Encoder(self.enc_sizes, l_dim)
+        self.decoder = Decoder(self.dec_sizes, im_size)
 
     def weights_init(self):
         self.encoder.weights_init()
