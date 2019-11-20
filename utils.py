@@ -405,6 +405,10 @@ def ae_kwargs(config):
     enc_sizes = [32] * config['n_layers']
     enc_sizes = [im_size] + [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1] + [l_dim]
 
+    print(enc_sizes)
+    print(enc_sizes[::-1])
+    input("end of ae_kwargs function")
+    
     # Update kwarg dicts
     kwargs.update({'enc_sizes' : enc_sizes,
                    'dec_sizes' : enc_sizes[::-1]})
