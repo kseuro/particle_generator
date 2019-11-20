@@ -151,12 +151,6 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
     # Log the time at the end of the training epoch
     times['epoch_times'].append(time.time() - epoch_start)
 
-    # Save output at end of epoch
-    if (x.shape[0] > config['sample_size']):
-        sample = AE(x.to(config['gpu'])).view(-1, 1, config['dataset'], config['dataset'])
-        sample = sample[:config['sample_size'],:,:,:]
-        utils.save_sample(sample, epoch, itr, config['fixed_samples'])
-
     return history, best_stats, times
 
 def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
@@ -333,6 +327,11 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         loss.backward()
         AE_optim.step()
 
+        # Save output periodically
+        if (itr % 1000 == 0):
+            sample = output[:config['sample_size'], :, :, :]
+            utils.save_sample(sample, epoch, itr, config['random_samples'])
+        
         # Return training metrics
         metrics = { 'ae_loss' : float(loss.item()) }
 
