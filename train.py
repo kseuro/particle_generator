@@ -90,7 +90,7 @@ def train(config):
         # Set up dicts for tracking progress
         history, best_stats = {}, {}
         times = {'epoch_times': [], 'tr_loop_times': []}
-        
+
     elif (config['model'] == 'ewm'):
         emw_kwargs = utils.ewm_kwargs(config)
         G = model.Generator(emw_kwargs).to(config['gpu'])
@@ -112,12 +112,7 @@ def train(config):
     # TODO: This may need to be modified after AE training is complete
     #       in order to add ability to load model latent space as target
     #       dataset for EWM algorithm
-    if (config['MNIST']):
-        dataloader = utils.MNIST(config) # Get MNIST data (DL if not available)
-    elif (config['model'] != 'ewm'):
-        dataloader = utils.get_LArCV_dataloader(config)
-    else:
-        dataloader = utils.get_full_dataloader(config)
+    dataloader = utils.get_dataloader(config)
 
     # Set up progress bars for terminal output and enumeration
     dataloader = tqdm(dataloader)
@@ -127,7 +122,9 @@ def train(config):
     config = utils.directories(config)
 
     # Set fixed random vector for sampling at the end of each epoch
-    z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
+    # if training GAN model or EWM model
+    if (config['model'] != 'ae'):
+        z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
@@ -142,8 +139,8 @@ def train(config):
             # if (history['d_loss_real'][-1] < 0.1) and (history['g_loss'][-1] >= history['d_loss_real'][-1]*5):
             #   break
         elif (config['model'] == 'ae'):
-            history, best_stats, times = loop(AE, AE_optim, dataloader, train_fn, 
-                                              history, best_stats, times, 
+            history, best_stats, times = loop(AE, AE_optim, dataloader, train_fn,
+                                              history, best_stats, times,
                                               config, epoch, epoch_start)
         elif (config['model'] == 'ewm'):
             pass

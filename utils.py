@@ -45,7 +45,7 @@ def directories(config):
         Creates directories for saving weights, samples, and other outputs.
     '''
     dirs = []
-    
+
     # Date and time labelling
     now  = datetime.now()
     date = now.strftime("%m-%d-%Y")
@@ -55,7 +55,7 @@ def directories(config):
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
     config['exp_label'] += '_LArCV_{}_dataset'.format(config['dataset'])
-    
+
     assert config['save_root'], "No save_root specified in config!"
 
     # Create path for experiment
@@ -167,7 +167,7 @@ def save_sample(sample, epoch, iter, save_dir):
         - Function also saves periodic samples from AutoEncoder
     '''
     # Un-normalize the sample and boost ADC values for better viz.
-    # NOTE: This transformation is (should be) un-done when deploy 
+    # NOTE: This transformation is (should be) un-done when deploy
     #       samples are loaded for analysis.
     sample = ((sample * 0.5) + 0.5) * 10
     if 'fixed' in save_dir:
@@ -342,6 +342,14 @@ def get_full_dataloader(config):
         print('Returning full dataloader')
         return data
 
+def get_dataloader(config):
+    if (config['MNIST']):
+        return MNIST(config)
+    elif (config['model'] != 'ewm'):
+        return get_LArCV_dataloader(config)
+    else:
+        return get_full_dataloader(config)
+
 #####################
 # GAN Functionality #
 #####################
@@ -349,7 +357,7 @@ def gan_kwargs(config):
     '''
         Create two dictionaries of key word arguments for
         generator and discriminator model from config dict.
-        
+
         - 'dataset' key corresponds to the integer size of one
           data image dimension. i.e. 64 corresponds to the LArCV_PNG_64
           dataset
