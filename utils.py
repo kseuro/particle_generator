@@ -45,6 +45,7 @@ def directories(config):
         Creates directories for saving weights, samples, and other outputs.
     '''
     dirs = []
+    
     # Date and time labelling
     now  = datetime.now()
     date = now.strftime("%m-%d-%Y")
@@ -161,10 +162,13 @@ def save_checkpoint(checkpoint, best, model_name, save_dir):
 
 def save_sample(sample, epoch, iter, save_dir):
     '''
-        Function for saving periodic samples from the Generator
-        function, using either with a fixed or random noise vector.
+        - Function for saving periodic samples from the Generator
+          function using either with a fixed or random noise vector.
+        - Function also saves periodic samples from AutoEncoder
     '''
     # Un-normalize the sample and boost ADC values for better viz.
+    # NOTE: This transformation is (should be) un-done when deploy 
+    #       samples are loaded for analysis.
     sample = ((sample * 0.5) + 0.5) * 10
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
@@ -217,7 +221,6 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
     # Save config dict for reference
     df = DataFrame.from_dict(config, orient='index')
     df.to_csv(config['save_dir'] + '/config.csv')
-
 
 #################################
 # Optimizer selection functions #

@@ -28,7 +28,7 @@ def train(config):
                 routine for GAN, AE, or EWM.
               - Writes model outputs, checkpoints, and metrics to disk during
                 and after training.
-        Args: config (dictionary): config dict of parsed command line params.
+        Args: config (dictionary): config dict of parsed command line args
         Returns: Nothing
     '''
     # Import the selected model
@@ -88,7 +88,9 @@ def train(config):
         train_fn = train_fns.AE_train_fn(AE, AE_optim, loss_fn, config)
 
         # Set up dicts for tracking progress
-
+        history, best_stats = {}, {}
+        times = {'epoch_times': [], 'tr_loop_times': []}
+        
     elif (config['model'] == 'ewm'):
         emw_kwargs = utils.ewm_kwargs(config)
         G = model.Generator(emw_kwargs).to(config['gpu'])
@@ -96,12 +98,6 @@ def train(config):
         G_optim = utils.get_optim(config, model_params)
 
         # Set up dicts for tracking progress
-
-        # Select training loop
-        if (config['MNIST']):
-            from train_fns import MNIST_EWM as loop
-        else:
-            from train_fns import LARCV_EWM as loop
 
     # Check if resuming from checkpoint
     if config['checkpoint']:
@@ -146,7 +142,9 @@ def train(config):
             # if (history['d_loss_real'][-1] < 0.1) and (history['g_loss'][-1] >= history['d_loss_real'][-1]*5):
             #   break
         elif (config['model'] == 'ae'):
-            pass
+            history, best_stats, times = loop(AE, AE_optim, dataloader, train_fn, 
+                                              history, best_stats, times, 
+                                              config, epoch, epoch_start)
         elif (config['model'] == 'ewm'):
             pass
         else:

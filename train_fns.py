@@ -6,7 +6,7 @@
 # Date: 10.15.2019
 # Purpose: - This file provides training functions for both the GAN model
 #            and the AE model. The desired training funcion is chosen at
-#            runtime. 
+#            runtime.
 ###############################################################################
 
 # Imports
@@ -59,18 +59,18 @@ def get_train_loop(config):
 ############################
 #  Training Loops - MNIST  #
 ############################
-def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats, 
+def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
               times, config, epoch, epoch_start, z_fixed):
     '''
         MNIST dataset training loop for GAN model. Used to train GAN as a
         proof-of-concept, i.e. that the linear GAN model is able to reproduce
         MNIST data, and is therefore (possibly) suited to reproducing the
-        LArCV1 dataset. Hopefully this will extend to other datasets.
+        LArCV1 dataset. Hopefully this will extend to other datasets...
         - Args: G (Torch model): Generator model
                 G_optim (function): G optimizer (either adam or sgd)
                 D (Torch model): Discriminator model
                 D_optim (function): D optimizer (either adam or sgd)
-                Dataloader (iterable): Torch dataloader object wrapped up as
+                Dataloader (iterable): Torch dataloader object wrapped as
                                        tqdm progress bar for terminal output
                 train_fn (function): GAN training function selected in train.py
                 history, best_stats, times, config (dicts): dictionaries
@@ -79,31 +79,31 @@ def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
                                         end of a training epoch
     '''
     for itr, (x, _) in enumerate(dataloader):
-            tr_loop_start = time.time()
+        tr_loop_start = time.time()
 
-            metrics = train_fn(x)
-            history, best_stats, best = utils.train_logger(history, best_stats, metrics)
+        metrics = train_fn(x)
+        history, best_stats, best = utils.train_logger(history, best_stats, metrics)
 
-            # Save checkpoint periodically
-            if (itr % 2000 == 0):
-                # G Checkpoint
-                chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
-                utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
+        # Save checkpoint periodically
+        if (itr % 2000 == 0):
+            # G Checkpoint
+            chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
+            utils.save_checkpoint(chkpt_G, best, 'G', config['weights_save'])
 
-                # D Checkpoint
-                chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
-                utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
+            # D Checkpoint
+            chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
+            utils.save_checkpoint(chkpt_D, best, 'D', config['weights_save'])
 
-            # Save Generator output periodically
-            if (itr % 1000 == 0):
-                z_rand = torch.randn(
-                    config['sample_size'], config['z_dim']).to(config['gpu'])
-                sample = G(z_rand).view(-1, 1,
-                           config['dataset'], config['dataset'])
-                utils.save_sample(sample, epoch, itr, config['random_samples'])
+        # Save Generator output periodically
+        if (itr % 1000 == 0):
+            z_rand = torch.randn(
+                config['sample_size'], config['z_dim']).to(config['gpu'])
+            sample = G(z_rand).view(-1, 1,
+                       config['dataset'], config['dataset'])
+            utils.save_sample(sample, epoch, itr, config['random_samples'])
 
-            # Log the time at the end of training loop
-            times['tr_loop_times'].append(time.time() - tr_loop_start)
+        # Log the time at the end of training loop
+        times['tr_loop_times'].append(time.time() - tr_loop_start)
 
     # Log the time at the end of the training epoch
     times['epoch_times'].append(time.time() - epoch_start)
@@ -111,16 +111,55 @@ def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
     # Save Generator output using fixed vector at end of epoch
     sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
     utils.save_sample(sample, epoch, itr, config['fixed_samples'])
-    
+
     return history, best_stats, times
 
 
-def MNIST_AE(E, E_optim, D, D_optim, dataloader, train_fn, history, best_stats,
-             times, config, epoch, epoch_start, z_fixed):
-    pass
+def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
+             times, config, epoch, epoch_start):
+    '''
+        MNIST dataset training loop for AE model. Used to train AE as a
+        proof-of-concept.
+        - Args: AE (Torch model): AutoEncoder model
+                AR_optim (function): AE optimizer (either adam or sgd)
+                Dataloader (iterable): Torch dataloader object wrapped as
+                                       tqdm progress bar for terminal output
+                train_fn (function): AE training function selected in train.py
+                history, best_stats, times, config (dicts): dictionaries
+                epoch, epoch_start (ints)
+    '''
+    for itr, (x, _) in enumerate(dataloader):
+        tr_loop_start = time.time()
 
+        metrics = train_fn(x)
+        history, best_stats, best = utils.train_logger(history, best_stats, metrics)
 
-def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times, 
+        # Save checkpoint periodically
+        if (itr % 1000 == 0):
+            chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
+            utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
+
+        # Save output periodically
+        if (itr % 1000 == 0):
+            x = x[:config['sample_size'], :, :, :]
+            sample = AE(x).view(-1, 1, config['dataset'], config['dataset']).detach()
+            utils.save_sample(sample, epoch, itr, config['random_samples'])
+
+        # Log the time at the end of training loop
+        times['tr_loop_times'].append(time.time() - tr_loop_start)
+
+    # Log the time at the end of the training epoch
+    times['epoch_times'].append(time.time() - epoch_start)
+
+    # Save output at end of epoch
+    if (x.shape[0] > config['sample_size']):
+        x = x[:config['sample_size'], :, :, :]
+    sample = AE(x).view(-1, 1, config['dataset'], config['dataset']).detach()
+    utils.save_sample(sample, epoch, itr, config['fixed_samples'])
+
+    return history, best_stats, times
+
+def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
               config, epoch, epoch_start, z_fixed):
     pass
 
@@ -164,7 +203,7 @@ def LARCV_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
 
             # Save Generator output periodically
             if (itr % 1000 == 0):
-                z_rand = torch.randn(config['sample_size'], 
+                z_rand = torch.randn(config['sample_size'],
                                      config['z_dim']).to(config['gpu'])
                 sample = G(z_rand).view(-1, 1,
                                         config['dataset'], config['dataset'])
@@ -200,7 +239,7 @@ def GAN_train_fn(G, D, G_optim, D_optim, loss_fn, config, G_D=None):
         Args: - G (Torch neural network): Generator model
               - D (Torch neural network): Discriminator model
               - G_D (Torch neural network, optional): Parallel model
-              - z_fixed (Torch tensor): Fixed tensor of Gaussian noise for 
+              - z_fixed (Torch tensor): Fixed tensor of Gaussian noise for
                                         sampling Generator function.
               - loss_fn (function): Torch loss function
     '''
@@ -286,7 +325,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
 
         # Forward pass
         output = AE(x)
-        
+
         # Compare output to real data
         loss = loss_fn(output, x)
 
@@ -305,7 +344,7 @@ def EWM_train_fn():
     '''
         EWM_train_fn
         Does: initilizes training function for EWM algorithm.
-        Args: 
+        Args:
         Returns: training function for training a generative model
                  using explicit wasserstein minimization
         Algorithm 1 (OTS):
@@ -319,5 +358,3 @@ def EWM_train_fn():
     def train(x):
         return 0
     return train
-
-
