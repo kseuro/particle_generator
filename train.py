@@ -73,6 +73,8 @@ def train(config):
 
         # Set up model on GPU
         AE = model.AutoEncoder(**ae_kwargs).to(config['gpu'])
+        AE.Encoder().to(config['gpu'])
+        AE.Decoder().to(config['gpu'])
 
         # Initialize the weights
         AE.weights_init()
