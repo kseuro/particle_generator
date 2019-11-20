@@ -131,7 +131,7 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
     for itr, (x, _) in enumerate(dataloader):
         tr_loop_start = time.time()
 
-        metrics = train_fn(x)
+        metrics = train_fn(x, itr)
         history, best_stats, best = utils.train_logger(history, best_stats, metrics)
 
         # Save checkpoint periodically
@@ -302,7 +302,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
               - loss_fn (Torch loss function): AE loss function
               - config (dict): config dictionary of parameters
     '''
-    def train(x):
+    def train(x, itr):
         '''
             AE training function
             Does: Trains the AE model
