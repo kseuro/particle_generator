@@ -323,6 +323,9 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         # Move data to GPU (if not there already) and flatten into vector
         x = x.view(config['batch_size'], -1).to(config['gpu'])
 
+        print(x.shape)
+        input("AE train function")
+        
         # Forward pass
         output = AE(x)
 
