@@ -142,7 +142,6 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
         # Save output periodically
         if (itr % 1000 == 0):
             sample = AE(x.to(config['gpu'])).view(-1, 1, config['dataset'], config['dataset'])
-            sample = sample[:config['sample_size'],:,:,:]
             utils.save_sample(sample, epoch, itr, config['random_samples'])
 
         # Log the time at the end of training loop
@@ -329,8 +328,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
 
         # Save output periodically
         if (itr % 1000 == 0):
-            sample = output[:config['sample_size'], :]
-            utils.save_sample(sample, epoch, itr, config['random_samples'])
+            utils.save_sample(output, epoch, itr, config['random_samples'])
         
         # Return training metrics
         metrics = { 'ae_loss' : float(loss.item()) }
