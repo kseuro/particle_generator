@@ -72,4 +72,6 @@ class AutoEncoder(nn.Module):
         self.decoder.weights_init()
 
     def forward(self, x):
-        return self.decoder(self.encoder(x))
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
