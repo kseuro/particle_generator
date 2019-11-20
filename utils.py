@@ -403,7 +403,7 @@ def ae_kwargs(config):
     # Example output structure: [l_dim, 32*1, 32*2, ... , 32*(2^(n-1)), im_size]
     sizes = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
     enc_sizes = [32] * config['n_layers']
-    enc_sizes = [im_size] + [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1] + [l_dim]
+    enc_sizes = [im_size] + [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1]
 
     print(enc_sizes)
     print(enc_sizes[::-1])
@@ -411,5 +411,7 @@ def ae_kwargs(config):
     
     # Update kwarg dicts
     kwargs.update({'enc_sizes' : enc_sizes,
+                   'l_dim'     : l_dim,
+                   'im_size'   : im_size,
                    'dec_sizes' : enc_sizes[::-1]})
     return kwargs

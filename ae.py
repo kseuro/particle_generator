@@ -24,11 +24,11 @@ def fc_block(in_f, out_f):
     )
 
 class Encoder(nn.Module):
-    def __init__(self, enc_sizes):
+    def __init__(self, enc_sizes, l_dim):
         super().__init__()
         self.fc_blocks = nn.Sequential(*[fc_block(in_f, out_f) for in_f, out_f
                                         in zip(enc_sizes, enc_sizes[1:])])
-        self.last = nn.Linear(enc_sizes[-2], enc_sizes[-1])
+        self.last = nn.Linear(enc_sizes[-1], l_dim)
 
     # Initialize the weights
     def weights_init(self):
@@ -42,11 +42,11 @@ class Encoder(nn.Module):
         return self.last(self.fc_blocks(x))
 
 class Decoder(nn.Module):
-    def __init__(self, dec_sizes):
+    def __init__(self, dec_sizes, im_size):
         super().__init__()
         self.fc_blocks = nn.Sequential(*[fc_block(in_f, out_f) for in_f, out_f
                                         in zip(dec_sizes, dec_sizes[1:])])
-        self.last = nn.Sequential(nn.Linear(dec_sizes[-2], dec_sizes[-1]), nn.Tanh())
+        self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Tanh())
 
     # Initialize the weights
     def weights_init(self):
@@ -60,18 +60,14 @@ class Decoder(nn.Module):
         return self.last(self.fc_blocks(x))
 
 class AutoEncoder(nn.Module):
-    def __init__(self, enc_sizes, dec_sizes):
+    def __init__(self, enc_sizes, l_dim, dec_sizes, im_size):
         super().__init__()
-        self.enc_sizes = [*enc_sizes]
-        self.dec_sizes = [*dec_sizes]
-
-        self.encoder = Encoder(self.enc_sizes)
-        self.decoder = Decoder(self.dec_sizes)
+        self.encoder = Encoder([*enc_sizes], l_dim)
+        self.decoder = Decoder([*dec_sizes], im_size)
 
     def weights_init(self):
         self.encoder.weights_init()
         self.decoder.weights_init()
 
     def forward(self, x):
-        x = self.encoder(x)
-        return self.decoder(x)
+        return self.decoder(self.encoder(x))
