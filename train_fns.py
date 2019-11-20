@@ -128,6 +128,7 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
                 history, best_stats, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
     '''
+    AE.to(config['gpu'])
     for itr, (x, _) in enumerate(dataloader):
         tr_loop_start = time.time()
 
