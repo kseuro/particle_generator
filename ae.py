@@ -19,7 +19,7 @@ import torchvision
 
 def fc_block(in_f, out_f):
     return nn.Sequential(
-        nn.Linear(in_f, out_f)),
+        nn.Linear(in_f, out_f),
         nn.ReLU(True)
     )
 
