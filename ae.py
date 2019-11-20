@@ -43,7 +43,7 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(self, dec_sizes):
-        super().__init()
+        super().__init__()
         self.fc_blocks = nn.Sequential(*[fc_block(in_f, out_f) for in_f, out_f
                                         in zip(dec_sizes, dec_sizes[1:])])
         self.last = nn.Sequential(nn.Linear(dec_sizes[-2], dec_sizes[-1]), nn.Tanh())
