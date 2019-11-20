@@ -128,7 +128,6 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
                 history, best_stats, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
     '''
-    AE.to(config['gpu'])
     for itr, (x, _) in enumerate(dataloader):
         tr_loop_start = time.time()
 
@@ -142,8 +141,8 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
 
         # Save output periodically
         if (itr % 1000 == 0):
-            x = x[:config['sample_size'], :, :, :].to(config['gpu'])
-            sample = AE(x).view(-1, 1, config['dataset'], config['dataset'])
+            sample = AE(x.to(config['gpu'])).view(-1, 1, config['dataset'], config['dataset'])
+            sample = sample[:config['sample_size'],:,:,:]
             utils.save_sample(sample, epoch, itr, config['random_samples'])
 
         # Log the time at the end of training loop
@@ -154,8 +153,8 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
 
     # Save output at end of epoch
     if (x.shape[0] > config['sample_size']):
-        x = x[:config['sample_size'], :, :, :].to(config['gpu'])
-        sample = AE(x).view(-1, 1, config['dataset'], config['dataset'])
+        sample = AE(x.to(config['gpu'])).view(-1, 1, config['dataset'], config['dataset'])
+        sample = sample[:config['sample_size'],:,:,:]
         utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
     return history, best_stats, times
