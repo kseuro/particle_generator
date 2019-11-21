@@ -139,11 +139,6 @@ def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
             chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
             utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
 
-        # Save output periodically
-        if (itr % 1000 == 0):
-            sample = AE(x.to(config['gpu'])).view(-1, 1, config['dataset'], config['dataset'])
-            utils.save_sample(sample, epoch, itr, config['random_samples'])
-
         # Log the time at the end of training loop
         times['tr_loop_times'].append(time.time() - tr_loop_start)
 
