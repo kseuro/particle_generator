@@ -303,10 +303,8 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
             Args: x (Torch tensor): Real data input image
             Returns: list of training metrics
         '''
-        # Make sure model is in training mode and that
-        # optimizer is zeroed, just in case.
+        # Make sure model is in training mode
         AE.train()
-        AE_optim.zero_grad()
 
         # Move data to GPU (if not there already) and flatten into vector
         x = x.view(config['batch_size'], -1).to(config['gpu'])
@@ -318,6 +316,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         loss = loss_fn(output, x)
 
         # Backprop and update weights
+        AE_optim.zero_grad()
         loss.backward()
         AE_optim.step()
 

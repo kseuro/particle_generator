@@ -255,7 +255,8 @@ def gan_optim(config, model_params):
 
 def ae_optim(config, model_params):
     if ('adam' in config['ae_opt']):
-        return torch.optim.Adam(model_params['ae_params'], lr = config['ae_lr'])
+        return torch.optim.Adam(model_params['ae_params'], lr = config['ae_lr'],
+                                weight_decay = 1e-5)
     elif ('sgd' in config['ae_opt']):
         return torch.optim.SGD(model_params['ae_params'], lr=config['ae_lr'],
                                momentum=config['p'])
