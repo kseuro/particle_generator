@@ -170,6 +170,10 @@ def save_sample(sample, epoch, iter, save_dir):
     # NOTE: This transformation is (should be) un-done when deploy
     #       samples are loaded for analysis.
     sample = ((sample * 0.5) + 0.5) * 10
+    
+    print(sample.size())
+    input('...')
+
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
         torchvision.utils.save_image(sample[0], im_out)
