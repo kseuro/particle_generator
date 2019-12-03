@@ -1,20 +1,18 @@
 #!/bin/bash
 CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --gpu 0 \
---MNIST True \
---batch_size 128 \
---num_epochs 100 \
+--dataset 64 \
+--batch_size 32 \
+--num_epochs 1 \
 --sample_size 16 \
 --shuffle True \
 --drop_last True \
 --num_workers 8 \
---model gan \
---n_hidden 512 \
+--model ae \
 --n_layers 4 \
---g_lr 1e-4 \
---g_opt adam \
---z_dim 100 \
---d_lr 1e-4 \
---d_opt adam \
+--l_dim 3 \
+--ae_lr 1e-4 \
+--ae_opt adam \
 --beta 0.5 \
+--data_root /media/disk1/kai/larcv_png_data/ \
 --save_root /media/hdd1/kai/particle_generator/experiments/
