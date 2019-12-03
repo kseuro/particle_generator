@@ -222,7 +222,7 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history, be
                 history, best_stats, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
     '''
-    for itr, (x, _) in enumerate(dataloader):
+    for itr, x in enumerate(dataloader):
         tr_loop_start = time.time()
 
         metrics = train_fn(x, itr, epoch)
