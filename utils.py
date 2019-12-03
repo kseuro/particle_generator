@@ -395,17 +395,18 @@ def ae_kwargs(config):
     # Check if MNIST - set image size
     if (config['MNIST']):
         config['dataset'] = 28
-    im_size = config['dataset']**2 # Input dimension
-    l_dim = config['l_dim']        # Encoder output dimension
+    im_size = config['dataset']**2        # Input dimension
+    base = [16 if im_size <= 784 else 32] # Layer base dimension
+    l_dim = config['l_dim']               # Encoder output dimension
 
     # Compute encoder sizes
-    # Decoder is the reverse of the encoder
-    # Example output structure: [l_dim, 32*1, 32*2, ... , 32*(2^(n-1)), im_size]
+    # Example output structure: [32*1, 32*2, ... , 32*(2^(n-1))]
     sizes = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
-    enc_sizes = [32] * config['n_layers']
+    enc_sizes = base * config['n_layers']
     enc_sizes = [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1]
     
     # Update kwarg dicts
+    # Decoder is the reverse of the encoder
     kwargs.update({'enc_sizes' : enc_sizes,
                    'l_dim'     : l_dim,
                    'im_size'   : im_size,
