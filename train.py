@@ -94,6 +94,9 @@ def train(config):
         history, best_stats = {}, {}
         times = {'epoch_times': [], 'tr_loop_times': []}
 
+        kwargs = {'AE'         : AE,         'AE_optim': AE_optim,
+                  'train_fn'   : train_fn,   'history' : history,
+                  'best_stats' : best_stats, 'times'   : times}
     elif (config['model'] == 'ewm'):
         emw_kwargs = utils.ewm_kwargs(config)
         G = model.Generator(emw_kwargs).to(config['gpu'])
@@ -124,15 +127,19 @@ def train(config):
     # Set up directories for saving training stats and outputs
     config = utils.directories(config)
 
+    # Update key word arguments for training loop
+    kwargs.update({'config' : config, 'dataloader' : dataloader})
+
     # Set fixed random vector for sampling at the end of each epoch
     # if training GAN model or EWM model
     if (config['model'] != 'ae'):
         z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
+        kwargs.update( {'z_fixed' : z_fixed} )
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
         epoch_start = time.time()
-
+        args = (epoch, epoch_start)
         if (config['model'] == 'gan'):
             history, best_stats, times = loop(G, G_optim, D, D_optim, dataloader,
                                               train_fn, history, best_stats,
@@ -142,9 +149,10 @@ def train(config):
             # if (history['d_loss_real'][-1] < 0.1) and (history['g_loss'][-1] >= history['d_loss_real'][-1]*5):
             #   break
         elif (config['model'] == 'ae'):
-            history, best_stats, times = loop(AE, AE_optim, dataloader, train_fn,
-                                              history, best_stats, times,
-                                              config, epoch, epoch_start)
+            # history, best_stats, times = loop(AE, AE_optim, dataloader, train_fn,
+            #                                   history, best_stats, times,
+            #                                   config, epoch, epoch_start)
+            history, best_stats, times = loop(*args, **kwargs)
         elif (config['model'] == 'ewm'):
             pass
         else:

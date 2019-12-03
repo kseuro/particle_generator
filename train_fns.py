@@ -209,9 +209,38 @@ def LARCV_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
 
     return history, best_stats, times
 
-def LARCV_AE(E, E_optim, D, D_optim, dataloader, train_fn, history, best_stats,
-             times, config, epoch, epoch_start, z_fixed):
-    pass
+
+def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history, best_stats,
+             times, config):
+    '''
+        LArCV dataset training loop for AE model.
+        - Args: AE (Torch model): AutoEncoder model
+                AR_optim (function): AE optimizer (either adam or sgd)
+                Dataloader (iterable): Torch dataloader object wrapped as
+                                       tqdm progress bar for terminal output
+                train_fn (function): AE training function selected in train.py
+                history, best_stats, times, config (dicts): dictionaries
+                epoch, epoch_start (ints)
+    '''
+    for itr, (x, _) in enumerate(dataloader):
+        tr_loop_start = time.time()
+
+        metrics = train_fn(x, itr, epoch)
+        history, best_stats, best = utils.train_logger(
+            history, best_stats, metrics)
+
+        # Save checkpoint periodically
+        if (itr % 1000 == 0):
+            chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
+            utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
+
+        # Log the time at the end of training loop
+        times['tr_loop_times'].append(time.time() - tr_loop_start)
+
+    # Log the time at the end of the training epoch
+    times['epoch_times'].append(time.time() - epoch_start)
+
+    return history, best_stats, times
 
 def LARCV_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
               config, epoch, epoch_start, z_fixed):
