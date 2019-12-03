@@ -54,7 +54,8 @@ def directories(config):
     # Create a label for the current experiment
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
-    config['exp_label'] += '_LArCV_{}_dataset'.format(config['dataset'])
+    label = 'MNIST' if config['MNIST'] else 'LArCV'
+    config['exp_label'] += '_{}_{}_dataset'.format(label, config['dataset'])
 
     assert config['save_root'], "No save_root specified in config!"
 
