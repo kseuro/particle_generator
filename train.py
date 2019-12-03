@@ -75,9 +75,10 @@ def train(config):
         AE = model.AutoEncoder(**ae_kwargs).to(config['gpu'])
 
         print(AE)
-        input('...')
+        input('Press any key to launch')
+
         # Initialize the weights
-        AE.weights_init()
+        # AE.weights_init()
 
         # Set up model optimizer function
         model_params = {'ae_params' : AE.parameters()}
