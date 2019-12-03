@@ -179,7 +179,7 @@ def save_sample(sample, epoch, iter, save_dir):
         torchvision.utils.save_image(sample[0], im_out)
     else:
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
-        torchvision.utils.save_image(sample, im_out)
+        torchvision.utils.save_image(sample, im_out, nrow=4)
 
 def shrink_lists(dict):
     '''
