@@ -322,7 +322,10 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
 
         # Save output periodically
         if (itr % 1000 == 0):
-            utils.save_sample(output[0:config['sample_size'],:], 
+            sample = output[0:config['sample_size'], :]
+            sample = sample.view(sample.size(0), 1, 
+                                 config['im_size'], config['im_size'])
+            utils.save_sample(, 
                               epoch, itr, config['random_samples'])
         
         # Return training metrics
