@@ -69,7 +69,7 @@ def train(config):
 
     elif (config['model'] == 'ae'):
         # Get model kwargs
-        ae_kwargs = utils.ae_kwargs(config)
+        ae_kwargs, config = utils.ae_kwargs(config)
 
         # Set up model on GPU
         AE = model.AutoEncoder(**ae_kwargs).to(config['gpu'])

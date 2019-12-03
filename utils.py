@@ -416,4 +416,4 @@ def ae_kwargs(config):
                    'l_dim'     : l_dim,
                    'im_size'   : im_size,
                    'dec_sizes' : enc_sizes[::-1]})
-    return kwargs
+    return kwargs, config

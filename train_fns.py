@@ -324,7 +324,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         if (itr % 1000 == 0):
             sample = output[0:config['sample_size'], :]
             sample = sample.view(sample.size(0), 1, 
-                                 config['im_size'], config['im_size'])
+                                 config['dataset'], config['dataset'])
             utils.save_sample(sample, epoch, itr, config['random_samples'])
         
         # Return training metrics
