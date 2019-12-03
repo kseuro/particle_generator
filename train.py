@@ -74,6 +74,8 @@ def train(config):
         # Set up model on GPU
         AE = model.AutoEncoder(**ae_kwargs).to(config['gpu'])
 
+        print(AE)
+        input('...')
         # Initialize the weights
         AE.weights_init()
 
