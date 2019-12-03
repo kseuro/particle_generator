@@ -170,9 +170,6 @@ def save_sample(sample, epoch, iter, save_dir):
     # NOTE: This transformation is (should be) un-done when deploy
     #       samples are loaded for analysis.
     sample = ((sample * 0.5) + 0.5) * 10
-    
-    print(sample.size())
-    input('...')
 
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
@@ -384,13 +381,6 @@ def gan_kwargs(config):
                      'fc_sizes'    : fc_sizes})
     return g_kwargs, d_kwargs
 
-#####################
-# EWM Functionality #
-#####################
-def ewm_kwargs(config): # TODO: Write this function!
-    ewm_kwargs = {}
-    return ewm_kwargs
-
 ####################
 # AE Functionality #
 ####################
@@ -417,3 +407,10 @@ def ae_kwargs(config):
                    'im_size'   : im_size,
                    'dec_sizes' : enc_sizes[::-1]})
     return kwargs, config
+
+#####################
+# EWM Functionality #
+#####################
+def ewm_kwargs(config):  # TODO: Write this function!
+    ewm_kwargs = {}
+    return ewm_kwargs
