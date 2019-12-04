@@ -32,8 +32,7 @@ def gan(model, config):
     # Set up training function
     train_fn = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn,
                                        config, G_D=None)
-    return {'G':G, 'G_optim':G_optim, 'D':D, 'D_optim':D_optim,
-            'train_fn':train_fn, 'loss_fn':loss_fn}
+    return {'G':G, 'G_optim':G_optim, 'D':D, 'D_optim':D_optim, 'train_fn':train_fn}
 
 def ae(model, config):
     '''
@@ -60,4 +59,4 @@ def ae(model, config):
 
     # Set up training function
     train_fn = train_fns.AE_train_fn(AE, AE_optim, loss_fn, config)
-    return {'AE':AE, 'AE_optim':AE_optim, 'train_fn':train_fn, 'loss_fn':loss_fn}
+    return {'AE':AE, 'AE_optim':AE_optim, 'train_fn':train_fn}
