@@ -59,8 +59,8 @@ def get_train_loop(config):
 ############################
 #  Training Loops - MNIST  #
 ############################
-def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
-              times, config, epoch, epoch_start, z_fixed):
+def MNIST_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
+              history, best_stats, times, config, z_fixed):
     '''
         MNIST dataset training loop for GAN model. Used to train GAN as a
         proof-of-concept, i.e. that the linear GAN model is able to reproduce
@@ -114,8 +114,8 @@ def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
 
     return history, best_stats, times
 
-def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
-             times, config, epoch, epoch_start):
+def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
+             best_stats, times, config):
     '''
         MNIST dataset training loop for AE model. Used to train AE as a
         proof-of-concept.
@@ -153,7 +153,7 @@ def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
 ############################
 #  Training Loops - LARCV  #
 ############################
-def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn, 
+def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
               history, best_stats, times, config, z_fixed):
     '''
         LArCV dataset training loop for GAN model.
@@ -350,10 +350,10 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         # Save output periodically
         if (itr % 1000 == 0):
             sample = output[0:config['sample_size'], :]
-            sample = sample.view(sample.size(0), 1, 
+            sample = sample.view(sample.size(0), 1,
                                  config['dataset'], config['dataset'])
             utils.save_sample(sample, epoch, itr, config['random_samples'])
-        
+
         # Return training metrics
         metrics = { 'ae_loss' : float(loss.item()) }
 
