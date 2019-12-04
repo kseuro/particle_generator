@@ -339,6 +339,9 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         # Forward pass
         output = AE(x)
 
+        # Check if output is bounded [0, 1] in case of BCELoss
+        assert (output >= 0. & output <= 1.).all(), "Output range not bounded"
+
         # Compare output to real data
         loss = loss_fn(output, x)
 

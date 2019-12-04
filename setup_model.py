@@ -60,4 +60,6 @@ def ae(model, config):
 
     # Set up training function
     train_fn = train_fns.AE_train_fn(AE, AE_optim, loss_fn, config)
+
+    # Return model, optimizer, and model training function
     return {'AE':AE, 'AE_optim':AE_optim, 'train_fn':train_fn}
