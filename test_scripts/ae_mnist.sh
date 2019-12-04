@@ -10,7 +10,7 @@ CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --num_workers 8 \
 --model ae \
 --n_layers 2 \
---l_dim 9 \
+--l_dim 10 \
 --ae_lr 1e-4 \
 --ae_opt adam \
 --beta 0.5 \
