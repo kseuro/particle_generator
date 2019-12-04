@@ -66,9 +66,10 @@ def train(config):
         # Set up dicts for tracking progress
         history, best_stats = {}, {}
         times = {'epoch_times' : [], 'tr_loop_times' : []}
-        kwargs = {'G':G, 'G_optim':G_optim, 'D':D, 'D_optim':D_optim,
-                  'train_fn':train_fn, 'history': history, 'best_stats':best_stats,
-                  'times':times}
+        kwargs = {'G' : G, 'G_optim' : G_optim,
+                  'D' : D, 'D_optim' : D_optim,
+                  'train_fn'  : train_fn,   'history' : history,
+                  'best_stats': best_stats, 'times'   : times }
     elif (config['model'] == 'ae'):
         # Get model kwargs
         ae_kwargs, config = utils.ae_kwargs(config)
@@ -124,7 +125,7 @@ def train(config):
 
     # Set up progress bars for terminal output and enumeration
     dataloader = tqdm(dataloader)
-    epoch_bar = tqdm([i for i in range(config['num_epochs'])])
+    epoch_bar  = tqdm([i for i in range(config['num_epochs'])])
 
     # Set up directories for saving training stats and outputs
     config = utils.directories(config)
