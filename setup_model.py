@@ -1,5 +1,6 @@
 import torch.nn as nn
 import utils
+import train_fns
 
 def gan(model, config):
     '''
