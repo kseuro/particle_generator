@@ -392,7 +392,7 @@ def ae_kwargs(config):
     if (config['MNIST']):
         config['dataset'] = 28
     im_size = config['dataset']**2        # Input dimension
-    base = [16 if im_size <= 784 else 32] # Layer base dimension
+    base = [128 if im_size <= 784 else 256] # Layer base dimension
     l_dim = config['l_dim']               # Latent vector dimension
 
     # Compute encoder sizes
