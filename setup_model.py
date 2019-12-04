@@ -55,8 +55,8 @@ def ae(model, config):
     AE_optim = utils.get_optim(config, model_params)
 
     # Set up loss function
-    # loss_fn = nn.MSELoss().to(config['gpu'])
-    loss_fn = nn.BCELoss().to(config['gpu'])
+    loss_fn = nn.MSELoss().to(config['gpu'])
+    # loss_fn = nn.BCELoss().to(config['gpu'])
 
     # Set up training function
     train_fn = train_fns.AE_train_fn(AE, AE_optim, loss_fn, config)

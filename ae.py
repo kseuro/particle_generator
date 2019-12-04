@@ -25,7 +25,8 @@ def enc_block(in_f, out_f):
 
 def dec_block(in_f, out_f):
     return nn.Sequential(
-        nn.Linear(in_f, out_f)
+        nn.Linear(in_f, out_f),
+        nn.LeakyReLU(0.2)
     )
 
 class Encoder(nn.Module):
@@ -51,8 +52,8 @@ class Decoder(nn.Module):
         super().__init__()
         self.fc_blocks = nn.Sequential(*[dec_block(in_f, out_f) for in_f, out_f
                                         in zip(dec_sizes, dec_sizes[1:])])
-        # self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Tanh())
-        self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Sigmoid())
+        self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Tanh())
+        # self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Sigmoid())
 
     # Initialize the weights
     def weights_init(self):
