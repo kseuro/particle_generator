@@ -1,7 +1,7 @@
 #!/bin/bash
 CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --gpu 1 \
---dataset 128 \
+--dataset 64 \
 --batch_size 128 \
 --num_epochs 100 \
 --sample_size 16 \
@@ -9,8 +9,8 @@ CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --drop_last True \
 --num_workers 8 \
 --model ae \
---n_layers 6 \
---l_dim 20 \
+--n_layers 3 \
+--l_dim 10 \
 --ae_lr 1e-4 \
 --ae_opt adam \
 --beta 0.5 \
