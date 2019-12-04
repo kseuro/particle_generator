@@ -393,14 +393,14 @@ def ae_kwargs(config):
         config['dataset'] = 28
     im_size = config['dataset']**2        # Input dimension
     base = [16 if im_size <= 784 else 32] # Layer base dimension
-    l_dim = config['l_dim']               # Encoder output dimension
+    l_dim = config['l_dim']               # Latent vector dimension
 
     # Compute encoder sizes
     # Example output structure: [32*1, 32*2, ... , 32*(2^(n-1))]
     sizes = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
     enc_sizes = base * config['n_layers']
     enc_sizes = [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1]
-    
+
     # Update kwarg dicts
     # Decoder is the reverse of the encoder
     kwargs.update({'enc_sizes' : enc_sizes,

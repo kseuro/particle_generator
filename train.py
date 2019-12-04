@@ -80,16 +80,12 @@ def train(config):
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
+
         epoch_start = time.time()
+
         args = (epoch, epoch_start)
-        if (config['model'] == 'gan'):
-            history, best_stats, times = loop(*args, **kwargs)
-        elif (config['model'] == 'ae'):
-            history, best_stats, times = loop(*args, **kwargs)
-        elif (config['model'] == 'ewm'):
-            pass
-        else:
-            raise Exception("Error in training loop!")
+
+        history, best_stats, times = loop(*args, **kwargs)
 
     # Save training history and experiment config for evaluation and deploy
     utils.save_train_hist(history, best_stats, times, config)

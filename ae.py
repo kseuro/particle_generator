@@ -17,16 +17,21 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision
 
-def fc_block(in_f, out_f):
+def enc_block(in_f, out_f):
     return nn.Sequential(
         nn.Linear(in_f, out_f),
         nn.ReLU(True)
     )
 
+def dec_block(in_f, out_f):
+    return nn.Sequential(
+        nn.Linear(in_f, out_f)
+    )
+
 class Encoder(nn.Module):
     def __init__(self, enc_sizes, l_dim):
         super().__init__()
-        self.fc_blocks = nn.Sequential(*[fc_block(in_f, out_f) for in_f, out_f
+        self.fc_blocks = nn.Sequential(*[enc_block(in_f, out_f) for in_f, out_f
                                         in zip(enc_sizes, enc_sizes[1:])])
         self.last = nn.Linear(enc_sizes[-1], l_dim)
 
@@ -44,9 +49,10 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, dec_sizes, im_size):
         super().__init__()
-        self.fc_blocks = nn.Sequential(*[fc_block(in_f, out_f) for in_f, out_f
+        self.fc_blocks = nn.Sequential(*[dec_block(in_f, out_f) for in_f, out_f
                                         in zip(dec_sizes, dec_sizes[1:])])
-        self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Tanh())
+        # self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Tanh())
+        self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Sigmoid())
 
     # Initialize the weights
     def weights_init(self):
