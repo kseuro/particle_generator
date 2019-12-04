@@ -114,7 +114,6 @@ def MNIST_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
 
     return history, best_stats, times
 
-
 def MNIST_AE(AE, AE_optim, dataloader, train_fn, history, best_stats,
              times, config, epoch, epoch_start):
     '''
@@ -361,7 +360,6 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         return metrics
     return train
 
-# EWM training function (TODO: Finish this function)
 def EWM_train_fn():
     '''
         EWM_train_fn
