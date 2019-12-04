@@ -2,7 +2,7 @@
 CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --gpu 0 \
 --dataset 512 \
---batch_size 20 \
+--batch_size 32 \
 --num_epochs 100 \
 --sample_size 8 \
 --shuffle True \
