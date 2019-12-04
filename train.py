@@ -66,7 +66,9 @@ def train(config):
         # Set up dicts for tracking progress
         history, best_stats = {}, {}
         times = {'epoch_times' : [], 'tr_loop_times' : []}
-
+        kwargs = {'G':G, 'G_optim':G_optim, 'D':D, 'D_optim':D_optim,
+                  'train_fn':train_fn, 'history': history, 'best_stats':best_stats,
+                  'times':times}
     elif (config['model'] == 'ae'):
         # Get model kwargs
         ae_kwargs, config = utils.ae_kwargs(config)
@@ -127,7 +129,7 @@ def train(config):
     # Set up directories for saving training stats and outputs
     config = utils.directories(config)
 
-    # Update key word arguments for training loop
+    # Update key word arguments with final config dict and dataloader
     kwargs.update({'config' : config, 'dataloader' : dataloader})
 
     # Set fixed random vector for sampling at the end of each epoch
@@ -141,17 +143,8 @@ def train(config):
         epoch_start = time.time()
         args = (epoch, epoch_start)
         if (config['model'] == 'gan'):
-            history, best_stats, times = loop(G, G_optim, D, D_optim, dataloader,
-                                              train_fn, history, best_stats,
-                                              times, config, epoch, epoch_start,
-                                              z_fixed)
-            # Add break condition?
-            # if (history['d_loss_real'][-1] < 0.1) and (history['g_loss'][-1] >= history['d_loss_real'][-1]*5):
-            #   break
+            history, best_stats, times = loop(*args, **kwargs)
         elif (config['model'] == 'ae'):
-            # history, best_stats, times = loop(AE, AE_optim, dataloader, train_fn,
-            #                                   history, best_stats, times,
-            #                                   config, epoch, epoch_start)
             history, best_stats, times = loop(*args, **kwargs)
         elif (config['model'] == 'ewm'):
             pass

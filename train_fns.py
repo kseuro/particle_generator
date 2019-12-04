@@ -154,8 +154,8 @@ def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
 ############################
 #  Training Loops - LARCV  #
 ############################
-def LARCV_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
-              times, config, epoch, epoch_start, z_fixed):
+def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn, 
+              history, best_stats, times, config, z_fixed):
     '''
         LArCV dataset training loop for GAN model.
         - Args: G (Torch model): Generator model
@@ -208,7 +208,6 @@ def LARCV_GAN(G, G_optim, D, D_optim, dataloader, train_fn, history, best_stats,
     utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
     return history, best_stats, times
-
 
 def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history, best_stats,
              times, config):
