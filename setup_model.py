@@ -12,6 +12,10 @@ def gan(model, config):
     G = model.Generator(**g_kwargs).to(config['gpu'])
     D = model.Discriminator(**d_kwargs).to(config['gpu'])
 
+    print(G)
+    print(D)
+    input('Press any key to launch')
+
     # Initialize model weights
     G.weights_init()
     D.weights_init()
