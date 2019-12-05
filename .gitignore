@@ -6,6 +6,7 @@ __pycache__/
 # Sandbox stuff
 dynamic_model_alloc.py
 test_model.py
+/dataset_analysis/data/*
 
 # Visual Studio Files
 *.vscode
