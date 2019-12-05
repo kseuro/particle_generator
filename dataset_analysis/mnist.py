@@ -42,6 +42,6 @@ for itr, (data, _) in enumerate(dataloader):
     results.append( (sum, p_fill) )
 
     # Testing
-    if itr % 10 == 0:
+    if itr == 10:
         print(results)
         break
