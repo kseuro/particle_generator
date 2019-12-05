@@ -32,7 +32,7 @@ for itr, (data, _) in enumerate(dataloader):
 
     # Binarize the image
     min = torch.tensor([0]); max = torch.tensor([1])
-    data = torch.where(data > 0.0, max, min)
+    data = torch.where(data > 0, max, min)
 
     # Get the sum and fill percentage
     sum = data.sum()
