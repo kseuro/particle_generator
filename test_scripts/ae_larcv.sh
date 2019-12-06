@@ -1,10 +1,10 @@
 #!/bin/bash
 CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --gpu 1 \
---dataset 64 \
---batch_size 128 \
+--dataset 512 \
+--batch_size 24 \
 --num_epochs 100 \
---sample_size 16 \
+--sample_size 8 \
 --shuffle True \
 --drop_last True \
 --num_workers 8 \
