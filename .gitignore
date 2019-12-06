@@ -7,6 +7,7 @@ __pycache__/
 dynamic_model_alloc.py
 test_model.py
 test_scripts/*
+test_scripts/data/*
 /dataset_analysis/
 /dataset_analysis/data/*
 
