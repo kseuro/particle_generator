@@ -8,7 +8,6 @@
 #            resuming training from checkpoint, metric tracking, and
 #            saving outputs.
 ###############################################################################
-
 # Imports
 import os
 import torch
@@ -177,7 +176,8 @@ def save_sample(sample, epoch, iter, save_dir):
         torchvision.utils.save_image(sample[0], im_out)
     else:
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
-        torchvision.utils.save_image(sample, im_out, nrow= (sample.size(0)//4))
+        nrow = (sample.size(0)//4) if (sample.size(0) % 4) == 0 else 2
+        torchvision.utils.save_image(sample, im_out, nrow = nrow)
 
 def shrink_lists(dict):
     '''
