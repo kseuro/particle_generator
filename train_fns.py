@@ -337,10 +337,11 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         x = x.view(config['batch_size'], -1).to(config['gpu'])
 
         # Testing Binarization of input images
-        x = torch.where(x > 0, torch.tensor([1]).to(config['gpu']),
-                               torch.tensor([0]).to(config['gpu']))
-        x = x.to(dtype = torch.float)
-        
+        # Result: Loss immediately goes to zero and network learns nothing.
+        #         Image samples are completely blank.
+        # x = torch.where(x > 0, torch.tensor([1]).to(config['gpu']),
+        #                        torch.tensor([0]).to(config['gpu'])).to(dtype = torch.float)
+
         # Forward pass
         output = AE(x)
 
