@@ -208,8 +208,8 @@ def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
 
     return history, best_stats, times
 
-def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history, best_stats,
-             times, config):
+def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
+             best_stats, times, config):
     '''
         LArCV dataset training loop for AE model.
         - Args: AE (Torch model): AutoEncoder model
@@ -336,6 +336,9 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         # Move data to GPU (if not there already) and flatten into vector
         x = x.view(config['batch_size'], -1).to(config['gpu'])
 
+        # Testing Binarization of input images
+        x = torch.where(x > 0, torch.tensor([1]).to(config['gpu']),
+                               torch.tensor([0]).to(config['gpu'])
         # Forward pass
         output = AE(x)
 
