@@ -339,6 +339,8 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         # Testing Binarization of input images
         x = torch.where(x > 0, torch.tensor([1]).to(config['gpu']),
                                torch.tensor([0]).to(config['gpu']))
+        x = x.to(dtype = torch.float)
+        
         # Forward pass
         output = AE(x)
 
