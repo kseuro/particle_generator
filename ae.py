@@ -20,13 +20,13 @@ import torchvision
 def enc_block(in_f, out_f):
     return nn.Sequential(
         nn.Linear(in_f, out_f),
-        nn.Sigmoid()
+        nn.LeakyReLU(0.2)
     )
 
 def dec_block(in_f, out_f):
     return nn.Sequential(
         nn.Linear(in_f, out_f),
-        nn.Sigmoid()
+        nn.LeakyReLU(0.2)
     )
 
 class Encoder(nn.Module):
