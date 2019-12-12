@@ -61,9 +61,11 @@ def dset_tag(root):
     elif str(256) in root:
         return root + 'larcv_png_256/'
     elif str(128) in root:
-        return root + 'larcv_png_128'
+        return root + 'larcv_png_128/'
     elif str(64) in root:
-        return root + 'larcv_png_64'
+        return root + 'larcv_png_64/'
+    elif str(32) in root:
+        return root + 'larcv_png_32/'
     else:
         raise(RuntimeError('Invalid dataset selection. Valid datasets are:'
                             + ','.join(VALID_DSETS)))
