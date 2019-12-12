@@ -222,10 +222,9 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
     '''
     for itr, x in enumerate(dataloader):
         tr_loop_start = time.time()
-
+        
         metrics = train_fn(x, itr, epoch)
-        history, best_stats, best = utils.train_logger(
-            history, best_stats, metrics)
+        history, best_stats, best = utils.train_logger(history, best_stats, metrics)
 
         # Save checkpoint periodically
         if (itr % 1000 == 0):

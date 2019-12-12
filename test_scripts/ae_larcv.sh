@@ -14,5 +14,5 @@ CUDA_VISIBLE_DEVICES=0,1 python train.py \
 --ae_lr 1e-4 \
 --ae_opt adam \
 --beta 0.5 \
---data_root /media/disk1/kai/larcv_png_data/ \
+--data_root /media/hdd1/kai/particle_generator/larcv_data/ \
 --save_root /media/hdd1/kai/particle_generator/experiments/

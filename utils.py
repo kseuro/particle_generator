@@ -21,6 +21,7 @@ from pandas import DataFrame
 
 # My stuff
 from dataloader import LArCV_loader
+from scipy.ndimage.measurements import center_of_mass as CoM
 
 #################################
 #     Logging Functionality     #
