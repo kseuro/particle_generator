@@ -303,6 +303,8 @@ def select_dataset(config):
         config['data_root'] += 'larcv_png_128/'
     elif (config['dataset'] == 64):
         config['data_root'] += 'larcv_png_64/'
+    elif (config['dataset'] == 32):
+        config['data_root'] += 'larcv_png_32/'
     else:
         raise Exception('Dataset not specified -- unable to set data_root')
     return config
