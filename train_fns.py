@@ -227,7 +227,7 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         history, best_stats, best = utils.train_logger(history, best_stats, metrics)
 
         # Save checkpoint periodically
-        if (itr % 1000 == 0):
+        if (itr % 5000 == 0):
             chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
             utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
 
@@ -347,7 +347,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         AE_optim.step()
 
         # Save output periodically
-        if (itr != 0) and (itr % 1000 == 0):
+        if itr % 250 == 0:
             sample = output[0:config['sample_size'], :]
             sample = sample.view(sample.size(0), 1,
                                  config['dataset'], config['dataset'])
