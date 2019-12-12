@@ -222,7 +222,7 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
     '''
     for itr, x in enumerate(dataloader):
         tr_loop_start = time.time()
-        
+
         metrics = train_fn(x, itr, epoch)
         history, best_stats, best = utils.train_logger(history, best_stats, metrics)
 
@@ -335,12 +335,6 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         # Move data to GPU (if not there already) and flatten into vector
         x = x.view(config['batch_size'], -1).to(config['gpu'])
 
-        # Testing Binarization of input images
-        # Result: Loss immediately goes to zero and network learns nothing.
-        #         Image samples are completely blank.
-        # x = torch.where(x > 0, torch.tensor([1]).to(config['gpu']),
-        #                        torch.tensor([0]).to(config['gpu'])).to(dtype = torch.float)
-
         # Forward pass
         output = AE(x)
 
@@ -353,7 +347,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         AE_optim.step()
 
         # Save output periodically
-        if (itr % 1000 == 0):
+        if (itr != 0) and (itr % 1000 == 0):
             sample = output[0:config['sample_size'], :]
             sample = sample.view(sample.size(0), 1,
                                  config['dataset'], config['dataset'])
