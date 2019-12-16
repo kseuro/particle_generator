@@ -227,9 +227,9 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         history, best_stats, best = utils.train_logger(history, best_stats, metrics)
 
         # Save checkpoint periodically
-        if (itr % 5000 == 0):
-            chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
-            utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
+        # if (itr % 5000 == 0):
+        #     chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
+        #     utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
 
         # Log the time at the end of training loop
         times['tr_loop_times'].append(time.time() - tr_loop_start)
