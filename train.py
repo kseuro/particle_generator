@@ -79,8 +79,8 @@ def train(config):
         kwargs.update( {'z_fixed' : z_fixed} )
     else:
         x_fixed = next(iter(dataloader))
-        print(x_fixed.shape)
-        kwargs.update( {'x_fixed' : x_fixed.view(config['batch_size'], 1, config['dataset'], config['dataset'])} )
+        x_fixed = x_fixed.view(config['sample_size']//2, 1, config['dataset'], config['dataset'])
+        kwargs.update( {'x_fixed' : x_fixed} )
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):

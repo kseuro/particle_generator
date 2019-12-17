@@ -237,7 +237,7 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         # Save periodic "fixed" sample to viz AE evolution
         if itr % 20 == 0:
             AE_sample = AE(x_fixed).view(x_fixed.size(0), 1, config['dataset'], config['dataset'])
-            sample = torch.cat([x[0:8], AE_sample], 0) # concat tensors along batch dimension
+            sample = torch.cat([x_fixed, AE_sample], 0) # concat tensors along batch dimension
             utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
         # Log the time at the end of training loop
