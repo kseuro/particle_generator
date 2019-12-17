@@ -174,7 +174,8 @@ def save_sample(sample, epoch, iter, save_dir):
 
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
-        torchvision.utils.save_image(sample[0], im_out)
+        nrow = 2
+        torchvision.utils.save_image(sample[0], im_out, nrow = nrow)
     else:
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
         nrow = (sample.size(0)//4) if (sample.size(0) % 4) == 0 else 2

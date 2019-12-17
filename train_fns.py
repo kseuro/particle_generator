@@ -209,7 +209,7 @@ def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
     return history, best_stats, times
 
 def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
-             best_stats, times, config):
+             best_stats, times, config, x_fixed):
     '''
         LArCV dataset training loop for AE model.
         - Args: AE (Torch model): AutoEncoder model
@@ -230,6 +230,15 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         # if (itr % 5000 == 0):
         #     chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
         #     utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
+
+        # Save periodic "fixed" sample to viz AE evolution
+        if itr % 20 == 0:
+            sample = torch.tensor([16, 1, config['dataset'], config['dataset'])
+            sample[0:8, :, :, :] = x_fixed[0:8, :, :, :]
+            AE_sample = AE(x_fixed)[0:8, :]
+            AE_sample = AE_Sample.view(sample.size(0), 1, config['dataset'], config['dataset'])
+            sample[8:16, 1, :, :] = AE_sample
+            utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
         # Log the time at the end of training loop
         times['tr_loop_times'].append(time.time() - tr_loop_start)
@@ -347,7 +356,7 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         AE_optim.step()
 
         # Save output periodically
-        if itr % 250 == 0:
+        if itr % 1000 == 0:
             sample = output[0:config['sample_size'], :]
             sample = sample.view(sample.size(0), 1,
                                  config['dataset'], config['dataset'])
