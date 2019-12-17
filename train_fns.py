@@ -217,6 +217,9 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
                 Dataloader (iterable): Torch dataloader object wrapped as
                                        tqdm progress bar for terminal output
                 train_fn (function): AE training function selected in train.py
+                x_fixed: (torch tensor): Torch tensor assigned to a fixed
+                                         variable at start of training. Used
+                                         to visualize model progress/evolution.
                 history, best_stats, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
     '''
