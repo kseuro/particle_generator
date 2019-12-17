@@ -80,7 +80,7 @@ def train(config):
     else:
         x_fixed = next(iter(dataloader))[0:config['sample_size']//2]
         x_fixed = x_fixed.view(config['sample_size']//2, 1, config['dataset'], config['dataset'])
-        kwargs.update( {'x_fixed' : x_fixed} )
+        kwargs.update( {'x_fixed' : x_fixed.to('cpu')} )
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
