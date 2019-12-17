@@ -78,8 +78,8 @@ def train(config):
         z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
         kwargs.update( {'z_fixed' : z_fixed} )
     else:
-        x_fixed = next(iter(dataloader))[0:config['sample_size']//2]
-        x_fixed = x_fixed.view(config['sample_size']//2, 1, config['dataset'], config['dataset'])
+        x_fixed = next(iter(dataloader))
+        x_fixed = x_fixed.view(config['batch_size'], 1, config['dataset'], config['dataset'])
         kwargs.update( {'x_fixed' : x_fixed} )
 
     # Train model for specified number of epochs
