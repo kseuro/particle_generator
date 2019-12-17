@@ -79,6 +79,7 @@ def train(config):
         kwargs.update( {'z_fixed' : z_fixed} )
     else:
         x_fixed = next(iter(dataloader))
+        print(x_fixed.shape)
         kwargs.update( {'x_fixed' : x_fixed.view(config['batch_size'], 1, :, :)} )
 
     # Train model for specified number of epochs
