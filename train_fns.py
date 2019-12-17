@@ -239,7 +239,7 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
             x_fixed = x_fixed.cuda()
             AE.cuda()
             AE_sample = AE(x_fixed)[0:config['sample_size']//2]
-            AE_sample = AE_sample.view(config['sample_size']//2, 1, config['dataset'], config['dataset']))
+            AE_sample = AE_sample.view(config['sample_size']//2, 1, config['dataset'], config['dataset'])
             x_fixed = x_fixed[0:config['sample_size']//2].cuda()
             sample = torch.cat([x_fixed, AE_sample], 0) # concat tensors along batch dimension
             utils.save_sample(sample, epoch, itr, config['fixed_samples'])
