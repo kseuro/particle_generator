@@ -8,7 +8,9 @@ dynamic_model_alloc.py
 test_model.py
 data/
 data/*
+test_scripts/*
 test_scripts/data/*
+dataset_analysis/
 /dataset_analysis/data/*
 
 # Visual Studio Files
