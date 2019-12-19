@@ -1,0 +1,21 @@
+#!/bin/bash
+CUDA_VISIBLE_DEVICES=1,2 python train.py \
+--gpu 1 \
+--dataset 64 \
+--batch_size 128 \
+--num_epochs 10 \
+--sample_size 16 \
+--shuffle True \
+--drop_last True \
+--num_workers 8 \
+--model gan \
+--n_hidden 512 \
+--n_layers 4 \
+--g_lr 1e-4 \
+--g_opt adam \
+--z_dim 100 \
+--d_lr 1e-4 \
+--d_opt adam \
+--beta 0.5 \
+--data_root /media/hdd1/kai/particle_generator/larcv_data/ \
+--save_root /media/hdd1/kai/particle_generator/experiments/
