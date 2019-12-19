@@ -349,7 +349,9 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         loss.backward()
         AE_optim.step()
 
-        # Save output periodically
+        # Save output periodically - concatenate the model outputs with the
+        # images it was supposed to reconstruct in order to visualize the
+        # model evolution during training.
         if itr % 20 == 0:
             sample = output[0:config['sample_size'], :]
             sample = torch.cat([x[0:config['sample_size'], :], sample])
