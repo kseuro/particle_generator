@@ -176,20 +176,20 @@ def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
             history, best_stats, best = utils.train_logger(
                 history, best_stats, metrics)
 
-            # Save checkpoint periodically
-            if (itr % 4000 == 0):
-                # G Checkpoint
-                chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
-                utils.save_checkpoint(chkpt_G, best, 'G',
-                                      config['weights_save'])
-
-                # D Checkpoint
-                chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
-                utils.save_checkpoint(chkpt_D, best, 'D',
-                                      config['weights_save'])
+            # # Save checkpoint periodically
+            # if (itr % 4000 == 0):
+            #     # G Checkpoint
+            #     chkpt_G = utils.get_checkpoint(itr, epoch, G, G_optim)
+            #     utils.save_checkpoint(chkpt_G, best, 'G',
+            #                           config['weights_save'])
+            #
+            #     # D Checkpoint
+            #     chkpt_D = utils.get_checkpoint(itr, epoch, D, D_optim)
+            #     utils.save_checkpoint(chkpt_D, best, 'D',
+            #                           config['weights_save'])
 
             # Save Generator output periodically
-            if (itr % 1000 == 0):
+            if (itr % 20 == 0):
                 z_rand = torch.randn(config['sample_size'],
                                      config['z_dim']).to(config['gpu'])
                 sample = G(z_rand).view(-1, 1,
