@@ -10,7 +10,6 @@ data/
 data/*
 test_scripts/*
 test_scripts/data/*
-dataset_analysis/
 
 # Visual Studio Files
 *.vscode
