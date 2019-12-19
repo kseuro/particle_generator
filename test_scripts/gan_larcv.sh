@@ -3,7 +3,7 @@ CUDA_VISIBLE_DEVICES=1,2 python train.py \
 --gpu 1 \
 --dataset 64 \
 --batch_size 128 \
---num_epochs 10 \
+--num_epochs 500 \
 --sample_size 16 \
 --shuffle True \
 --drop_last True \
@@ -14,7 +14,7 @@ CUDA_VISIBLE_DEVICES=1,2 python train.py \
 --g_lr 1e-4 \
 --g_opt adam \
 --z_dim 100 \
---d_lr 1e-4 \
+--d_lr 1e-5 \
 --d_opt adam \
 --beta 0.5 \
 --data_root /media/hdd1/kai/particle_generator/larcv_data/ \
