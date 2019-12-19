@@ -234,16 +234,6 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         #     chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
         #     utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
 
-        # Save periodic "fixed" sample to viz AE evolution
-        if itr % 20 == 0:
-            x_fixed = x_fixed.cuda()
-            AE.cuda()
-            AE_sample = AE(x_fixed)[0:config['sample_size']//2]
-            AE_sample = AE_sample.view(config['sample_size']//2, 1, config['dataset'], config['dataset'])
-            x_fixed = x_fixed[0:config['sample_size']//2].cuda()
-            sample = torch.cat([x_fixed, AE_sample], 0) # concat tensors along batch dimension
-            utils.save_sample(sample, epoch, itr, config['fixed_samples'])
-
         # Log the time at the end of training loop
         times['tr_loop_times'].append(time.time() - tr_loop_start)
 
@@ -360,8 +350,9 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         AE_optim.step()
 
         # Save output periodically
-        if itr % 1000 == 0:
+        if itr % 20 == 0:
             sample = output[0:config['sample_size'], :]
+            sample = torch.cat([x[0:config['sample_size'], :], sample])
             sample = sample.view(sample.size(0), 1,
                                  config['dataset'], config['dataset'])
             utils.save_sample(sample, epoch, itr, config['random_samples'])
