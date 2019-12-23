@@ -10,8 +10,8 @@ data/
 data/*
 test_scripts/*
 test_scripts/data/*
-/dataset_analysis/
 /dataset_analysis/data/*
+/dataset_analysis/.ipynb_checkpoints
 
 # Visual Studio Files
 *.vscode
