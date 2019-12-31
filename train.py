@@ -94,7 +94,7 @@ def train(config):
 
         # Check losses starting after 5000 epochs and determine if
         # the current model is the best model state
-        if epoch > 1:
+        if (epoch > 5000) and (epoch % 250 == 0):
             for key in best_stat:
                 if best is None:
                     best = best_stat[key]
