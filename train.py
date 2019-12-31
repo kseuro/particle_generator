@@ -92,6 +92,11 @@ def train(config):
 
         history, best_stat, times = loop(*args, **kwargs)
 
+        # Testing save functionality
+        if epoch % 2 == 0:
+            checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+            utils.save_checkpoint(checkpoint, config)
+        
         # Check losses starting after 5000 epochs and determine if
         # the current model is the best model state
         if (epoch > 5000) and (epoch % 250 == 0):
