@@ -96,17 +96,17 @@ def directories(config):
 
     return config
 
-def train_logger(history, best_stats, metrics):
+def train_logger(history, best_stat, metrics):
     '''
         Function for tracking training metrics. Determines with each update
         to the training history if that update represents the best model
         performance.
         Args: history (dict): dictionary of training history as lists of floats
-              best_stats (dict): dictionary of best loss values
+              best_stat (dict): dictionary of best loss values
               metrics (dict): most recent loss values as three floats
         Does: updates history dict with most recent metrics. Checks if
               that update is the best yet.
-        Returns: history, best_stats, True/False
+        Returns: history, best_stat, True/False
     '''
     # Check if history is empty before appending data
     # Append most recent training history to loss lists
@@ -118,47 +118,50 @@ def train_logger(history, best_stats, metrics):
             history[key].append(metrics[key])
 
     check = []
-    # Check if best_stats is empty before appending data
-    if not best_stats:
+    # Check if best_stat is empty before appending data
+    if not best_stat:
         for key in history:
-            best_stats.update({key: history[key][-1]})
+            best_stat.update({key: history[key][-1]})
             check.append(True)
     else:
         for key in history:
-            threshold = best_stats[key] - round(best_stats[key] * 0.5, 3)
+            threshold = best_stat[key] - round(best_stat[key] * 0.5, 3)
             if round(history[key][-1], 3) < threshold:
-                best_stats[key] = history[key][-1]
+                best_stat[key] = history[key][-1]
                 check.append(True)
             else:
                 check.append(False)
-    return history, best_stats, all(check)
+    return history, best_stat, all(check)
 
 def get_checkpoint(iter, epoch, model, optim):
+get_checkpoint(epoch, kwargs, config):
     '''
         Function for generating a model checkpoint dictionary
     '''
     dict = {}
-    dict.update({'iter'      : iter,
-                 'epoch'     : epoch,
-                 'state_dict': model.state_dict(),
-                 'optimizer' : optim.state_dict()
-                })
+    if 'ae' in config['model']:
+        dict.update( { 'epoch'     : epoch,
+                       'state_dict': kwargs['AE'].state_dict(),
+                       'optimizer' : kwargs['AE_optim'].state_dict() } )
+    elif 'gan' in config['model']:
+        # Write model checkpoint save for 'G' and 'D' in kwargs
+        pass
+    elif 'ewm' in config['model']:
+        # Write model checkpoint save for 'G' in kwargs
+        pass
+
     return dict
 
-def save_checkpoint(checkpoint, best, model_name, save_dir):
+def save_checkpoint(checkpoint, config):
     '''
         Function for saving model and optimizer weights
         Args: checkpoint (dict): dictionary of model weights
-              best (bool): boolean corresponding to best checkpoint
+              config (dict): experiment configuration dictionary
               save_dir (str): full path to save location
     '''
-    if best:
-        filename = save_dir + 'best_chkpt_{}_{}.tar'.format(model_name,
-                                                            checkpoint['epoch'])
-    else:
-        filename = save_dir + 'chkpt_{}_it_{}_ep_{}.tar'.format(model_name,
-                                                                checkpoint['iter'],
-                                                                checkpoint['epoch'])
+    save_dir = config['weights_save']
+    chkpt_name = 'best_{}_ep_{}.tar'.format(config['model'], checkpoint['epoch'])
+    filename = save_dir + chkpt_name
     torch.save(checkpoint, filename)
 
 def save_sample(sample, epoch, iter, save_dir):
@@ -208,12 +211,12 @@ def get_arch(config):
                        'n_hidden' : config['n_hidden'] } )
     return arch
 
-def save_train_hist(history, best_stats, times, config, histogram=None):
+def save_train_hist(history, best_stat, times, config, histogram=None):
     '''
         Function for saving network training history and
         best performance stats.
         Args: history (dict): dictionary of network training metrics
-              best_stats (dict): dictionary of floating point numbers
+              best_stat (dict): dictionary of floating point numbers
                                  representing the best network performance
                                  (i.e. lowest loss)
               times (dict): dictionary of lists containing the training times

@@ -60,7 +60,7 @@ def get_train_loop(config):
 #  Training Loops - MNIST  #
 ############################
 def MNIST_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
-              history, best_stats, times, config, z_fixed):
+              history, best_stat, times, config, z_fixed):
     '''
         MNIST dataset training loop for GAN model. Used to train GAN as a
         proof-of-concept, i.e. that the linear GAN model is able to reproduce
@@ -73,7 +73,7 @@ def MNIST_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
                 Dataloader (iterable): Torch dataloader object wrapped as
                                        tqdm progress bar for terminal output
                 train_fn (function): GAN training function selected in train.py
-                history, best_stats, times, config (dicts): dictionaries
+                history, best_stat, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
                 z_fixed (Torch tensor): Fixed vector for sampling G at the
                                         end of a training epoch
@@ -82,7 +82,7 @@ def MNIST_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
         tr_loop_start = time.time()
 
         metrics = train_fn(x)
-        history, best_stats, best = utils.train_logger(history, best_stats, metrics)
+        history, best_stat, best = utils.train_logger(history, best_stat, metrics)
 
         # Save checkpoint periodically
         if (itr % 2000 == 0):
@@ -112,10 +112,10 @@ def MNIST_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
     sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
     utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
-    return history, best_stats, times
+    return history, best_stat, times
 
 def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
-             best_stats, times, config):
+             best_stat, times, config):
     '''
         MNIST dataset training loop for AE model. Used to train AE as a
         proof-of-concept.
@@ -124,14 +124,14 @@ def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
                 Dataloader (iterable): Torch dataloader object wrapped as
                                        tqdm progress bar for terminal output
                 train_fn (function): AE training function selected in train.py
-                history, best_stats, times, config (dicts): dictionaries
+                history, best_stat, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
     '''
     for itr, (x, _) in enumerate(dataloader):
         tr_loop_start = time.time()
 
         metrics = train_fn(x, itr, epoch)
-        history, best_stats, best = utils.train_logger(history, best_stats, metrics)
+        history, best_stat, best = utils.train_logger(history, best_stat, metrics)
 
         # Save checkpoint periodically
         if (itr % 1000 == 0):
@@ -144,9 +144,9 @@ def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
     # Log the time at the end of the training epoch
     times['epoch_times'].append(time.time() - epoch_start)
 
-    return history, best_stats, times
+    return history, best_stat, times
 
-def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
+def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stat, times,
               config, epoch, epoch_start, z_fixed):
     pass
 
@@ -154,7 +154,7 @@ def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
 #  Training Loops - LARCV  #
 ############################
 def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
-              history, best_stats, times, config, z_fixed):
+              history, best_stat, times, config, z_fixed):
     '''
         LArCV dataset training loop for GAN model.
         - Args: G (Torch model): Generator model
@@ -164,7 +164,7 @@ def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
                 Dataloader (iterable): Torch dataloader object wrapped up as
                                        tqdm progress bar for terminal output
                 train_fn (function): GAN training function selected in train.py
-                history, best_stats, times, config (dicts): dictionaries
+                history, best_stat, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
                 z_fixed (Torch tensor): Fixed vector for sampling G at the
                                         end of a training epoch
@@ -173,8 +173,8 @@ def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
             tr_loop_start = time.time()
 
             metrics = train_fn(x)
-            history, best_stats, best = utils.train_logger(
-                history, best_stats, metrics)
+            history, best_stat, best = utils.train_logger(
+                history, best_stat, metrics)
 
             # Save checkpoint periodically
             if (itr % 4000 == 0):
@@ -206,10 +206,10 @@ def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
     sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
     utils.save_sample(sample, epoch, itr, config['fixed_samples'])
 
-    return history, best_stats, times
+    return history, best_stat, times
 
 def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
-             best_stats, times, config, x_fixed):
+             best_stat, times, config, x_fixed):
     '''
         LArCV dataset training loop for AE model.
         - Args: AE (Torch model): AutoEncoder model
@@ -220,14 +220,14 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
                 x_fixed: (torch tensor): Torch tensor assigned to a fixed
                                          variable at start of training. Used
                                          to visualize model progress/evolution.
-                history, best_stats, times, config (dicts): dictionaries
+                history, best_stat, times, config (dicts): dictionaries
                 epoch, epoch_start (ints)
     '''
     for itr, x in enumerate(dataloader):
         tr_loop_start = time.time()
 
         metrics = train_fn(x, itr, epoch)
-        history, best_stats, best = utils.train_logger(history, best_stats, metrics)
+        history, best_stat, best = utils.train_logger(history, best_stat, metrics)
 
         # Save checkpoint periodically
         # if (itr % 5000 == 0):
@@ -240,9 +240,9 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
     # Log the time at the end of the training epoch
     times['epoch_times'].append(time.time() - epoch_start)
 
-    return history, best_stats, times
+    return history, best_stat, times
 
-def LARCV_EWM(G, G_optim, dataloader, train_fn, history, best_stats, times,
+def LARCV_EWM(G, G_optim, dataloader, train_fn, history, best_stat, times,
               config, epoch, epoch_start, z_fixed):
     pass
 

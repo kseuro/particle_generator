@@ -67,10 +67,10 @@ def train(config):
 
     # Update key word arguments with final config dict and dataloader
     # Set up dicts for tracking progress
-    history, best_stats = {}, {}
+    history, best_stat = {}, {}
     times = {'epoch_times': [], 'tr_loop_times': []}
     kwargs.update({'config' : config,  'dataloader' : dataloader,
-                   'history': history, 'best_stats' : best_stats,
+                   'history': history, 'best_stat' : best_stat,
                    'times'  : times})
 
     # If GAN or EWM set fixed random vector for sampling at the end of each epoch
@@ -82,6 +82,7 @@ def train(config):
         x_fixed = x_fixed.view(config['batch_size'], 1, config['dataset'], config['dataset'])
         kwargs.update( {'x_fixed' : x_fixed} )
 
+    best = None
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
 
@@ -89,15 +90,22 @@ def train(config):
 
         args = (epoch, epoch_start)
 
-        history, best_stats, times = loop(*args, **kwargs)
+        history, best_stat, times = loop(*args, **kwargs)
 
         # Check losses starting after 5000 epochs and determine if
         # the current model is the best model state
-        if epoch > 5000:
-            pass
+        if epoch > 1:
+            for key in best_stat:
+                if best is None:
+                    best = best_stat[key]
+                if best_stat[key] < best:
+                    best = best_stat[key]
+                    # Save model state checkpoint
+                    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+                    utils.save_checkpoint(checkpoint, config)
 
     # Save training history and experiment config for evaluation and deploy
-    utils.save_train_hist(history, best_stats, times, config)
+    utils.save_train_hist(history, best_stat, times, config)
     print("Training Complete")
 
 def main():
