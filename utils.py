@@ -242,7 +242,7 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
 
     # Save model architecture
     arch = get_arch(config)
-    arch_file = config['save_dir'] + 'model_arch.csv'
+    arch_file = config['save_dir'] + '/model_arch.csv'
     DataFrame.from_dict(arch, orient="index").to_csv(arch_file)
 
 #################################
