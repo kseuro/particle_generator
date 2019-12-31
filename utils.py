@@ -121,13 +121,13 @@ def train_logger(history, best_stats, metrics):
     # Check if best_stats is empty before appending data
     if not best_stats:
         for key in history:
-            best_stats.update({key: history[key][len(history[key]) - 1]})
+            best_stats.update({key: history[key][-1]})
             check.append(True)
     else:
         for key in history:
             threshold = best_stats[key] - round(best_stats[key] * 0.5, 3)
-            if (history[key][len(history[key]) - 1]) < threshold:
-                best_stats[key] = history[key][len(history[key]) - 1]
+            if round(history[key][-1], 3) < threshold:
+                best_stats[key] = history[key][-1]
                 check.append(True)
             else:
                 check.append(False)
