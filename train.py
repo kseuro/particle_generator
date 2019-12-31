@@ -91,6 +91,16 @@ def train(config):
 
         history, best_stats, times = loop(*args, **kwargs)
 
+        # Debugging: dump out train history
+        print(history)
+        print(best_stats)
+        print(times)
+        input(...)
+        # Check losses starting after 5000 epochs and determine if
+        # the current model is the best model state
+        if epoch > 5000:
+            pass
+
     # Save training history and experiment config for evaluation and deploy
     utils.save_train_hist(history, best_stats, times, config)
     print("Training Complete")
