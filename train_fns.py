@@ -353,8 +353,13 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         # images it was supposed to reconstruct in order to visualize the
         # model evolution during training.
         if itr % 20 == 0:
-            sample = output[0:config['sample_size'], :]
-            sample = torch.cat([x[0:config['sample_size'], :], sample])
+            # Arrange training data and model outputs on
+            # alternating rows for easy visual comparison.
+            row1 = x[0:config['sample_size']//2, :]
+            row2 = output[0:config['sample_size']//2, :]
+            row3 = x[config['sample_size']//2:config['sample_size'], :]
+            row4 = output[config['sample_size']//2:config['sample_size'], :]
+            sample = torch.cat([row1, row2, row3, row4])
             sample = sample.view(sample.size(0), 1,
                                  config['dataset'], config['dataset'])
             utils.save_sample(sample, epoch, itr, config['random_samples'])

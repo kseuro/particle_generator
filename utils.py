@@ -194,6 +194,20 @@ def shrink_lists(dict):
         dict[key] = [dict[key][i] for i in range(idx)]
     return dict
 
+def get_arch(config):
+    arch = {}
+    # Architecture features common to both models
+    arch.update( { 'n_layers'   : config['n_layers'],
+                   'num_epochs' : config['num_epochs'],
+                   'model'      : config['model'] } )
+    # Model dependent features
+    if 'ae' in config['model']:
+        arch.update( { 'l_dim' : config['l_dim']} )
+    if 'gan' in config['model']:
+        arch.update( { 'z_dim'    : config['z_dim'],
+                       'n_hidden' : config['n_hidden'] } )
+    return arch
+
 def save_train_hist(history, best_stats, times, config, histogram=None):
     '''
         Function for saving network training history and
@@ -208,8 +222,8 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
                                           histogram values representing the probability
                                           density distribution of the generator function.
     '''
-    # Save times - arrays must all be the same length, otherwise
-    # Pandas will thrown an error!
+    # Save times - arrays must all be the same length,
+    # otherwise Pandas will thrown an error!
     times_csv = config['save_dir'] + '/times.csv'
     DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
 
@@ -225,6 +239,11 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
     # Save config dict for reference
     df = DataFrame.from_dict(config, orient='index')
     df.to_csv(config['save_dir'] + '/config.csv')
+
+    # Save model architecture
+    arch = get_arch(config)
+    arch_file = config['save_dir'] + 'model_arch.csv'
+    pd.DataFrame.from_dict(arch, orient="index").to_csv(arch_file)
 
 #################################
 # Optimizer selection functions #
