@@ -133,8 +133,7 @@ def train_logger(history, best_stat, metrics):
                 check.append(False)
     return history, best_stat, all(check)
 
-def get_checkpoint(iter, epoch, model, optim):
-get_checkpoint(epoch, kwargs, config):
+def get_checkpoint(epoch, kwargs, config):
     '''
         Function for generating a model checkpoint dictionary
     '''
