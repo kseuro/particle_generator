@@ -13,6 +13,7 @@ test_scripts/data/*
 /dataset_analysis/*.png
 /dataset_analysis/data/*
 /dataset_analysis/.ipynb_checkpoints
+/deploy_analysis/.ipynb_checkpoints
 
 # Visual Studio Files
 *.vscode
