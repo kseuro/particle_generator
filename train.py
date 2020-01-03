@@ -114,7 +114,8 @@ def train(config):
 
     # Save training history and experiment config for evaluation and deploy
     utils.save_train_hist(history, best_stat, times, config)
-    print("Training Complete")
+    print("Your training is complete.")
+    print("But I find your lack of control disturbing.")
 
 def main():
     parser = train_parser()
