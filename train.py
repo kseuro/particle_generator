@@ -95,21 +95,15 @@ def train(config):
         # Check losses starting after 5000 epochs and determine if
         # the current model is the best model state
         if (epoch > 5000) and (epoch % 250 == 0):
-            print("Testing save checkpoint functionality")
-            print("Epoch number: ", epoch)
             for key in best_stat:
                 if best is None:
-                    print("Best is none")
-                    print("best_stat[key] is: ", best_stat[key])
                     best = best_stat[key]
-                if best_stat[key] < best:
-                    print("best_stat[key] < best")
-                    print("Best is:           ", best)
-                    print("best_stat[key] is: ", best_stat[key])
+                    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+                    utils.save_checkpoint(checkpoint, config)
+                if round(best_stat[key], 4) < round(best, 4):
                     best = best_stat[key]
-                # Save model state checkpoint
-                checkpoint = utils.get_checkpoint(epoch, kwargs, config)
-                utils.save_checkpoint(checkpoint, config)
+                    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+                    utils.save_checkpoint(checkpoint, config)
 
     # Save training history and experiment config for evaluation and deploy
     utils.save_train_hist(history, best_stat, times, config)
