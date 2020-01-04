@@ -55,7 +55,7 @@ def directories(config):
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
     label = 'MNIST' if config['MNIST'] else 'LArCV'
-    config['exp_label'] += '_{}_{}_dataset'.format(label, config['dataset'])
+    config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
 
     assert config['save_root'], "No save_root specified in config!"
 
@@ -65,29 +65,24 @@ def directories(config):
     dirs.append(config['save_dir'])
 
     # Create path for saving weights
-    config.update({'weights_save' : config['save_dir'] + '/weights/'})
+    config.update({'weights_save' : config['save_dir'] + 'weights/'})
     dirs.append(config['weights_save'])
 
     # Sample saving
-    dirs.append(save_dir + '/training_samples/')
+    samples_dir = save_dir + 'training_samples/'
+    dirs.append(samples_dir)
 
     # Random samples
-    config.update( {'random_samples' :
-                    config['save_dir'] +
-                    '/training_samples/' +
-                    'random_samples/'})
+    config.update( {'random_samples' : samples_dir + 'random_samples/' } )
     dirs.append(config['random_samples'])
 
     # Fixed samples
-    config.update({'fixed_samples':
-                   config['save_dir'] +
-                   '/training_samples/' +
-                   'fixed_samples/'})
+    config.update({'fixed_samples': samples_dir + 'fixed_samples/'})
     dirs.append(config['fixed_samples'])
 
     # OTS Histograms
     if (config['model'] == 'EWM' or config['model'] == 'ewm'):
-        config.update( {'histograms' : config['save_dir'] + '/histograms/'})
+        config.update( {'histograms' : config['save_dir'] + 'histograms/'})
         dirs.append(config['histograms'])
 
     # Make directories for saving

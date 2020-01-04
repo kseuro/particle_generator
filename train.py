@@ -107,10 +107,9 @@ def train(config):
                     print("Best is:           ", best)
                     print("best_stat[key] is: ", best_stat[key])
                     best = best_stat[key]
-                    # Save model state checkpoint
-                    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
-                    utils.save_checkpoint(checkpoint, config)
-            input("Checkpoint Saved")
+                # Save model state checkpoint
+                checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+                utils.save_checkpoint(checkpoint, config)
 
     # Save training history and experiment config for evaluation and deploy
     utils.save_train_hist(history, best_stat, times, config)
