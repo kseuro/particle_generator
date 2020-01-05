@@ -93,21 +93,20 @@ def directories(config):
 
 def train_logger(history, best_stat, metrics):
     '''
-        Function for tracking training metrics. Determines with each update
-        to the training history if that update represents the best model
+        Function for tracking training metrics. Determines, with each update
+        to the training history, if that update represents the best model
         performance.
         Args: history (dict): dictionary of training history as lists of floats
               best_stat (dict): dictionary of best loss values
               metrics (dict): most recent loss values as three floats
-        Does: updates history dict with most recent metrics. Checks if
-              that update is the best yet.
-        Returns: history, best_stat, True/False
+        Does: updates history dict with most recent metrics.
+        Returns: history, best_stat
     '''
     # Check if history is empty before appending data
     # Append most recent training history to loss lists
     if not history:
         for key in metrics:
-            history.update({ key: [metrics[key]] })
+            history.update( { key: [metrics[key]] } )
     else:
         for key in metrics:
             history[key].append(metrics[key])
@@ -116,17 +115,15 @@ def train_logger(history, best_stat, metrics):
     # Check if best_stat is empty before appending data
     if not best_stat:
         for key in history:
-            best_stat.update({key: history[key][-1]})
-            check.append(True)
+            best_stat.update( { key: history[key][-1] } )
     else:
+        # Compare the last recorded loss value with the current
+        # best_stat. If that loss value is lower than the best_stat,
+        # then update the best_stat.
         for key in history:
-            threshold = best_stat[key] - round(best_stat[key] * 0.5, 3)
-            if round(history[key][-1], 3) < threshold:
+            if round(history[key][-1], 5) < round(best_stat, 5):
                 best_stat[key] = history[key][-1]
-                check.append(True)
-            else:
-                check.append(False)
-    return history, best_stat, all(check)
+    return history, best_stat
 
 def get_checkpoint(epoch, kwargs, config):
     '''

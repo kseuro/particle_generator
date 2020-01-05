@@ -82,7 +82,10 @@ def train(config):
         x_fixed = x_fixed.view(config['batch_size'], 1, config['dataset'], config['dataset'])
         kwargs.update( {'x_fixed' : x_fixed} )
 
+    # The variable 'best' will keep track of the previous best_stat and
+    # be updated only once the best_stat changes to a new, lower value.
     best = None
+    
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
 
@@ -100,7 +103,7 @@ def train(config):
                     best = best_stat[key]
                     checkpoint = utils.get_checkpoint(epoch, kwargs, config)
                     utils.save_checkpoint(checkpoint, config)
-                if round(best_stat[key], 4) < round(best, 4):
+                if round(best_stat[key], 5) < round(best, 5):
                     best = best_stat[key]
                     checkpoint = utils.get_checkpoint(epoch, kwargs, config)
                     utils.save_checkpoint(checkpoint, config)
