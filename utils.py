@@ -121,7 +121,7 @@ def train_logger(history, best_stat, metrics):
         # best_stat. If that loss value is lower than the best_stat,
         # then update the best_stat.
         for key in history:
-            if round(history[key][-1], 5) < round(best_stat, 5):
+            if round(history[key][-1], 5) < round(best_stat[key], 5):
                 best_stat[key] = history[key][-1]
     return history, best_stat
 

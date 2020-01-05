@@ -70,7 +70,7 @@ def train(config):
     history, best_stat = {}, {}
     times = {'epoch_times': [], 'tr_loop_times': []}
     kwargs.update({'config' : config,  'dataloader' : dataloader,
-                   'history': history, 'best_stat' : best_stat,
+                   'history': history, 'best_stat'  : best_stat,
                    'times'  : times})
 
     # If GAN or EWM set fixed random vector for sampling at the end of each epoch
@@ -85,7 +85,7 @@ def train(config):
     # The variable 'best' will keep track of the previous best_stat and
     # be updated only once the best_stat changes to a new, lower value.
     best = None
-    
+
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
 
