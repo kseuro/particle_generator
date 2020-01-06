@@ -4,12 +4,12 @@ __pycache__/
 *$py.class
 
 # Sandbox stuff
+*/*.sh
 dynamic_model_alloc.py
 test_model.py
 data/
 data/*
 test_scripts/data/*
-test_scripts/*
 /dataset_analysis/data/*
 /dataset_analysis/*.png
 /deploy_analysis/*.png
