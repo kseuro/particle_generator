@@ -1,9 +1,9 @@
 #!/bin/bash
 CUDA_VISIBLE_DEVICES=1,2 python train.py \
 --gpu 1 \
---dataset 64 \
+--dataset 128 \
 --batch_size 64 \
---num_epochs 1 \
+--num_epochs 7500 \
 --sample_size 16 \
 --shuffle True \
 --drop_last True \
