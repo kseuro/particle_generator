@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # Sandbox stuff
+*.sh
 */*.sh
 dynamic_model_alloc.py
 test_model.py
