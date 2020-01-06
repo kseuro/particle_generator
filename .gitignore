@@ -9,7 +9,11 @@ test_model.py
 data/
 data/*
 test_scripts/data/*
+test_scripts/*
 /dataset_analysis/data/*
+/dataset_analysis/*.png
+/deploy_analysis/*.png
+
 
 # Visual Studio Files
 *.vscode
