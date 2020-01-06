@@ -110,6 +110,12 @@ def train(config):
 
     # Save training history and experiment config for evaluation and deploy
     utils.save_train_hist(history, best_stat, times, config)
+
+    # Save one last checkpoint
+    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+    utils.save_checkpoint(checkpoint, config)
+
+    # For Aiur
     print("Your training is complete.")
     print("But I find your lack of control disturbing.")
 
