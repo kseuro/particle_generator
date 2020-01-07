@@ -6,6 +6,7 @@ __pycache__/
 # Sandbox stuff
 *.sh
 */*.sh
+test_scripts/ae_larcv.sh
 dynamic_model_alloc.py
 test_model.py
 data/
