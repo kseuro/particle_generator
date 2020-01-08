@@ -12,12 +12,24 @@
 #                   - __len__ so that len(dataset) returns the dataset size
 #                   - __getitem__ to support indexing into dataset, e.g. so
 #                                 that dataset[i] gets the ith data sample.
+#          - The BottleLoader class inherits from the torch abstract
+#            dataset class: torch.utils.Dataset
+#               - This class allows the code-vector targets generated from
+#                 the bottleneck layer of a trained AutoEncoder to be used
+#                 as training data for a Generator model.
+#               - The follow packages need to be installed for the BottleLoader
+#                 class to work: pandas (for csv parsing)
+#               - The following methods are overriden:
+#                   - __len__ so that len(dataset) returns the dataset size
+#                   - __getitem__ to support indexing into dataset, e.g. so
+#                                 that dataset[i] gets the ith data sample.
 ###############################################################################
 
 # Imports
 import os
 import PIL
 import torch
+import pandas as pd
 from PIL import Image
 from torchvision import transforms, utils
 from torch.utils.data import Dataset, DataLoader
@@ -72,25 +84,29 @@ def dset_tag(root):
 
 def get_paths(root):
     '''
-        Does: gets the full path for every training image in a selected dataset
+        Does: gets the full path for every training example in a dataset
         Args: root (string): full path to folder of training images
-        Returns: string list of full paths to training images
+        Returns: string list of full paths to training examples
     '''
     # Get appropriate dataset tag
-    root = dset_tag(root)
+    root = dset_tag(root) # TODO: Add tag for code-vectors
     paths = []
+    larcv = True if 'larcv' in root else False
 
     # Walk through image folder and compute paths
-    for image in os.listdir(root):
-        image_path = os.path.join(root, image)
-        if verify_image(image_path):
-            paths.append(image_path)
+    for example in os.listdir(root):
+        example_path = os.path.join(root, example)
+        if larcv:
+            if verify_image(example_path):
+                paths.append(example_path)
+            else:
+                continue
         else:
-            continue
+            paths.append(example_path)
     if (len(paths) == 0):
-        raise(RuntimeError("Found 0 images in subfolders of: " + root + "\n"
-             "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
-    # Return list of verified training images
+        raise(RuntimeError("Found 0 training examples in subfolders of: " + root + "\n"
+                           "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
+    # Return list of paths to training examples
     return paths
 
 # Dataloading functions
@@ -156,3 +172,28 @@ class LArCV_loader(Dataset):
             image = self.transforms(image)
 
         return image
+
+class BottleLoader(Dataset):
+    '''
+        BottleLoader class for handling the loading of code-vector
+        targets produced by the Encoder branch of a trained AutoEncoder
+        model.
+        Does: Creates a dataloader object that inherits from the base
+              PyTorch nn.Dataset class, for loading target .csv files
+              as Torch Tensors.
+        Args: - root (string): full path to the code-vector .csv files
+              - transform (callable): optional transform to be called on the
+                                      vector
+    '''
+    def __init__(self, root, transforms=None):
+        self.root = root
+        self.csv_paths = get_paths(self.root) # TODO: Check that this works
+        self.transforms = transforms
+        print("Code-Target examples will be loaded from subfolder of: {}".format(self.root))
+
+    def __len__(self):
+        return len(self.csv_paths)
+
+    def __getitem__(self, index):
+        # TODO: Finish this method
+        pass
