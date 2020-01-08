@@ -21,6 +21,7 @@ from pandas import DataFrame
 
 # My stuff
 from dataloader import LArCV_loader
+from scipy.ndimage.measurements import center_of_mass as CoM
 
 #################################
 #     Logging Functionality     #
@@ -54,7 +55,7 @@ def directories(config):
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
     label = 'MNIST' if config['MNIST'] else 'LArCV'
-    config['exp_label'] += '_{}_{}_dataset'.format(label, config['dataset'])
+    config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
 
     assert config['save_root'], "No save_root specified in config!"
 
@@ -64,29 +65,24 @@ def directories(config):
     dirs.append(config['save_dir'])
 
     # Create path for saving weights
-    config.update({'weights_save' : config['save_dir'] + '/weights/'})
+    config.update({'weights_save' : config['save_dir'] + 'weights/'})
     dirs.append(config['weights_save'])
 
     # Sample saving
-    dirs.append(save_dir + '/training_samples/')
+    samples_dir = save_dir + 'training_samples/'
+    dirs.append(samples_dir)
 
     # Random samples
-    config.update( {'random_samples' :
-                    config['save_dir'] +
-                    '/training_samples/' +
-                    'random_samples/'})
+    config.update( {'random_samples' : samples_dir + 'random_samples/' } )
     dirs.append(config['random_samples'])
 
     # Fixed samples
-    config.update({'fixed_samples':
-                   config['save_dir'] +
-                   '/training_samples/' +
-                   'fixed_samples/'})
+    config.update({'fixed_samples': samples_dir + 'fixed_samples/'})
     dirs.append(config['fixed_samples'])
 
     # OTS Histograms
     if (config['model'] == 'EWM' or config['model'] == 'ewm'):
-        config.update( {'histograms' : config['save_dir'] + '/histograms/'})
+        config.update( {'histograms' : config['save_dir'] + 'histograms/'})
         dirs.append(config['histograms'])
 
     # Make directories for saving
@@ -95,69 +91,68 @@ def directories(config):
 
     return config
 
-def train_logger(history, best_stats, metrics):
+def train_logger(history, best_stat, metrics):
     '''
-        Function for tracking training metrics. Determines with each update
-        to the training history if that update represents the best model
+        Function for tracking training metrics. Determines, with each update
+        to the training history, if that update represents the best model
         performance.
         Args: history (dict): dictionary of training history as lists of floats
-              best_stats (dict): dictionary of best loss values
+              best_stat (dict): dictionary of best loss values
               metrics (dict): most recent loss values as three floats
-        Does: updates history dict with most recent metrics. Checks if
-              that update is the best yet.
-        Returns: history, best_stats, True/False
+        Does: updates history dict with most recent metrics.
+        Returns: history, best_stat
     '''
     # Check if history is empty before appending data
     # Append most recent training history to loss lists
     if not history:
         for key in metrics:
-            history.update({ key: [metrics[key]] })
+            history.update( { key: [metrics[key]] } )
     else:
         for key in metrics:
             history[key].append(metrics[key])
 
     check = []
-    # Check if best_stats is empty before appending data
-    if not best_stats:
+    # Check if best_stat is empty before appending data
+    if not best_stat:
         for key in history:
-            best_stats.update({key: history[key][len(history[key]) - 1]})
-            check.append(True)
+            best_stat.update( { key: history[key][-1] } )
     else:
+        # Compare the last recorded loss value with the current
+        # best_stat. If that loss value is lower than the best_stat,
+        # then update the best_stat.
         for key in history:
-            threshold = best_stats[key] - round(best_stats[key] * 0.5, 3)
-            if (history[key][len(history[key]) - 1]) < threshold:
-                best_stats[key] = history[key][len(history[key]) - 1]
-                check.append(True)
-            else:
-                check.append(False)
-    return history, best_stats, all(check)
+            if round(history[key][-1], 5) < round(best_stat[key], 5):
+                best_stat[key] = history[key][-1]
+    return history, best_stat
 
-def get_checkpoint(iter, epoch, model, optim):
+def get_checkpoint(epoch, kwargs, config):
     '''
         Function for generating a model checkpoint dictionary
     '''
     dict = {}
-    dict.update({'iter'      : iter,
-                 'epoch'     : epoch,
-                 'state_dict': model.state_dict(),
-                 'optimizer' : optim.state_dict()
-                })
+    if 'ae' in config['model']:
+        dict.update( { 'epoch'     : epoch,
+                       'state_dict': kwargs['AE'].state_dict(),
+                       'optimizer' : kwargs['AE_optim'].state_dict() } )
+    elif 'gan' in config['model']:
+        # Write model checkpoint save for 'G' and 'D' in kwargs
+        pass
+    elif 'ewm' in config['model']:
+        # Write model checkpoint save for 'G' in kwargs
+        pass
+
     return dict
 
-def save_checkpoint(checkpoint, best, model_name, save_dir):
+def save_checkpoint(checkpoint, config):
     '''
         Function for saving model and optimizer weights
         Args: checkpoint (dict): dictionary of model weights
-              best (bool): boolean corresponding to best checkpoint
+              config (dict): experiment configuration dictionary
               save_dir (str): full path to save location
     '''
-    if best:
-        filename = save_dir + 'best_chkpt_{}_{}.tar'.format(model_name,
-                                                            checkpoint['epoch'])
-    else:
-        filename = save_dir + 'chkpt_{}_it_{}_ep_{}.tar'.format(model_name,
-                                                                checkpoint['iter'],
-                                                                checkpoint['epoch'])
+    save_dir = config['weights_save']
+    chkpt_name = 'best_{}_ep_{}.tar'.format(config['model'], checkpoint['epoch'])
+    filename = save_dir + chkpt_name
     torch.save(checkpoint, filename)
 
 def save_sample(sample, epoch, iter, save_dir):
@@ -173,7 +168,8 @@ def save_sample(sample, epoch, iter, save_dir):
 
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
-        torchvision.utils.save_image(sample[0], im_out)
+        nrow = 2
+        torchvision.utils.save_image(sample[0], im_out, nrow = nrow)
     else:
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
         nrow = (sample.size(0)//4) if (sample.size(0) % 4) == 0 else 2
@@ -192,12 +188,26 @@ def shrink_lists(dict):
         dict[key] = [dict[key][i] for i in range(idx)]
     return dict
 
-def save_train_hist(history, best_stats, times, config, histogram=None):
+def get_arch(config):
+    arch = {}
+    # Architecture features common to both models
+    arch.update( { 'n_layers'   : config['n_layers'],
+                   'num_epochs' : config['num_epochs'],
+                   'model'      : config['model'] } )
+    # Model dependent features
+    if 'ae' in config['model']:
+        arch.update( { 'l_dim' : config['l_dim']} )
+    if 'gan' in config['model']:
+        arch.update( { 'z_dim'    : config['z_dim'],
+                       'n_hidden' : config['n_hidden'] } )
+    return arch
+
+def save_train_hist(history, best_stat, times, config, histogram=None):
     '''
         Function for saving network training history and
         best performance stats.
         Args: history (dict): dictionary of network training metrics
-              best_stats (dict): dictionary of floating point numbers
+              best_stat (dict): dictionary of floating point numbers
                                  representing the best network performance
                                  (i.e. lowest loss)
               times (dict): dictionary of lists containing the training times
@@ -206,8 +216,8 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
                                           histogram values representing the probability
                                           density distribution of the generator function.
     '''
-    # Save times - arrays must all be the same length, otherwise
-    # Pandas will thrown an error!
+    # Save times - arrays must all be the same length,
+    # otherwise Pandas will thrown an error!
     times_csv = config['save_dir'] + '/times.csv'
     DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
 
@@ -223,6 +233,11 @@ def save_train_hist(history, best_stats, times, config, histogram=None):
     # Save config dict for reference
     df = DataFrame.from_dict(config, orient='index')
     df.to_csv(config['save_dir'] + '/config.csv')
+
+    # Save model architecture
+    arch = get_arch(config)
+    arch_file = config['save_dir'] + '/model_arch.csv'
+    DataFrame.from_dict(arch, orient="index").to_csv(arch_file)
 
 #################################
 # Optimizer selection functions #
@@ -302,6 +317,8 @@ def select_dataset(config):
         config['data_root'] += 'larcv_png_128/'
     elif (config['dataset'] == 64):
         config['data_root'] += 'larcv_png_64/'
+    elif (config['dataset'] == 32):
+        config['data_root'] += 'larcv_png_32/'
     else:
         raise Exception('Dataset not specified -- unable to set data_root')
     return config

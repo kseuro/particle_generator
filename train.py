@@ -67,16 +67,24 @@ def train(config):
 
     # Update key word arguments with final config dict and dataloader
     # Set up dicts for tracking progress
-    history, best_stats = {}, {}
+    history, best_stat = {}, {}
     times = {'epoch_times': [], 'tr_loop_times': []}
     kwargs.update({'config' : config,  'dataloader' : dataloader,
-                   'history': history, 'best_stats' : best_stats,
+                   'history': history, 'best_stat'  : best_stat,
                    'times'  : times})
 
     # If GAN or EWM set fixed random vector for sampling at the end of each epoch
     if (config['model'] != 'ae'):
         z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
         kwargs.update( {'z_fixed' : z_fixed} )
+    else:
+        x_fixed = next(iter(dataloader))
+        x_fixed = x_fixed.view(config['batch_size'], 1, config['dataset'], config['dataset'])
+        kwargs.update( {'x_fixed' : x_fixed} )
+
+    # The variable 'best' will keep track of the previous best_stat and
+    # be updated only once the best_stat changes to a new, lower value.
+    best = None
 
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
@@ -85,11 +93,31 @@ def train(config):
 
         args = (epoch, epoch_start)
 
-        history, best_stats, times = loop(*args, **kwargs)
+        history, best_stat, times = loop(*args, **kwargs)
+
+        # Check losses starting after 5000 epochs and determine if
+        # the current model is the best model state
+        if (epoch > 5000) and (epoch % 250 == 0):
+            for key in best_stat:
+                if best is None:
+                    best = best_stat[key]
+                    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+                    utils.save_checkpoint(checkpoint, config)
+                if round(best_stat[key], 5) < round(best, 5):
+                    best = best_stat[key]
+                    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+                    utils.save_checkpoint(checkpoint, config)
 
     # Save training history and experiment config for evaluation and deploy
-    utils.save_train_hist(history, best_stats, times, config)
-    print("Training Complete")
+    utils.save_train_hist(history, best_stat, times, config)
+
+    # Save one last checkpoint
+    checkpoint = utils.get_checkpoint(epoch, kwargs, config)
+    utils.save_checkpoint(checkpoint, config)
+
+    # For Aiur
+    print("Your training is complete.")
+    print("But I find your lack of control disturbing.")
 
 def main():
     parser = train_parser()

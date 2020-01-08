@@ -22,10 +22,11 @@ from PIL import Image
 from torchvision import transforms, utils
 from torch.utils.data import Dataset, DataLoader
 
-# string tuples for exception handling 
-IMG_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', 
+# string tuples for exception handling
+IMG_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm',
                   '.tif', '.tiff', '.webp')
-VALID_DSETS = ('larcv_png_512', 'larcv_png_256', 'larcv_png_128', 'larcv_png_64')
+VALID_DSETS = ('larcv_png_512', 'larcv_png_256', 'larcv_png_128',
+               'larcv_png_64' , 'larcv_png_32')
 CONV_FLAGS = ('RGB', 'L')
 
 # Dataloader object constructor functions
@@ -60,11 +61,13 @@ def dset_tag(root):
     elif str(256) in root:
         return root + 'larcv_png_256/'
     elif str(128) in root:
-        return root + 'larcv_png_128'
+        return root + 'larcv_png_128/'
     elif str(64) in root:
-        return root + 'larcv_png_64'
+        return root + 'larcv_png_64/'
+    elif str(32) in root:
+        return root + 'larcv_png_32/'
     else:
-        raise(RuntimeError('Invalid dataset selection. Valid datasets are:' 
+        raise(RuntimeError('Invalid dataset selection. Valid datasets are:'
                             + ','.join(VALID_DSETS)))
 
 def get_paths(root):
@@ -106,7 +109,7 @@ def pil_loader(image_path, conv_flag):
 
 # Dataset Class - batch-to-batch loading of training images
 class LArCV_loader(Dataset):
-    ''' 
+    '''
         Liquid Argon Computer Vision dataloader class
         Does: Creates a dataloader object that inherits from the base
               PyTorch nn.Dataset class, for loading LArCV1 dataset images.
@@ -136,7 +139,7 @@ class LArCV_loader(Dataset):
                 "Valid conversion flags are:" + ",".join(CONV_FLAGS)))
         print('Image conversion flag is: {}'.format(self.conv_flag))
         print('Images will be loaded from subfolder of: {}'.format(self.root))
-    
+
     def __len__(self):
         return len(self.paths)
 
@@ -151,5 +154,5 @@ class LArCV_loader(Dataset):
 
         if (self.transforms is not None):
             image = self.transforms(image)
-        
+
         return image

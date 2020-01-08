@@ -4,14 +4,18 @@ __pycache__/
 *$py.class
 
 # Sandbox stuff
+*.sh
+*/*.sh
+test_scripts/ae_larcv.sh
 dynamic_model_alloc.py
 test_model.py
 data/
 data/*
-test_scripts/*
 test_scripts/data/*
-/dataset_analysis/
 /dataset_analysis/data/*
+/dataset_analysis/*.png
+/deploy_analysis/*.png
+
 
 # Visual Studio Files
 *.vscode

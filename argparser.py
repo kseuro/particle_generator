@@ -107,11 +107,6 @@ def train_parser():
     parser.add_argument('--n_hidden', type=int, default=512,
                         help='Number of hidden units in each layer of G and D \
                             | (default: &(default)s)')
-    # n_layers: number of layers of G and D
-    parser.add_argument('--n_layers', type=int, default=4,
-                        help='Number of desired layers of G and D \
-                            | (default: &(default)s)')
-
     ### Generator Network
     # g_lr: generator learning rate
     parser.add_argument('--g_lr', type=float, default=1e-4,
@@ -146,6 +141,10 @@ def train_parser():
     parser.add_argument('--p', type=float, default=0.9,
                         help='Momentum value for SGD optimizer \
                             | (default: &(default)s)')
+    # n_layers: number of model layers
+    parser.add_argument('--n_layers', type=int, default=4,
+                        help='Number of desired model layers \
+                            | (default: &(default)s)')
     ######################################################
 
     ## AE Model
@@ -154,11 +153,11 @@ def train_parser():
                         help='Dimension of the AE encoder latent space \
                             | (default: &(default)s)')
     # AE optimization function
-    parser.add_argument('--ae_opt', type=str, default='adam', 
+    parser.add_argument('--ae_opt', type=str, default='adam',
                         help='Autoencoder optimization function - \
                             choices: adam, sgd | (default: &(default)s)')
     # AE learning rate
-    parser.add_argument('--ae_lr', type=float, default=1e-4, 
+    parser.add_argument('--ae_lr', type=float, default=1e-4,
                         help='Autoencoder learning rate \
                             | (default: &(default)s)')
 

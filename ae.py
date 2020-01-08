@@ -18,9 +18,13 @@ import torch.nn.functional as F
 import torchvision
 
 def enc_block(in_f, out_f):
+    '''
+        Using LeakyReLU in the encoder portion generates much 'cleaner'
+        looking digits during MNIST PoC.
+    '''
     return nn.Sequential(
         nn.Linear(in_f, out_f),
-        nn.ReLU(True)
+        nn.LeakyReLU(0.2)
     )
 
 def dec_block(in_f, out_f):
@@ -53,7 +57,6 @@ class Decoder(nn.Module):
         self.fc_blocks = nn.Sequential(*[dec_block(in_f, out_f) for in_f, out_f
                                         in zip(dec_sizes, dec_sizes[1:])])
         self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Tanh())
-        # self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Sigmoid())
 
     # Initialize the weights
     def weights_init(self):
