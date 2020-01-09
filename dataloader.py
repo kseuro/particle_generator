@@ -221,7 +221,7 @@ class BottleLoader(Dataset):
              - This list of floats can then be converted to a NumPy array,
                which is an acceptable argument for a call to torch.Tensor()
         '''
-        code_vector = pd.read_csv(self.csv_paths[index], delimiter=',', header=0, skipinitalspace=True)
+        code_vector = pd.read_csv(self.csv_paths[index], delimiter=',', header=0, skipinitialspace=True)
         code_vector = code_vector.columns.tolist()
         code_vector = list(map(float, code_vector))
         code_vector = np.asarray(code_vector, dtype=np.float32)
