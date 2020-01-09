@@ -91,7 +91,7 @@ def train(config):
 
     # Set up progress bars for terminal output and enumeration
     dataloader = utils.get_dataloader(config) # Full Dataloader
-    dataloader = dataloader.view(len(dataloader), -1).to(gpu) # Flatten (may not be necessary)
+    dataloader = dataloader.view(len(dataloader), -1).to(config['gpu']) # Flatten (may not be necessary)
     n_dim      = len(dataloader)
     epoch_bar  = tqdm([i for i in range(config['num_epochs'])])
 
