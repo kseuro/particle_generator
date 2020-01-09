@@ -29,6 +29,7 @@
 import os
 import PIL
 import torch
+import numpy as np
 import pandas as pd
 from PIL import Image
 from torchvision import transforms, utils
