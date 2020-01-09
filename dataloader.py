@@ -115,13 +115,6 @@ def get_paths(root):
     elif len(paths) == 0:
             raise(RuntimeError("Found 0 code_vector files in subfolders of: {}".format(root)))
 
-    # Debugging Statements
-    print("Testing dataloader.get_paths() function")
-    print("Length of paths array: ", len(paths))
-    print("Sample of the first 10 paths in the array: ")
-    for i in range(10):
-        print(paths[i])
-    input(...)
     return paths
 
 # Dataloading functions
