@@ -82,7 +82,7 @@ def train(config):
     emw_kwargs = setup_model.ewm_kwargs(config)
 
     # Setup model on GPU
-    G = model.Generator(emw_kwargs).to(config['gpu'])
+    G = ewm.Generator(emw_kwargs).to(config['gpu'])
     G.weights_init()
 
     # Setup model optimizer
