@@ -35,6 +35,7 @@ import os
 import time
 import errno
 import shutil
+from tqdm import tqdm, trange
 from   datetime import datetime
 
 # Python
