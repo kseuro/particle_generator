@@ -295,9 +295,9 @@ def ae_optim(config, model_params):
 
 def ewm_optim(config, model_params):
     # Generator optimizer
-    if ('adam' in config['ewm_optim']):
+    if ('adam' in config['g_opt']):
         ewm_optim = torch.optim.Adam(model_params['g_params'], lr=config['g_lr'])
-    elif ('sgd' in config['ewm_optim']):
+    elif ('sgd' in config['g_opt']):
         ewm_optim = torch.optim.SGD(model_params['g_params'], lr=config['g_lr'],
                                     momentum=config['p'])
     else:
