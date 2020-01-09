@@ -212,12 +212,22 @@ class BottleLoader(Dataset):
         return len(self.csv_paths)
 
     def __getitem__(self, index):
-        # code_vector = np.genfromtxt(self.csv_paths[index], delimiter=',')
-        # code_vector = torch.from_numpy(code_vector).long()
+        '''
+            - Loading a target_vector.csv file with pandas results in an 'empty'
+              dataframe containing only column headers, since pandas assumes the
+              first row of the .csv file are the column names.
+             - Extracting the column names as a list gives a list of string floats
+             - We convert this list to floats via a call to map()
+             - This list of floats can then be converted to a NumPy array,
+               which is an acceptable argument for a call to torch.Tensor()
+        '''
+        code_vector = pd.read_csv(self.csv_paths[index], delimiter=',', header=0, skipinitalspace=True)
+        code_vector = code_vector.columns.tolist()
+        code_vector = list(map(float, code_vector))
+        code_vector = np.asarray(code_vector, dtype=np.float32)
+        # code_tensor = torch.Tensor(code_vector).view(1, -1) # May need channel dim
+        code_tensor = torch.Tensor(code_vector) # May need channel dim
 
-        code_vector = pd.read_csv(self.csv_paths[index])
-        code_tensor = torch.Tensor(code_vector.values())
-        
         # if self.transforms is not None:
         #     code_vector = self.transforms(code_vector)
 
