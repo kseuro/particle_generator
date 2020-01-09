@@ -13,70 +13,70 @@ This model consists of a single generator function to be trained using explicit 
 
 @article{1906.03471, Author = {Yucheng Chen and Matus Telgarsky and Chao Zhang and Bolton Bailey and Daniel Hsu and Jian Peng}, Title = {A gradual, semi-discrete approach to generative network training via explicit Wasserstein minimization}, Year = {2019}, Eprint = {arXiv:1906.03471},
 
-
 ### Auto-Encoder (AE)
-Our working hypothesis is that the non-zero pixels in LArCV1 monte carlo data images is defined only on a very thin hypermanifold extending through the data space. Most of the pixels within this space have a value very close to zero, which causes convolutional implementations of GANs to converge towards generative modes that produce only black images. In other words, there appears to be no simple, direct mapping from the space of the Generator's 100-dimensional Gaussian input noise to the space of NxN LArCV1 data images, using only a GAN approach. (Comments and criticism welcome).
+Our working hypothesis is that the non-zero pixels in LArCV1 monte carlo data images is define only on a very thin hyper-manifold extending through the image data space. That is, the particle charge information lies on a thin manifold in NxN space. Most of the pixels within this space have a value very close to zero and results in convolutional implementations of GANs to collapse to modes that produce only black images. In the case of a GAN, there appears to be difficult to find a direct mapping from the space of the Generator's 100-dimensional Gaussian input noise to the space of NxN LArCV1 data images, using conventional GAN training methods.
 
-Instead, we propose to use a AE to learn a compact representation of the LArCV1 data distribution, and subsequently use the model's learned latent as input to a generative model. The generative model will then be trained to reproduce images in data space using a non-adversarial approach.
+Instead, we propose to use an AutoEncoder to learn a compact representation of the LArCV1 data, and subsequently use the model's learned latent representation as a target for training a generative model. The generative model will then be trained to reproduce images in data space using the non-adversarial EWM approach.
 
 ### Short-term goal(s):
 - Train for single iteration using MNIST and save outputs (Done)
-- Resume training of a saved model for a single iteration 
 - GAN proof-of-concept using MNIST (Done)
-- AE proof-of-concept using MNIST
-- EWM proof-of-concept using MNIST
+- AE proof-of-concept using MNIST (Done)
+- EWM proof-of-concept using MNIST (Done - See EWM repo)
 
 ### Repo work in progress:
 - model agnostic argparser (Done)
 - data loading class - batch-to-batch (Done)
 - data loading class - EWM single batch (Done)
 - data loading function (Done)
-- Training routine 
+- Training routine (Done)
     - LArCV data training funcitons
         - GAN (Done)
+        - AE (Done)
+    - Code-vector targets training functionality
         - EWM
-        - AE
 - Sample saving functionality
   - GAN (Done)
-  - EWM
-  - AE
+  - AE (Done)
 - Metrics saving functionality (Done)
 - Checkpoint saving functionality (Done)
 
-#### Proof-of-Concept
-- Train GAN on MNIST dataset (Done)
-- Train AE on MNIST dataset
-
 #### Deploy functionality
-- Deploy scripts
-  - GAN
-  - EWM
-  - AE
 - Deploy routines
-  - GAN
-  - EWM
-  - AE
+    - GAN
+    - AE (Done)
+    - EWM
 
 #### GAN
 - linear GAN model class (Done)
 - linear GAN training function (Done)
-- linear GAN deploy function
 
 #### EWM
-- move model and functionality from EWM repo
+- move model and functionality from EWM repo (Done)
+- Load code vector targets as torch tensors
 
 #### AE
-- AE model class
-- AE training function
-- AE deploy function
+- AE model class (Done)
+- AE training function (Done)
+- AE deploy function (Done)
 
 #### Model evaluation functionality
 - graphics generation capabilities
-    - Loss Plotting
-    - GIF generation
+    - Loss Plotting (Done)
 - hamming distance (on GPU) computations
+    - Move functionality over from EWM repo
 
 ### Requirements:
 - Python version 3.5 or later
 - PyTorch version 1.0 or later
-- CUDA version 10.0 or later (no CPU implemention will be provided here)
+- CUDA version 10.0 or later (no CPU implemention is provided here)
+
+### Experiment Requirements
+The ArgParser requirements for each respective experiment are listed below:
+- All Models:
+    - <pre><code> --data_root --save_root --dataset --batch_size --num_epochs --sample_size --gpu
+                  --shuffle --drop_last --num_workers </code></pre>
+- GAN Model:
+    - <pre><code> --n_layers</code></pre>
+
+
