@@ -80,6 +80,6 @@ The ArgParser requirements for each respective experiment are listed below:
 - AutoEncoder Model:
     - <pre><code> --l_dim --ae_opt --ae_lr </code></pre>
 - EWM Training Routing
-    - <pre><code> --psi_lr --mem_size </code></pre>
+    - <pre><code> --psi_lr --mem_size --n_hidden --n_layers --g_lr --g_opt </code></pre>
 
 
