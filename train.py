@@ -37,7 +37,7 @@ def train(config):
 
     # If training Generator model using EWM algo, switch to
     # EWM training routine defined in train_ewm.py
-    if model == 'ewm':
+    if config['model'] == 'ewm':
         from train_ewm import train as EWM_train
         EWM_train(config)
         return

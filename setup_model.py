@@ -5,7 +5,7 @@ import train_fns
 #####################
 # GAN Functionality #
 #####################
-def gan_kwargs(config):
+def get_gan_kwargs(config):
     '''
         Create two dictionaries of key word arguments for
         generator and discriminator model from config dict.
@@ -36,7 +36,7 @@ def gan(model, config):
         GAN setup function
     '''
     # Get G and D kwargs based on command line inputs
-    g_kwargs, d_kwargs = gan_kwargs(config)
+    g_kwargs, d_kwargs = get_gan_kwargs(config)
 
     # Set up models on GPU
     G = model.Generator(**g_kwargs).to(config['gpu'])
@@ -66,7 +66,7 @@ def gan(model, config):
 #####################
 # AE  Functionality #
 #####################
-def ae_kwargs(config):
+def get_ae_kwargs(config):
     kwargs = {}
 
     # Check if MNIST - set image size
@@ -95,7 +95,7 @@ def ae(model, config):
         AutoEncoder setup function
     '''
     # Get model kwargs
-    ae_kwargs, config = ae_kwargs(config)
+    ae_kwargs, config = get_ae_kwargs(config)
 
     # Set up model on GPU
     AE = model.AutoEncoder(**ae_kwargs).to(config['gpu'])
