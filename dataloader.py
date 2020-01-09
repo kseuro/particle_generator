@@ -212,9 +212,12 @@ class BottleLoader(Dataset):
         return len(self.csv_paths)
 
     def __getitem__(self, index):
-        code_vector = np.genfromtxt(self.csv_paths[index], delimiter=',')
-        code_vector = torch.from_numpy(code_vector).long()
+        # code_vector = np.genfromtxt(self.csv_paths[index], delimiter=',')
+        # code_vector = torch.from_numpy(code_vector).long()
 
+        code_vector = pd.read_csv(self.csv_paths[index])
+        code_tensor = torch.Tensor(code_vector.values())
+        
         # if self.transforms is not None:
         #     code_vector = self.transforms(code_vector)
 
