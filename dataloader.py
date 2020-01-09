@@ -213,13 +213,12 @@ class BottleLoader(Dataset):
 
     def __getitem__(self, index):
         code_vector = np.genfromtxt(self.csv_paths[index], delimiter=',')
+        code_vector = torch.from_numpy(code_vector).long()
 
-        print("Code vector shape: ", code_vector.shape)
-        input(...)
-        if self.transforms is not None:
-            code_tensor = torch.from_numpy(code_vector).long()
-            print("Code tensor shape: ", code_tensor.shape)
-            input(...)
-            # code_vector = self.transforms(code_vector)
+        # if self.transforms is not None:
+        #     code_tensor = torch.from_numpy(code_vector).long()
+        #     print("Code tensor shape: ", code_tensor.shape)
+        #     input(...)
+        #     code_vector = self.transforms(code_vector)
 
         return code_vector
