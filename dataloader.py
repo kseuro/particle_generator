@@ -68,9 +68,6 @@ def dset_tag(root):
         Args: root (string): full path to the selected LArCV1 dataset
         Returns: root (string) with appropriate dataset tag
     '''
-    # Tag for code_vector target data (EWM generator model targets)
-    if 'code' in root:
-        return root + 'code_vectors/'
     # Tag for LArCV1 image data (AutoEncoder or GAN model targets)
     if str(512) in root:
         return root + 'larcv_png_512/'
@@ -92,10 +89,12 @@ def get_paths(root):
         Args: root (string): full path to folder of training examples
         Returns: list of full paths (strings) to training examples
     '''
-    # Get appropriate dataset tag
-    root = dset_tag(root)
     paths = []
-    larcv = True if 'larcv' in root else False
+    # Get appropriate dataset tag
+    larcv = False
+    if 'larcv' in root:
+        larcv = True
+        root = dset_tag(root)
 
     # Walk through image folder and compute paths
     for example in os.listdir(root):
