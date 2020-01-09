@@ -35,28 +35,21 @@ def train(config):
     # Import the selected model
     model = __import__(config['model']) # GAN, AE, or EWM
 
+    # If training Generator model using EWM algo, switch to
+    # EWM training routine defined in train_ewm.py
+    if model == 'ewm':
+        from train_ewm import train as EWM_train
+        EWM_train(config)
+        return
+
     # Import appropriate training loop
     loop = train_fns.get_train_loop(config)
 
     # Instantiate the model and corresponding optimizer
-    if (config['model'] == 'gan'):
+    if config['model'] == 'gan':
         kwargs = setup_model.gan(model, config)
-    elif (config['model'] == 'ae'):
+    else:
         kwargs = setup_model.ae(model, config)
-    elif (config['model'] == 'ewm'):
-        emw_kwargs = utils.ewm_kwargs(config)
-        G = model.Generator(emw_kwargs).to(config['gpu'])
-        model_params = {'g_params': G.parameters()}
-        G_optim = utils.get_optim(config, model_params)
-
-    # Check if resuming from checkpoint
-    if config['checkpoint']:
-        '''
-            This functionality should be written after state_dict saving
-            conventions have been established for all three model training
-            routines.
-        '''
-        pass
 
     # Set up progress bars for terminal output and enumeration
     dataloader = tqdm(utils.get_dataloader(config))
@@ -73,14 +66,10 @@ def train(config):
                    'history': history, 'best_stat'  : best_stat,
                    'times'  : times})
 
-    # If GAN or EWM set fixed random vector for sampling at the end of each epoch
-    if (config['model'] != 'ae'):
+    # If GAN, set fixed random vector for sampling at the end of each epoch
+    if (config['model'] == 'gan'):
         z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
         kwargs.update( {'z_fixed' : z_fixed} )
-    else:
-        x_fixed = next(iter(dataloader))
-        x_fixed = x_fixed.view(config['batch_size'], 1, config['dataset'], config['dataset'])
-        kwargs.update( {'x_fixed' : x_fixed} )
 
     # The variable 'best' will keep track of the previous best_stat and
     # be updated only once the best_stat changes to a new, lower value.
@@ -109,15 +98,15 @@ def train(config):
                     utils.save_checkpoint(checkpoint, config)
 
     # Save training history and experiment config for evaluation and deploy
-    utils.save_train_hist(history, best_stat, times, config)
+    utils.save_train_hist(history, config, times=times, histogram=None)
 
     # Save one last checkpoint
     checkpoint = utils.get_checkpoint(epoch, kwargs, config)
     utils.save_checkpoint(checkpoint, config)
 
-    # For Aiur
+    # The Force will be with you - always
     print("Your training is complete.")
-    print("But I find your lack of control disturbing.")
+    print("But you are not a Jedi yet.")
 
 def main():
     parser = train_parser()

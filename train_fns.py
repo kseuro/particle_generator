@@ -42,19 +42,15 @@ def get_train_loop(config):
         Function for selection of appropriate training loop
     '''
     if config['MNIST']:
-        if (config['model'] == 'gan'):
+        if config['model'] == 'gan':
             return MNIST_GAN
-        elif (config['model'] == 'ae'):
+        else
             return MNIST_AE
-        elif (config['model'] == 'ewm'):
-            return MNIST_EWM
     else:
-        if (config['model'] == 'gan'):
+        if config['model'] == 'gan':
             return LARCV_GAN
-        elif (config['model'] == 'ae'):
+        else:
             return LARCV_AE
-        elif (config['model'] == 'ewm'):
-            return LARCV_EWM
 
 ############################
 #  Training Loops - MNIST  #
@@ -146,10 +142,6 @@ def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
 
     return history, best_stat, times
 
-def MNIST_EWM(G, G_optim, dataloader, train_fn, history, best_stat, times,
-              config, epoch, epoch_start, z_fixed):
-    pass
-
 ############################
 #  Training Loops - LARCV  #
 ############################
@@ -236,10 +228,6 @@ def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
     times['epoch_times'].append(time.time() - epoch_start)
 
     return history, best_stat, times
-
-def LARCV_EWM(G, G_optim, dataloader, train_fn, history, best_stat, times,
-              config, epoch, epoch_start, z_fixed):
-    pass
 
 ########################
 #  Training Functions  #
@@ -363,23 +351,4 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         metrics = { 'ae_loss' : float(loss.item()) }
 
         return metrics
-    return train
-
-def EWM_train_fn():
-    '''
-        EWM_train_fn
-        Does: initilizes training function for EWM algorithm.
-        Args:
-        Returns: training function for training a generative model
-                 using explicit wasserstein minimization
-        Algorithm 1 (OTS):
-            - Input: Feed-forward distribution from G and entire training set
-            - Output: Psi (Optimal transport solver - OTS)
-            This algorithm operates over the entire dataset and is O(n) complex
-        Algorithm 2 (FTS):
-            - Input: Sampling distribution, Old Generator function, Transport plan
-            - Output: Updated generator function
-    '''
-    def train(x):
-        return 0
     return train

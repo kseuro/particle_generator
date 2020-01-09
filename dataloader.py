@@ -38,10 +38,10 @@ from torch.utils.data import Dataset, DataLoader
 IMG_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm',
                   '.tif', '.tiff', '.webp')
 VALID_DSETS = ('larcv_png_512', 'larcv_png_256', 'larcv_png_128',
-               'larcv_png_64' , 'larcv_png_32')
+               'larcv_png_64' , 'larcv_png_32', 'code_vectors')
 CONV_FLAGS = ('RGB', 'L')
 
-# Dataloader object constructor functions
+# Dataloader constructor functions
 def verify_image(image_path):
     '''
         Does: verifies that a training image is an image (e.g. not corrupt)
@@ -68,6 +68,10 @@ def dset_tag(root):
         Args: root (string): full path to the selected LArCV1 dataset
         Returns: root (string) with appropriate dataset tag
     '''
+    # Tag for code_vector target data (EWM generator model targets)
+    if 'code' in root:
+        return root + 'code_vectors/'
+    # Tag for LArCV1 image data (AutoEncoder or GAN model targets)
     if str(512) in root:
         return root + 'larcv_png_512/'
     elif str(256) in root:
@@ -85,11 +89,11 @@ def dset_tag(root):
 def get_paths(root):
     '''
         Does: gets the full path for every training example in a dataset
-        Args: root (string): full path to folder of training images
-        Returns: string list of full paths to training examples
+        Args: root (string): full path to folder of training examples
+        Returns: list of full paths (strings) to training examples
     '''
     # Get appropriate dataset tag
-    root = dset_tag(root) # TODO: Add tag for code-vectors
+    root = dset_tag(root)
     paths = []
     larcv = True if 'larcv' in root else False
 
@@ -103,10 +107,22 @@ def get_paths(root):
                 continue
         else:
             paths.append(example_path)
-    if (len(paths) == 0):
-        raise(RuntimeError("Found 0 training examples in subfolders of: " + root + "\n"
-                           "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
-    # Return list of paths to training examples
+
+    # Make sure dataloading occured
+    if larcv:
+        if len(paths) == 0:
+            raise(RuntimeError("Found 0 LArCV Images in subfolders of: " + root + "\n"
+                               "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
+    elif len(paths) == 0:
+            raise(RuntimeError("Found 0 code_vector files in subfolders of: {}".format(root)))
+
+    # Debugging Statements
+    print("Testing dataloader.get_paths() function")
+    print("Length of paths array: ", len(paths))
+    print("Sample of the first 10 paths in the array: ")
+    for i in range(10):
+        print(paths[i])
+    input(...)
     return paths
 
 # Dataloading functions
@@ -123,7 +139,7 @@ def pil_loader(image_path, conv_flag):
         img = Image.open(f)
         return img.convert(conv_flag)
 
-# Dataset Class - batch-to-batch loading of training images
+# Dataset Class - batch-to-batch loading of LArCV images
 class LArCV_loader(Dataset):
     '''
         Liquid Argon Computer Vision dataloader class
@@ -134,7 +150,7 @@ class LArCV_loader(Dataset):
                     and returns a transformed version.
         Returns: LArCV1 dataloader object equipped with image transforms.
 
-        The dataloader object expects the following image-folder strucutre:
+        The dataloader object expects the following image-folder structure:
             full_path/image_class/image0.png
             full_path/image_class/image1.png
             .
@@ -173,6 +189,7 @@ class LArCV_loader(Dataset):
 
         return image
 
+# Dataset class - batch-to-batch loading of AE.Encoder code-vectors
 class BottleLoader(Dataset):
     '''
         BottleLoader class for handling the loading of code-vector
@@ -182,12 +199,19 @@ class BottleLoader(Dataset):
               PyTorch nn.Dataset class, for loading target .csv files
               as Torch Tensors.
         Args: - root (string): full path to the code-vector .csv files
-              - transform (callable): optional transform to be called on the
-                                      vector
+              - transform (callable): optional transform to be called on a
+                                      code vector training example.
+        The dataloader object expects the following image-folder structure:
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_0.csv
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_1.csv
+            .
+            .
+            .
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_N.csv
     '''
     def __init__(self, root, transforms=None):
         self.root = root
-        self.csv_paths = get_paths(self.root) # TODO: Check that this works
+        self.csv_paths = get_paths(self.root)
         self.transforms = transforms
         print("Code-Target examples will be loaded from subfolder of: {}".format(self.root))
 
@@ -195,5 +219,9 @@ class BottleLoader(Dataset):
         return len(self.csv_paths)
 
     def __getitem__(self, index):
-        # TODO: Finish this method
-        pass
+        code_vector = np.genfromtxt(self.csv_paths[index], delimiter=',')
+
+        if self.transform is not None:
+            code_vector = self.transforms(code_vector)
+
+        return code_vector
