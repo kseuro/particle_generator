@@ -74,12 +74,13 @@ Instead, we propose to use an AutoEncoder to learn a compact representation of t
 ### Experiment Requirements
 The ArgParser requirements for each respective experiment are listed below:
 - All Models:
-    - <pre><code> --data_root --save_root --dataset --batch_size --num_epochs --sample_size --gpu --shuffle --drop_last --num_workers --n_layers --beta --p </code></pre>
+    - Dataloader kwargs: <pre><code>--data_root --save_root --dataset --batch_size --num_epochs --sample_size --gpu --shuffle --drop_last --num_workers </code></pre>
+    - Model and optim specs: <pre><code>  --n_layers --beta --p </code></pre>
 - GAN Model:
     - <pre><code> --n_hidden --g_lr --g_opt --z_dim --d_lr --d_opt </code></pre>
 - AutoEncoder Model:
     - <pre><code> --l_dim --ae_opt --ae_lr </code></pre>
 - EWM Training Routing
-    - <pre><code> --psi_lr --mem_size --n_hidden --n_layers --g_lr --g_opt </code></pre>
+    - <pre><code> --g_lr --g_opt --n_hidden --psi_lr --mem_size </code></pre>
 
 
