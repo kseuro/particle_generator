@@ -85,7 +85,7 @@ def train(config):
     G = model.Generator(emw_kwargs).to(config['gpu'])
     G.weights_init()
 
-    # gpuup model optimizer
+    # Setup model optimizer
     model_params = {'g_params': G.parameters()}
     G_optim = utils.get_optim(config, model_params)
 
@@ -115,10 +115,7 @@ def train(config):
     # Training Loop
     for epoch, _ in enumerate(epoch_bar):
 
-        history['epoch'] += epoch
-
-        # Save list of losses for end-training determination
-        loss_memory = []
+        history['epoch'] = epoch
 
         # Set up memory tensors: simple feed-forward distribution, transfer plan
         mu = torch.zeros(config['mem_size'], config['batch_size'], config['z_dim'])
@@ -128,7 +125,7 @@ def train(config):
         # Compute the Optimal Transport Solver over every training example
         for iter in range(n_dim):
 
-            history['iter'] += iter
+            history['iter'] = iter
 
             psi_optim.zero_grad()
 
@@ -136,8 +133,7 @@ def train(config):
             z_batch = torch.randn(config['batch_size'], config['z_dim']).to(config['gpu'])
             y_fake  = G(z_batch) # [B, n_dim]
 
-            # Compute the W1 distance between the model output
-            # and the target distribution
+            # Compute the W1 distance between the model output and the target distribution
             score = my_ops.l1_t(y_fake, dataloader) - psi
 
             phi, hit = torch.max(score, 1)
@@ -209,11 +205,3 @@ def train(config):
     print("I see you have an appetite for destruction.")
     print("And you have learned to use your illusion.")
     print("But I find your lack of control disturbing.")
-
-def main():
-    parser = argparser.prepare_parser()
-    config = vars(parser.parse_args())
-    train(config)
-
-if __name__ == '__main__':
-    main()
