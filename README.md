@@ -66,10 +66,20 @@ Instead, we propose to use an AutoEncoder to learn a compact representation of t
 - hamming distance (on GPU) computations
     - Move functionality over from EWM repo
 
-### Requirements:
-- Python version 3.5 or later
-- PyTorch version 1.0 or later
-- CUDA version 10.0 or later (no CPU implemention is provided here)
+### Workflow
+In order to produce trained AutoEncoder and Generative models capable of functioning together to produce novel particle interaction images, the workflow is as follows:
+1. Train an AutoEncoder
+    - Select a LArCV image dataset for which you wish to learn a compressed representation.
+    - Train the AutoEncoder using the experiment requirements listed below.
+    - Save checkpoints between 90 and 300 epochs.
+        - This is the regime wherein the AutoEncoder begins to overfit. Normally, this is the desired behaviour but we want to produce a Decoder that can generalize to a varied set of latent vectors. Therefore, we want a model that has the smallest difference in loss values between the training set and the test set.
+2. Load a saved state prior to AE overfitting
+    - Check the difference between the average MeanSquaredError of the trained AutoEncoder on the test set and on the training set.
+        - Compute the average loss for ~10,000 training and test examples
+    - Find the checkpoint that has the smallest Delta(MSE_train, MSE_test) in order to select for an AE model that has a decoder branch which will generalize to a set of new latent vectors
+    - Produce a set of latent vectors from the Encoder branch, one for each training example in the training set
+3. Train a generative model using the EWM algorithm
+    - TODO: Finish this description
 
 ### Experiment Requirements
 The ArgParser requirements for each respective experiment are listed below:
@@ -83,4 +93,8 @@ The ArgParser requirements for each respective experiment are listed below:
 - EWM Training Routing
     - <pre><code> --g_lr --g_opt --n_hidden --psi_lr --mem_size </code></pre>
 
-
+### Software and Hardware Requirements:
+- Python version 3.5 or later
+- PyTorch version 1.0 or later
+- CUDA version 10.0 or later
+- One CUDA enabled GPU with at least 3GB of memory
