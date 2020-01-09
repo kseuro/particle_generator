@@ -325,7 +325,7 @@ def select_dataset(config):
         based on dataset value. This is necessary because of the folder
         structure expected by the torch ImageFolder class.
     '''
-    if config['code_vectors']:
+    if config['model'] == 'ewm':
         config['data_root'] += 'code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
         return config
     if (config['dataset'] == 512):
