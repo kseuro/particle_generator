@@ -177,7 +177,7 @@ class LArCV_loader(Dataset):
         '''
         image = pil_loader(self.paths[index], self.conv_flag)
 
-        if (self.transforms is not None):
+        if self.transforms is not None:
             image = self.transforms(image)
 
         return image
@@ -214,7 +214,7 @@ class BottleLoader(Dataset):
     def __getitem__(self, index):
         code_vector = np.genfromtxt(self.csv_paths[index], delimiter=',')
 
-        if self.transform is not None:
+        if self.transforms is not None:
             code_vector = self.transforms(code_vector)
 
         return code_vector
