@@ -44,7 +44,7 @@ def get_train_loop(config):
     if config['MNIST']:
         if config['model'] == 'gan':
             return MNIST_GAN
-        else
+        else:
             return MNIST_AE
     else:
         if config['model'] == 'gan':
