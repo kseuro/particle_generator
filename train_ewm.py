@@ -107,7 +107,7 @@ def train(config):
     epoch_bar  = tqdm([i for i in range(config['num_epochs'])])
 
     # Set up psi optimizer
-    psi = torch.zeros(dset_size, requires_grad=True, device=device)
+    psi = torch.zeros(dset_size, requires_grad=True).to(device)
     psi_optim = torch.optim.Adam([psi], lr=config['psi_lr'])
 
     # Set up directories for saving training stats and outputs
@@ -141,11 +141,11 @@ def train(config):
             psi_optim.zero_grad()
 
             # Generate samples from feed-forward distribution
-            z_batch = torch.randn(config['batch_size'], config['z_dim'], device=device)
+            z_batch = torch.randn(config['batch_size'], config['z_dim']).to(device)
             y_fake  = G(z_batch) # [B, dset_size]
 
             # Compute the W1 distance between the model output and the target distribution
-            score = my_ops.l1_t(y_fake.to(device), dataloader.to(device)) - psi.to(device)
+            score = my_ops.l1_t(y_fake, dataloader) - psi
 
             phi, hit = torch.max(score, 1)
 
