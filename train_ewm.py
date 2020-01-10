@@ -139,7 +139,7 @@ def train(config):
             y_fake  = G(z_batch) # [B, dset_size]
 
             # Compute the W1 distance between the model output and the target distribution
-            score = my_ops.l1_t(y_fake.to(config['gpu']), dataloader) - psi
+            score = my_ops.l1_t(y_fake, dataloader) - psi
 
             phi, hit = torch.max(score, 1)
 
@@ -147,7 +147,7 @@ def train(config):
 
             # Backprop
             loss.backward() # Gradient ascent
-            opt_psi.step()
+            psi_optim.step()
 
             # Update memory tensors
             mu[mem_idx] = z_batch
