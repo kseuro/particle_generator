@@ -17,6 +17,9 @@ from torchvision      import transforms
 from torch.utils.data import DataLoader
 import time
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from datetime import datetime
 from pandas import DataFrame
 
