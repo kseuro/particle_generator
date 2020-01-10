@@ -146,9 +146,10 @@ def train(config):
 
             # Compute the W1 distance between the model output and the target distribution
             score = my_ops.l1_t(y_fake, dataloader)
-            score = score.to(device)
+            print(score)
+            input(...)
             score -= psi
-            
+
             phi, hit = torch.max(score, 1)
 
             loss = -torch.mean(psi[hit]) # equiv. to loss
