@@ -135,9 +135,6 @@ def train(config):
             y_fake  = G(z_batch) # [B, n_dim]
 
             # Compute the W1 distance between the model output and the target distribution
-            print(type(y_fake))
-            print(type(dataloader))
-            input(...)
             score = my_ops.l1_t(y_fake, dataloader) - psi
 
             phi, hit = torch.max(score, 1)
