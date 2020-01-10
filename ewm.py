@@ -39,7 +39,7 @@ class ewm_G(nn.Module):
         MLP GAN, but with an unbounded activation function at the output layer.
     '''
     def __init__(self, z_dim, fc_sizes, n_out):
-        super(Generator, self).__init__()
+        super(ewm_G, self).__init__()
         # Set size of input layer and unpack middle layer sizes as list
         self.fc_sizes = [z_dim, *fc_sizes]
         self.fc = nn.Sequential(*[FullyConnected(in_f, out_f)
