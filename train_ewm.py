@@ -61,7 +61,7 @@ import utils
 import argparser
 import setup_model
 
-torch.backends.cudnn.benchmark = True
+# torch.backends.cudnn.benchmark = True
 
 def train(config):
     '''
@@ -145,14 +145,7 @@ def train(config):
             y_fake  = G(z_batch) # [B, dset_size]
 
             # Compute the W1 distance between the model output and the target distribution
-            dataloader.to(device)
-            y_fake.to(device)
-            score = my_ops.l1_t(y_fake, dataloader)
-
-            print(score)
-            input(...)
-            
-            score -= psi
+            score = my_ops.l1_t(y_fake, dataloader) - psi
 
             phi, hit = torch.max(score, 1)
 
