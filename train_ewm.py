@@ -56,8 +56,8 @@ from   torchvision      import transforms
 from   torchvision      import datasets as dset
 
 # My stuff
+from ewm import ewm_G
 import utils
-import ewm
 import argparser
 import setup_model
 
@@ -83,7 +83,7 @@ def train(config):
     emw_kwargs = setup_model.ewm_kwargs(config)
 
     # Setup model on GPU
-    G = ewm.Generator(**emw_kwargs).to(config['gpu'])
+    G = ewm_G(**emw_kwargs).to(config['gpu'])
     G.weights_init()
 
     print(G)
