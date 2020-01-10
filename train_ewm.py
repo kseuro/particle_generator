@@ -79,11 +79,14 @@ def train(config):
     # Update the config data_root to point to desired set of code vectors
     config['data_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
 
+    # Set up GPU device ordinal
+    device = torch.device(config['gpu'])
+
     # Get model kwargs
     emw_kwargs = setup_model.ewm_kwargs(config)
 
     # Setup model on GPU
-    G = ewm_G(**emw_kwargs).to(config['gpu'])
+    G = ewm_G(**emw_kwargs).to(device)
     G.weights_init()
 
     print(G)
@@ -98,13 +101,13 @@ def train(config):
     dset_size  = len(dataloader)
 
     # Flatten the dataloader into a Tensor of shape [dset_size, l_dim]
-    dataloader = dataloader.view(dset_size, -1).to(config['gpu'])
+    dataloader = dataloader.view(dset_size, -1).to(device)
 
     # Set up progress bar for terminal output and enumeration
     epoch_bar  = tqdm([i for i in range(config['num_epochs'])])
 
     # Set up psi optimizer
-    psi = torch.zeros(dset_size, requires_grad=True, device=config['gpu'])
+    psi = torch.zeros(dset_size, requires_grad=True, device=device)
     psi_optim = torch.optim.Adam([psi], lr=config['psi_lr'])
 
     # Set up directories for saving training stats and outputs
@@ -138,7 +141,7 @@ def train(config):
             psi_optim.zero_grad()
 
             # Generate samples from feed-forward distribution
-            z_batch = torch.randn(config['batch_size'], config['z_dim'], device=config['gpu'])
+            z_batch = torch.randn(config['batch_size'], config['z_dim'], device=device)
             y_fake  = G(z_batch) # [B, dset_size]
 
             # Compute the W1 distance between the model output and the target distribution
@@ -176,11 +179,11 @@ def train(config):
             G_optim.zero_grad()
 
             # Retrieve stored batch of generated samples
-            z_batch = mu[fit_iter].to(config['gpu'])
+            z_batch = mu[fit_iter].to(device)
             y_fake  = G(z_batch) # G'(z)
 
             # Get Transfer plan from OTS: T(G_{t-1}(z))
-            y0_hit = dataloader[transfer[fit_iter]].to(config['gpu'])
+            y0_hit = dataloader[transfer[fit_iter]].to(device)
 
             # Compute Wasserstein distance between G and T
             G_loss = torch.mean(torch.abs(y0_hit - y_fake)) * config['l_dim']
