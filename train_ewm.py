@@ -189,7 +189,7 @@ def train(config):
             history['losses']['fit_loss'].append(G_loss.item())
 
             # Check if best loss value and save checkpoint
-            if not history['best_loss']:
+            if 'best_loss' not in history:
                 history.update({ 'best_loss' : G_loss.item() })
 
             best = G_loss.item() < (history['best_loss'] * 0.5)
