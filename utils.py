@@ -16,6 +16,7 @@ from torchvision      import datasets
 from torchvision      import transforms
 from torch.utils.data import DataLoader
 import time
+import numpy as np
 from datetime import datetime
 from pandas import DataFrame
 
