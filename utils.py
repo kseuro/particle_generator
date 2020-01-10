@@ -376,7 +376,7 @@ def get_BottleLoader(config, loader_kwargs=None):
     '''
     train_transform = transforms.Compose([ transforms.ToTensor() ])
 
-    # Select the code_vector dataset and add its lenght to the loader_kwargs
+    # Select the code_vector dataset and add its length to the loader_kwargs
     config = select_dataset(config)
     loader_kwargs.update({'batch_size': get_dset_size(config['data_root'])})
     train_dataset = BottleLoader(root=config['data_root'], transforms=train_transform)

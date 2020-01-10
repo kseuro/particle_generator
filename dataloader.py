@@ -221,14 +221,9 @@ class BottleLoader(Dataset):
              - This list of floats can then be converted to a NumPy array,
                which is an acceptable argument for a call to torch.Tensor()
         '''
-        code_vector = pd.read_csv(self.csv_paths[index], delimiter=',', header=0, skipinitialspace=True)
-        code_vector = code_vector.columns.tolist()
-        code_vector = list(map(float, code_vector))
-        code_vector = np.asarray(code_vector, dtype=np.float32)
-        # code_tensor = torch.Tensor(code_vector).view(1, -1) # May need channel dim
-        code_tensor = torch.Tensor(code_vector) # May need channel dim
+        code_vector = np.load(self.csv_paths[index])
 
-        # if self.transforms is not None:
-        #     code_vector = self.transforms(code_vector)
+        if self.transforms is not None:
+            code_vector = self.transforms(code_vector)
 
         return code_vector
