@@ -161,10 +161,8 @@ def train(config):
             history['losses']['ot_loss'].append(loss.item())
 
             if (iter % 500 == 0):
-                if 'best_loss' in history:
-                    print('OTS Iteration {} | Epoch {} | Best Loss Value: {}'.format(iter, epoch, history['best_loss']))
-                else:
-                    print('OTS Iteration {} | Epoch {}'.format(iter, epoch))
+                avg_loss = np.mean(history['losses']['ot_loss'])
+                print('OTS Iteration {} | Epoch {} | Avg Loss Value: {}'.format(iter, epoch, avg_loss))
             if (iter % 2000 == 0):
                 # Display histogram stats
                 hist_dict, stop = utils.update_histogram(transfer, history, config)
@@ -205,7 +203,8 @@ def train(config):
                 utils.save_checkpoint(checkpoint, config)
 
             if (fit_iter % 500 == 0):
-                print('FIT Iteration {} | Epoch {} | Best Loss Value: {}'.format(fit_iter, epoch, history['best_loss']))
+                avg_loss = np.mean(history['losses']['fit_loss'])
+                print('FIT Iteration {} | Epoch {} | Avg Loss Value: {}'.format(fit_iter, epoch, avg_loss))
 
     # Save a checkpoint at end of training
     checkpoint = utils.get_checkpoint(history['epoch'], checkpoint_kwargs, config)
