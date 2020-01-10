@@ -191,25 +191,25 @@ class BottleLoader(Dataset):
         Does: Creates a dataloader object that inherits from the base
               PyTorch nn.Dataset class, for loading target .csv files
               as Torch Tensors.
-        Args: - root (string): full path to the code-vector .csv files
+        Args: - root (string): full path to the code-vector .npy files
               - transform (callable): optional transform to be called on a
                                       code vector training example.
         The dataloader object expects the following image-folder structure:
-            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_0.csv
-            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_1.csv
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_0.npy
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_1.npy
             .
             .
             .
-            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_N.csv
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_N.npy
     '''
     def __init__(self, root, transforms=None):
         self.root = root
-        self.csv_paths = get_paths(self.root)
+        self.npy_paths = get_paths(self.root)
         self.transforms = transforms
         print("Code-Target examples will be loaded from subfolder of: {}".format(self.root))
 
     def __len__(self):
-        return len(self.csv_paths)
+        return len(self.npy_paths)
 
     def __getitem__(self, index):
         '''
@@ -221,7 +221,7 @@ class BottleLoader(Dataset):
              - This list of floats can then be converted to a NumPy array,
                which is an acceptable argument for a call to torch.Tensor()
         '''
-        code_vector = np.load(self.csv_paths[index])
+        code_vector = np.load(self.npy_paths[index])
 
         if self.transforms is not None:
             code_vector = self.transforms(code_vector)

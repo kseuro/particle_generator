@@ -90,14 +90,18 @@ def train(config):
     model_params = {'g_params': G.parameters()}
     G_optim = utils.get_optim(config, model_params)
 
-    # Set up progress bars for terminal output and enumeration
+    # Set up full_dataloader (single batch)
     dataloader = utils.get_dataloader(config) # Full Dataloader
-    dataloader = dataloader.to(config['gpu']) # Tensor: [dset_size, l_dim]
-    n_dim      = len(dataloader)
+    dset_size  = len(dataloader)
+
+    # Flatten the dataloader into a Tensor of shape [dset_size, l_dim]
+    dataloader = dataloader.view(dset_size, -1).to(config['gpu'])
+
+    # Set up progress bar for terminal output and enumeration
     epoch_bar  = tqdm([i for i in range(config['num_epochs'])])
 
     # Set up psi optimizer
-    psi = torch.zeros(n_dim, requires_grad=True, device=config['gpu'])
+    psi = torch.zeros(dset_size, requires_grad=True, device=config['gpu'])
     psi_optim = torch.optim.Adam([psi], lr=config['psi_lr'])
 
     # Set up directories for saving training stats and outputs
@@ -109,7 +113,7 @@ def train(config):
     # Set up stats logging
     hist_dict = {'hist_min':[], 'hist_max':[], 'ot_loss':[]}
     losses    = {'ot_loss': [], 'fit_loss': []}
-    history   = {'n_dim': n_dim, 'epoch': 0, 'iter': 0,
+    history   = {'dset_size': dset_size, 'epoch': 0, 'iter': 0,
                  'losses':losses, 'hist_dict': hist_dict}
     config['early_end'] = (200, 320) # Expirical stopping criterion
 
@@ -124,7 +128,7 @@ def train(config):
         mem_idx = 0
 
         # Compute the Optimal Transport Solver over every training example
-        for iter in range(n_dim):
+        for iter in range(dset_size):
 
             history['iter'] = iter
 
@@ -132,7 +136,7 @@ def train(config):
 
             # Generate samples from feed-forward distribution
             z_batch = torch.randn(config['batch_size'], config['z_dim'], device=config['gpu'])
-            y_fake  = G(z_batch) # [B, n_dim]
+            y_fake  = G(z_batch) # [B, dset_size]
 
             # Compute the W1 distance between the model output and the target distribution
             score = my_ops.l1_t(y_fake, dataloader) - psi
