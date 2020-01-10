@@ -161,7 +161,10 @@ def train(config):
             history['losses']['ot_loss'].append(loss.item())
 
             if (iter % 500 == 0):
-                print('OTS Iteration {} | Epoch {}'.format(iter, epoch))
+                if 'best_loss' in history:
+                    print('OTS Iteration {} | Epoch {} | Best Loss Value: {}'.format(iter, epoch, history['best_loss']))
+                else:
+                    print('OTS Iteration {} | Epoch {}'.format(iter, epoch))
             if (iter % 2000 == 0):
                 # Display histogram stats
                 hist_dict, stop = utils.update_histogram(transfer, history, config)
@@ -202,7 +205,7 @@ def train(config):
                 utils.save_checkpoint(checkpoint, config)
 
             if (fit_iter % 500 == 0):
-                print('FIT Iteration {} | Epoch {} | Best Loss Value: {}'.format(iter, epoch, history['best_loss']))
+                print('FIT Iteration {} | Epoch {} | Best Loss Value: {}'.format(fit_iter, epoch, history['best_loss']))
 
     # Save a checkpoint at end of training
     checkpoint = utils.get_checkpoint(history['epoch'], checkpoint_kwargs, config)
