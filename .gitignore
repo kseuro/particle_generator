@@ -6,7 +6,9 @@ __pycache__/
 # Sandbox stuff
 */.ipynb_checkpoints/
 *.sh
+*.sh~
 */*.sh
+*/*.sh~
 test_scripts/ae_larcv.sh
 dynamic_model_alloc.py
 test_model.py
