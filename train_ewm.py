@@ -88,7 +88,7 @@ def train(config):
 
     print(G)
     input('Press any key to launch')
-    
+
     # Setup model optimizer
     model_params = {'g_params': G.parameters()}
     G_optim = utils.get_optim(config, model_params)
@@ -200,6 +200,9 @@ def train(config):
                 history['best_loss'] = G_loss.item()
                 checkpoint = utils.get_checkpoint(history['epoch'], checkpoint_kwargs, config)
                 utils.save_checkpoint(checkpoint, config)
+
+            if (fit_iter % 500 == 0):
+                print('FIT Iteration {} | Epoch {} | Best Loss Value: {}'.format(iter, epoch, history['best_loss']))
 
     # Save a checkpoint at end of training
     checkpoint = utils.get_checkpoint(history['epoch'], checkpoint_kwargs, config)
