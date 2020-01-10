@@ -107,7 +107,7 @@ def train(config):
     epoch_bar  = tqdm([i for i in range(config['num_epochs'])])
 
     # Set up psi optimizer
-    psi = torch.zeros(dset_size, requires_grad=True).to(device)
+    psi = torch.zeros(dset_size, requires_grad=True).to(device).detach().requires_grad_(True)
     psi_optim = torch.optim.Adam([psi], lr=config['psi_lr'])
 
     # Set up directories for saving training stats and outputs
