@@ -422,10 +422,11 @@ def update_histogram(transfer, history, config):
 
     hist = np.histogram(transfer.reshape(-1), bins=1000, range=(0, history['dset_size'] -1 ))[0]
     ots_loss = np.mean(history['losses']['ot_loss'][-1000:])
+    print("-"*60)
     print("OTS Epoch {}, iteration {}".format(history['epoch'], history['iter']))
     print("OTS Loss  {:.2f}".format(ots_loss))
     print("Histogram: (min: {}, max {})".format(hist.min(), hist.max()))
-
+    print("-"*60)
     # Update the histogram dict
     history['hist_dict']['hist_min'].append(hist.min())
     history['hist_dict']['hist_max'].append(hist.max())
