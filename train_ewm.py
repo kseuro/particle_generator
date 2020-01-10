@@ -86,6 +86,9 @@ def train(config):
     G = ewm.Generator(**emw_kwargs).to(config['gpu'])
     G.weights_init()
 
+    print(G)
+    input('Press any key to launch')
+    
     # Setup model optimizer
     model_params = {'g_params': G.parameters()}
     G_optim = utils.get_optim(config, model_params)
