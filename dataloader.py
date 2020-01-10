@@ -223,6 +223,8 @@ class BottleLoader(Dataset):
         '''
         code_vector = pd.read_csv(self.csv_paths[index], delimiter=',', header=0, skipinitialspace=True)
         code_vector = code_vector.columns.tolist()
+        print(code_vector)
+        input(...)
         code_vector = list(map(float, code_vector))
         code_vector = np.asarray(code_vector, dtype=np.float32)
         # code_tensor = torch.Tensor(code_vector).view(1, -1) # May need channel dim
