@@ -214,7 +214,6 @@ def train(config):
     utils.save_train_hist(history, config, times=None, histogram=history['hist_dict'])
 
     # For Aiur
-    print("Your thoughts betray you.")
     print("I see you have an appetite for destruction.")
     print("And you have learned to use your illusion.")
     print("But I find your lack of control disturbing.")
