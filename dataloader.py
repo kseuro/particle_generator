@@ -206,7 +206,7 @@ class BottleLoader(Dataset):
         self.root = root
         self.npy_paths = get_paths(self.root)
         self.transforms = transforms
-        print("Code-Target examples will be loaded from subfolder of: {}".format(self.root))
+        print("Code-Target examples will be loaded from subfolder of: \n{}".format(self.root))
 
     def __len__(self):
         return len(self.npy_paths)
