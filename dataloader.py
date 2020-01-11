@@ -84,6 +84,27 @@ def dset_tag(root):
         raise(RuntimeError('Invalid dataset selection. Valid datasets are:'
                             + ','.join(VALID_DSETS)))
 
+def code_vec_tag(root):
+    '''
+        This function assumes that the training dataset is a collection of
+            code vectors produced by a Generator model
+        The folder structure for each dataset is assumed to be:
+            - ewm_code_vectors/ewm_code_vectors_{larcv_im_dim}_{l_dim}/
+        Does: adds the approriate suffix to the data root.
+        Args: root (string): full path to the selected code_vector dataset
+        Returns: root (string) with appropriate code_vector tag
+    '''
+    # Split the root string on the underscore delimiter
+    # Look for the integers at the end of the root string
+    path = root.strip('/').split('_')
+    dims = []
+    for item in path:
+        try:
+            dims.append(int(item))
+        except ValueError:
+            pass
+    return root + 'code_vectors_{}_{}/'.format(dims[0], dims[1])
+
 def get_paths(root):
     '''
         Does: gets the full path for every training example in a dataset
@@ -96,6 +117,8 @@ def get_paths(root):
     if 'larcv' in root:
         larcv = True
         root = dset_tag(root)
+    elif 'code' in root:
+        root = code_vec_tag(root)
 
     # Walk through image folder and compute paths
     for example in os.listdir(root):
