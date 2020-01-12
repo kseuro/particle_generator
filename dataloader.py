@@ -103,8 +103,8 @@ def code_vec_tag(root):
             dims.append(int(item))
         except ValueError:
             pass
-    root += 'code_vectors_{}_{}/'.format(dims[0], dims[1])
-    return root 
+    root += 'ewm_code_vectors_{}_{}/'.format(dims[0], dims[1])
+    return root
 
 # def get_code_paths(root):
 #     paths = []
