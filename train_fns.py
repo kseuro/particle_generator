@@ -209,7 +209,7 @@ def LARCV_GAN(epoch, epoch_start, G, G_optim, D, D_optim, dataloader, train_fn,
     return history, best_stat, times
 
 def LARCV_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
-             best_stat, times, config, x_fixed):
+             best_stat, times, config):
     '''
         LArCV dataset training loop for AE model.
         - Args: AE (Torch model): AutoEncoder model

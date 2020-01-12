@@ -77,15 +77,11 @@ def train(config):
     if (config['model'] != 'ae'):
         z_fixed = torch.randn(config['sample_size'], config['z_dim']).to(config['gpu'])
         kwargs.update( {'z_fixed' : z_fixed} )
-    else:
-        x_fixed = next(iter(dataloader))
-        x_fixed = x_fixed.view(config['batch_size'], 1, config['dataset'], config['dataset'])
-        kwargs.update( {'x_fixed' : x_fixed} )
 
     # The variable 'best' will keep track of the previous best_stat and
     # be updated only once the best_stat changes to a new, lower value.
     best = None
-
+    
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
 
