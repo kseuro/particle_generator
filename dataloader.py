@@ -239,7 +239,7 @@ class BottleLoader(Dataset):
     '''
     def __init__(self, root, transforms=None):
         self.root = root
-        self.npy_paths = gget_code_paths(self.root)
+        self.npy_paths = get_code_paths(self.root)
         self.transforms = transforms
         print("Code-Target examples will be loaded from subfolder of: \n{}".format(self.root))
 
