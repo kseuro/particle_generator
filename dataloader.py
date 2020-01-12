@@ -103,19 +103,20 @@ def code_vec_tag(root):
             dims.append(int(item))
         except ValueError:
             pass
-    return root + 'code_vectors_{}_{}/'.format(dims[0], dims[1])
+    root += 'code_vectors_{}_{}/'.format(dims[0], dims[1])
+    return root 
 
-def get_code_paths(root):
-    paths = []
-    root = code_vec_tag(root)
-    for ex in os.walk(root):
-        paths.append(ex)
-
-    full_paths = []
-    for i in range(len(paths[0][2])):
-        full_paths.append( paths[0][0] + paths[0][2][i])
-
-    return full_paths
+# def get_code_paths(root):
+#     paths = []
+#     root = code_vec_tag(root)
+#     for ex in os.walk(root):
+#         paths.append(ex)
+#
+#     full_paths = []
+#     for i in range(len(paths[0][2])):
+#         full_paths.append( paths[0][0] + paths[0][2][i])
+#
+#     return full_paths
 
 def get_paths(root):
     '''
@@ -239,7 +240,7 @@ class BottleLoader(Dataset):
     '''
     def __init__(self, root, transforms=None):
         self.root = root
-        self.npy_paths = get_code_paths(self.root)
+        self.npy_paths = get_paths(self.root)
         self.transforms = transforms
         print("Code-Target examples will be loaded from subfolder of: \n{}".format(self.root))
 
