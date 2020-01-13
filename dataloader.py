@@ -88,8 +88,10 @@ def code_vec_tag(root):
     '''
         This function assumes that the training dataset is a collection of
             code vectors produced by a Generator model
-        The folder structure for each dataset is assumed to be:
-            - ewm_code_vectors/ewm_code_vectors_{larcv_im_dim}_{l_dim}/
+        The folder structure for each dataset is assumed to be either:
+            - ewm_code_vectors/ewm_code_vectors_{larcv_im_dim}_{l_dim}/...
+            or
+            - code_vectors/code_vectors_{larcv_im_dim}_{l_dim}/...
         Does: adds the approriate suffix to the data root.
         Args: root (string): full path to the selected code_vector dataset
         Returns: root (string) with appropriate code_vector tag
@@ -103,20 +105,11 @@ def code_vec_tag(root):
             dims.append(int(item))
         except ValueError:
             pass
-    root += 'ewm_code_vectors_{}_{}/'.format(dims[0], dims[1])
+    if 'ewm' in root:
+        root += 'ewm_code_vectors_{}_{}/'.format(dims[0], dims[1])
+    else:
+        root += 'code_vectors_{}_{}/'.format(dims[0], dims[1])
     return root
-
-# def get_code_paths(root):
-#     paths = []
-#     root = code_vec_tag(root)
-#     for ex in os.walk(root):
-#         paths.append(ex)
-#
-#     full_paths = []
-#     for i in range(len(paths[0][2])):
-#         full_paths.append( paths[0][0] + paths[0][2][i])
-#
-#     return full_paths
 
 def get_paths(root):
     '''
