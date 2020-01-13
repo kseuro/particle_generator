@@ -76,8 +76,8 @@ def train(config):
                   verbose = False)
     import my_ops
 
-    # Update the config data_root to point to desired set of code vectors
-    config['data_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
+    # # Update the config data_root to point to desired set of code vectors
+    # config['data_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
 
     # Set up GPU device ordinal
     device = torch.device(config['gpu'])
