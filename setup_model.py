@@ -27,7 +27,10 @@ def gan(model, config):
     G_optim, D_optim = utils.get_optim(config, model_params)
 
     # Set up loss function
-    loss_fn = nn.BCELoss().to(config['gpu'])
+    if 'bce' in config['loss_fn']:
+        loss_fn = nn.BCELoss().to(config['gpu'])
+    else:
+        raise Exception("No GAN loss function selected ... aborting")
 
     # Set up training function
     train_fn = train_fns.GAN_train_fn(G, D, G_optim, D_optim, loss_fn,
@@ -55,8 +58,12 @@ def ae(model, config):
     AE_optim = utils.get_optim(config, model_params)
 
     # Set up loss function
-    loss_fn = nn.MSELoss().to(config['gpu'])
-    # loss_fn = nn.BCELoss().to(config['gpu'])
+    if 'mse' in config['loss_fn']:
+        loss_fn = nn.MSELoss().to(config['gpu'])
+    elif 'bce' in config['loss_fn']:
+        loss_fn = nn.BCELoss().to(config['gpu'])
+    else:
+        raise Exception("No AutoEncoder loss function selected ... aborting")
 
     # Set up training function
     train_fn = train_fns.AE_train_fn(AE, AE_optim, loss_fn, config)

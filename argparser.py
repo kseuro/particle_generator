@@ -145,6 +145,11 @@ def train_parser():
     parser.add_argument('--n_layers', type=int, default=4,
                         help='Number of desired model layers \
                             | (default: &(default)s)')
+    # loss_fn: select the model's loss function -either
+    #          MeanSquaredError or BinaryCrossEntropy
+    parser.add_argument('loss_fn', type=str, default='',
+                        help="String specifiying which loss function \
+                        the model should use | (default: &(default)s)")
     ######################################################
 
     ## AE Model
