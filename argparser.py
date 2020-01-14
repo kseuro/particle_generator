@@ -147,7 +147,7 @@ def train_parser():
                             | (default: &(default)s)')
     # loss_fn: select the model's loss function -either
     #          MeanSquaredError or BinaryCrossEntropy
-    parser.add_argument('loss_fn', type=str, default='',
+    parser.add_argument('--loss_fn', type=str, default='',
                         help="String specifiying which loss function \
                         the model should use | (default: &(default)s)")
     ######################################################
