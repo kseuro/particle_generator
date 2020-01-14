@@ -13,7 +13,7 @@ CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=1,2 python train.py \
 --l_dim 256 \
 --ae_lr 1e-4 \
 --ae_opt adam \
---loss_fn mse \		   
+--loss_fn bce \
 --beta 0.5 \
 --data_root /media/hdd1/kai/particle_generator/larcv_data/train/ \
 --save_root /media/hdd1/kai/particle_generator/experiments/
