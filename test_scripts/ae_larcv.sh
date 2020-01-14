@@ -1,7 +1,7 @@
 #!/bin/bash
-CUDA_VISIBLE_DEVICES=1,2 python train.py \
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=1,2 python train.py \
 --gpu 1 \
---dataset 64 \
+--dataset 128 \
 --batch_size 256 \
 --num_epochs 1000 \
 --sample_size 16 \
