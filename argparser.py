@@ -58,10 +58,13 @@ def train_parser():
     parser.add_argument('--save_root', type=str, default='/train_save',
                         help='Path where training output should be saved \
                             | (default: &(default)s)')
-    # dataset: which LArCV1 dataset to use (512, 256, 128)
+    # dataset: - which LArCV1 dataset to use (512, 256, 128, 64, 32)
     parser.add_argument('--dataset', type=int, default=256,
-                        help='Which crop size of the LArCV1 dataset to use \
+                        help='Which crop size of the LArCV1 dataset to use, or \
                             | (default: &(default)s)')
+    #########################################
+    ## Torch DataLoader Key Word Arguments ##
+    #########################################
     # batch_size: size of training data batches
     parser.add_argument('--batch_size', type=int, default=24,
                         help='Size of data batches to use during model training\
@@ -150,9 +153,9 @@ def train_parser():
     parser.add_argument('--loss_fn', type=str, default='',
                         help="String specifiying which loss function \
                         the model should use | (default: &(default)s)")
-    ######################################################
 
-    ## AE Model
+    ######################################################
+    ## AutoEncoder
     # l_dim: dimension of the encoders latent representation of the data
     parser.add_argument('--l_dim', type=int, default=20,
                         help='Dimension of the AE encoder latent space \
@@ -169,6 +172,13 @@ def train_parser():
     ######################################################
     ## EWM Model
     # ewm_optim: optimizer function for EWM model training
+    parser.add_argument('--psi_lr', type=float, default=1e-1,
+                        help='Learning rate for EWM psi optimizer \
+                            | (default: &(default)s)')
+    ### Set memory size
+    parser.add_argument('--mem_size', type=int, default=5000,
+                        help='Size of memory arrays used in OTS computation \
+                        | (default: %(default)s)')
 
     return parser
 

@@ -16,11 +16,16 @@ from torchvision      import datasets
 from torchvision      import transforms
 from torch.utils.data import DataLoader
 import time
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from datetime import datetime
 from pandas import DataFrame
 
 # My stuff
 from dataloader import LArCV_loader
+from dataloader import BottleLoader
 from scipy.ndimage.measurements import center_of_mass as CoM
 
 #################################
@@ -54,8 +59,13 @@ def directories(config):
     # Create a label for the current experiment
     prefix = '{}_{}_{}'.format(date, time, config['model'])
     config['exp_label'] = prefix + '_{}_epochs'.format(config['num_epochs'])
-    label = 'MNIST' if config['MNIST'] else 'LArCV'
-    config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
+
+    if config['model'] != 'ewm':
+        label = 'MNIST' if config['MNIST'] else 'LArCV'
+        config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
+    else:
+        label = 'Code_Vectors_{}_{}'.format(config['dataset'], config['l_dim'])
+        config['exp_label'] += '_{}/'.format(label)
 
     assert config['save_root'], "No save_root specified in config!"
 
@@ -81,7 +91,7 @@ def directories(config):
     dirs.append(config['fixed_samples'])
 
     # OTS Histograms
-    if (config['model'] == 'EWM' or config['model'] == 'ewm'):
+    if config['model'] == 'ewm':
         config.update( {'histograms' : config['save_dir'] + 'histograms/'})
         dirs.append(config['histograms'])
 
@@ -131,16 +141,16 @@ def get_checkpoint(epoch, kwargs, config):
     '''
     dict = {}
     if 'ae' in config['model']:
-        dict.update( { 'epoch'     : epoch,
-                       'state_dict': kwargs['AE'].state_dict(),
-                       'optimizer' : kwargs['AE_optim'].state_dict() } )
+        dict.update( { 'epoch'      : epoch,
+                       'state_dict' : kwargs['AE'].state_dict(),
+                       'optimizer'  : kwargs['AE_optim'].state_dict() } )
     elif 'gan' in config['model']:
         # Write model checkpoint save for 'G' and 'D' in kwargs
         pass
     elif 'ewm' in config['model']:
-        # Write model checkpoint save for 'G' in kwargs
-        pass
-
+        dict.update( { 'epoch'      : epoch,
+                       'state_dict' : kwargs['G'].state_dict(),
+                       'optimizer'  : kwargs['G_optim'].state_dict() } )
     return dict
 
 def save_checkpoint(checkpoint, config):
@@ -161,11 +171,6 @@ def save_sample(sample, epoch, iter, save_dir):
           function using either with a fixed or random noise vector.
         - Function also saves periodic samples from AutoEncoder
     '''
-    # Un-normalize the sample and boost ADC values for better viz.
-    # NOTE: This transformation is (should be) un-done when deploy
-    #       samples are loaded for analysis.
-    sample = ((sample * 0.5) + 0.5) * 10
-
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
         nrow = 2
@@ -200,9 +205,14 @@ def get_arch(config):
     if 'gan' in config['model']:
         arch.update( { 'z_dim'    : config['z_dim'],
                        'n_hidden' : config['n_hidden'] } )
+    if 'ewm' in config['model']:
+        arch.update( { 'dataset'  : config['dataset'],
+                       'n_hidden' : config['n_hidden'],
+                       'l_dim'    : config['l_dim'],
+                       'z_dim'    : config['z_dim'] } )
     return arch
 
-def save_train_hist(history, best_stat, times, config, histogram=None):
+def save_train_hist(history, config, times=None, histogram=None):
     '''
         Function for saving network training history and
         best performance stats.
@@ -218,17 +228,24 @@ def save_train_hist(history, best_stat, times, config, histogram=None):
     '''
     # Save times - arrays must all be the same length,
     # otherwise Pandas will thrown an error!
-    times_csv = config['save_dir'] + '/times.csv'
-    DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
-
-    # Save losses
-    loss_csv = config['save_dir'] + '/losses.csv'
-    DataFrame(shrink_lists(history)).to_csv(loss_csv, header=True, index=False)
+    if times is not None:
+        times_csv = config['save_dir'] + '/times.csv'
+        DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
+        # Save losses
+        loss_csv = config['save_dir'] + '/losses.csv'
+        DataFrame(shrink_lists(history)).to_csv(loss_csv, header=True, index=False)
+    else:
+        ots_loss = config['save_dir'] + '/ots_losses.csv'
+        DataFrame(history['losses']['ot_loss']).to_csv(ots_loss, header=True, index=False)
+        fit_loss = config['save_dir'] + '/fit_losses.csv'
+        DataFrame(history['losses']['fit_loss']).to_csv(fit_loss, header=True, index=False)
 
     # Save histogram if using EWM algorithm
+    # Convert the histogram dict to csv file using Pandas
     if histogram is not None:
         hist_csv = config['save_dir'] + '/histogram.csv'
-        DataFrame(histogram).to_csv(hist_csv, header=True, index=False)
+        df = DataFrame.from_dict(histogram, orient='index')
+        df.to_csv(hist_csv)
 
     # Save config dict for reference
     df = DataFrame.from_dict(config, orient='index')
@@ -282,9 +299,9 @@ def ae_optim(config, model_params):
 
 def ewm_optim(config, model_params):
     # Generator optimizer
-    if ('adam' in config['ewm_optim']):
+    if ('adam' in config['g_opt']):
         ewm_optim = torch.optim.Adam(model_params['g_params'], lr=config['g_lr'])
-    elif ('sgd' in config['ewm_optim']):
+    elif ('sgd' in config['g_opt']):
         ewm_optim = torch.optim.SGD(model_params['g_params'], lr=config['g_lr'],
                                     momentum=config['p'])
     else:
@@ -303,12 +320,18 @@ def get_loader_kwargs(config):
                           'drop_last'  : config['drop_last']})
     return loader_kwargs
 
+def get_dset_size(data_root):
+    return sum( [len(examples) for _, _, examples in os.walk(data_root)] )
+
 def select_dataset(config):
     '''
         Function that appends the appropriate path suffix to the data_root
         based on dataset value. This is necessary because of the folder
         structure expected by the torch ImageFolder class.
     '''
+    if config['model'] == 'ewm':
+        config['data_root'] += 'code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
+        return config
     if (config['dataset'] == 512):
         config['data_root'] += 'larcv_png_512/'
     elif (config['dataset'] == 256):
@@ -348,22 +371,38 @@ def get_LArCV_dataloader(config, loader_kwargs=None):
         dataloader = DataLoader(train_dataset, **loader_kwargs)
     return dataloader
 
+def get_BottleLoader(config, loader_kwargs=None):
+    '''
+        Function that sets up the loading of code_vector targets.
+            -  The code_vectors are .csv files loaded as NumPy arrays
+               inside the BottleLoader object. They only need to be
+               cast to Torch Tensors, as we wish to perserve their structure.
+    '''
+    train_transform = transforms.Compose([ transforms.ToTensor() ])
+
+    # Select the code_vector dataset and add its length to the loader_kwargs
+    config = select_dataset(config)
+    loader_kwargs.update({'batch_size': get_dset_size(config['data_root'])})
+    train_dataset = BottleLoader(root=config['data_root'], transforms=train_transform)
+    dataloader = DataLoader(train_dataset, **loader_kwargs)
+
+    return dataloader
+
 def get_full_dataloader(config):
     '''
-        Returns a dataloader containing 10000 training images.
-        10000 is safe to load onto a Nvidia Titan 1080x with a single
-        model also loaded. 20000 may also work, but the operating system may
-        squash the thread at a higher number.
+        Returns a dataloader containing full set of code_vector examples.
+        10000 is safe to load onto a Nvidia Titan 1080x with a single model.
     '''
     loader_kwargs = get_loader_kwargs(config)
-    loader_kwargs.update({'batch_size': 10000})
-    dataloader = get_LArCV_dataloader(config, loader_kwargs=loader_kwargs)
+    dataloader = get_BottleLoader(config, loader_kwargs=loader_kwargs)
     for data in dataloader:
-        print('Returning full dataloader')
+        print('Returning full dataloader with {} training examples'.format(loader_kwargs['batch_size']))
         return data
 
 def get_dataloader(config):
     if (config['MNIST']):
+        if (config['model'] == 'ewm'):
+            raise Exception("EWM model is not set up to train on MNIST data")
         return MNIST(config)
     elif (config['model'] != 'ewm'):
         return get_LArCV_dataloader(config)
@@ -371,64 +410,34 @@ def get_dataloader(config):
         return get_full_dataloader(config)
 
 #####################
-# GAN Functionality #
-#####################
-def gan_kwargs(config):
-    '''
-        Create two dictionaries of key word arguments for
-        generator and discriminator model from config dict.
-
-        - 'dataset' key corresponds to the integer size of one
-          data image dimension. i.e. 64 corresponds to the LArCV_PNG_64
-          dataset
-    '''
-    g_kwargs, d_kwargs = {}, {}
-    if (config['MNIST']):
-        config['dataset'] = 28
-    im_size  = config['dataset']**2
-
-    # Creat list of sizes corresponding to the individual
-    # fully connected layers in the model(s)
-    # e.g. n_hidden = 10, nlayers = 4, fc_sizes = [10,10,10,10]
-    fc_sizes = [config['n_hidden']] * config['n_layers']
-
-    g_kwargs.update({ 'z_dim'      : config['z_dim'],
-                      'fc_sizes'   : fc_sizes,
-                      'n_out'      : im_size})
-    d_kwargs.update({'in_features' : im_size,
-                     'fc_sizes'    : fc_sizes})
-    return g_kwargs, d_kwargs
-
-####################
-# AE Functionality #
-####################
-def ae_kwargs(config):
-    kwargs = {}
-
-    # Check if MNIST - set image size
-    if (config['MNIST']):
-        config['dataset'] = 28
-    im_size = config['dataset']**2        # Input dimension
-    base = [128 if im_size <= 784 else 256] # Layer base dimension
-    l_dim = config['l_dim']               # Latent vector dimension
-
-    # Compute encoder sizes
-    # Example output structure: [32*1, 32*2, ... , 32*(2^(n-1))]
-    sizes = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
-    enc_sizes = base * config['n_layers']
-    enc_sizes = [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1]
-
-    # Update kwarg dicts
-    # Decoder is the reverse of the encoder
-    kwargs.update({'enc_sizes' : enc_sizes,
-                   'l_dim'     : l_dim,
-                   'im_size'   : im_size,
-                   'dec_sizes' : enc_sizes[::-1]})
-    return kwargs, config
-
-#####################
 # EWM Functionality #
 #####################
-def ewm_kwargs(config):  # TODO: Write this function!
-    ewm_kwargs = {}
-    return ewm_kwargs
+def save_histogram(histogram, history, config):
+    fig = plt.hist(histogram)
+    fig_name = 'OTS_Histogram_{}_{}.png'.format(history['epoch'], history['iter'])
+    plt.title(fig_name)
+    plt.savefig(config['histograms'] + fig_name)
+
+def update_histogram(transfer, history, config):
+
+    hist = np.histogram(transfer.reshape(-1), bins=1000, range=(0, history['dset_size'] -1 ))[0]
+    ots_loss = np.mean(history['losses']['ot_loss'][-1000:])
+    print("-"*60)
+    print("OTS Epoch {}, iteration {}".format(history['epoch'], history['iter']))
+    print("OTS Loss  {:.2f}".format(ots_loss))
+    print("Histogram: (min: {}, max {})".format(hist.min(), hist.max()))
+    print("-"*60)
+    # Update the histogram dict
+    history['hist_dict']['hist_min'].append(hist.min())
+    history['hist_dict']['hist_max'].append(hist.max())
+    history['hist_dict']['ot_loss'].append(ots_loss)
+
+    save_histogram(hist, history, config)
+
+    stop = False
+    min_check = hist.min() >= config['early_end'][0]
+    max_check = hist.max() <= config['early_end'][1]
+    if min_check and max_check:
+        stop = True
+
+    return history, stop

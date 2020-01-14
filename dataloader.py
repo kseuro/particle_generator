@@ -12,12 +12,25 @@
 #                   - __len__ so that len(dataset) returns the dataset size
 #                   - __getitem__ to support indexing into dataset, e.g. so
 #                                 that dataset[i] gets the ith data sample.
+#          - The BottleLoader class inherits from the torch abstract
+#            dataset class: torch.utils.Dataset
+#               - This class allows the code-vector targets generated from
+#                 the bottleneck layer of a trained AutoEncoder to be used
+#                 as training data for a Generator model.
+#               - The follow packages need to be installed for the BottleLoader
+#                 class to work: pandas (for csv parsing)
+#               - The following methods are overriden:
+#                   - __len__ so that len(dataset) returns the dataset size
+#                   - __getitem__ to support indexing into dataset, e.g. so
+#                                 that dataset[i] gets the ith data sample.
 ###############################################################################
 
 # Imports
 import os
 import PIL
 import torch
+import numpy as np
+import pandas as pd
 from PIL import Image
 from torchvision import transforms, utils
 from torch.utils.data import Dataset, DataLoader
@@ -26,10 +39,10 @@ from torch.utils.data import Dataset, DataLoader
 IMG_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm',
                   '.tif', '.tiff', '.webp')
 VALID_DSETS = ('larcv_png_512', 'larcv_png_256', 'larcv_png_128',
-               'larcv_png_64' , 'larcv_png_32')
+               'larcv_png_64' , 'larcv_png_32', 'code_vectors')
 CONV_FLAGS = ('RGB', 'L')
 
-# Dataloader object constructor functions
+# Dataloader constructor functions
 def verify_image(image_path):
     '''
         Does: verifies that a training image is an image (e.g. not corrupt)
@@ -56,6 +69,7 @@ def dset_tag(root):
         Args: root (string): full path to the selected LArCV1 dataset
         Returns: root (string) with appropriate dataset tag
     '''
+    # Tag for LArCV1 image data (AutoEncoder or GAN model targets)
     if str(512) in root:
         return root + 'larcv_png_512/'
     elif str(256) in root:
@@ -70,27 +84,67 @@ def dset_tag(root):
         raise(RuntimeError('Invalid dataset selection. Valid datasets are:'
                             + ','.join(VALID_DSETS)))
 
+def code_vec_tag(root):
+    '''
+        This function assumes that the training dataset is a collection of
+            code vectors produced by a Generator model
+        The folder structure for each dataset is assumed to be either:
+            - ewm_code_vectors/ewm_code_vectors_{larcv_im_dim}_{l_dim}/...
+            or
+            - code_vectors/code_vectors_{larcv_im_dim}_{l_dim}/...
+        Does: adds the approriate suffix to the data root.
+        Args: root (string): full path to the selected code_vector dataset
+        Returns: root (string) with appropriate code_vector tag
+    '''
+    # Split the root string on the underscore delimiter
+    # Look for the integers at the end of the root string
+    path = root.strip('/').split('_')
+    dims = []
+    for item in path:
+        try:
+            dims.append(int(item))
+        except ValueError:
+            pass
+    if 'ewm' in root:
+        root += 'ewm_code_vectors_{}_{}/'.format(dims[0], dims[1])
+    else:
+        root += 'code_vectors_{}_{}/'.format(dims[0], dims[1])
+    return root
+
 def get_paths(root):
     '''
-        Does: gets the full path for every training image in a selected dataset
-        Args: root (string): full path to folder of training images
-        Returns: string list of full paths to training images
+        Does: gets the full path for every training example in a dataset
+        Args: root (string): full path to folder of training examples
+        Returns: list of full paths (strings) to training examples
     '''
-    # Get appropriate dataset tag
-    root = dset_tag(root)
     paths = []
+    # Get appropriate dataset tag
+    larcv = False
+    if 'larcv' in root:
+        larcv = True
+        root = dset_tag(root)
+    elif 'code' in root:
+        root = code_vec_tag(root)
 
     # Walk through image folder and compute paths
-    for image in os.listdir(root):
-        image_path = os.path.join(root, image)
-        if verify_image(image_path):
-            paths.append(image_path)
+    for example in os.listdir(root):
+        example_path = os.path.join(root, example)
+        if larcv:
+            if verify_image(example_path):
+                paths.append(example_path)
+            else:
+                continue
         else:
-            continue
-    if (len(paths) == 0):
-        raise(RuntimeError("Found 0 images in subfolders of: " + root + "\n"
-             "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
-    # Return list of verified training images
+            paths.append(example_path)
+
+    # Make sure dataloading occured
+    if larcv:
+        if len(paths) == 0:
+            raise(RuntimeError("Found 0 LArCV Images in subfolders of: " + root + "\n"
+                               "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
+    elif len(paths) == 0:
+            raise(RuntimeError("Found 0 code_vector files in subfolders of: {}".format(root)))
+
     return paths
 
 # Dataloading functions
@@ -107,7 +161,7 @@ def pil_loader(image_path, conv_flag):
         img = Image.open(f)
         return img.convert(conv_flag)
 
-# Dataset Class - batch-to-batch loading of training images
+# Dataset Class - batch-to-batch loading of LArCV images
 class LArCV_loader(Dataset):
     '''
         Liquid Argon Computer Vision dataloader class
@@ -118,7 +172,7 @@ class LArCV_loader(Dataset):
                     and returns a transformed version.
         Returns: LArCV1 dataloader object equipped with image transforms.
 
-        The dataloader object expects the following image-folder strucutre:
+        The dataloader object expects the following image-folder structure:
             full_path/image_class/image0.png
             full_path/image_class/image1.png
             .
@@ -152,7 +206,53 @@ class LArCV_loader(Dataset):
         '''
         image = pil_loader(self.paths[index], self.conv_flag)
 
-        if (self.transforms is not None):
+        if self.transforms is not None:
             image = self.transforms(image)
 
         return image
+
+# Dataset class - batch-to-batch loading of AE.Encoder code-vectors
+class BottleLoader(Dataset):
+    '''
+        BottleLoader class for handling the loading of code-vector
+        targets produced by the Encoder branch of a trained AutoEncoder
+        model.
+        Does: Creates a dataloader object that inherits from the base
+              PyTorch nn.Dataset class, for loading target .csv files
+              as Torch Tensors.
+        Args: - root (string): full path to the code-vector .npy files
+              - transform (callable): optional transform to be called on a
+                                      code vector training example.
+        The dataloader object expects the following image-folder structure:
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_0.npy
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_1.npy
+            .
+            .
+            .
+            full_path/code_vectors_{dataset}_{l_dim}/code_vectors_{dataset}_{l_dim}/target_N.npy
+    '''
+    def __init__(self, root, transforms=None):
+        self.root = root
+        self.npy_paths = get_paths(self.root)
+        self.transforms = transforms
+        print("Code-Target examples will be loaded from subfolder of: \n{}".format(self.root))
+
+    def __len__(self):
+        return len(self.npy_paths)
+
+    def __getitem__(self, index):
+        '''
+            - Loading a target_vector.csv file with pandas results in an 'empty'
+              dataframe containing only column headers, since pandas assumes the
+              first row of the .csv file are the column names.
+             - Extracting the column names as a list gives a list of string floats
+             - We convert this list to floats via a call to map()
+             - This list of floats can then be converted to a NumPy array,
+               which is an acceptable argument for a call to torch.Tensor()
+        '''
+        code_vector = np.load(self.npy_paths[index])
+
+        if self.transforms is not None:
+            code_vector = self.transforms(code_vector)
+
+        return code_vector
