@@ -262,7 +262,7 @@ def save_train_hist(history, config, times=None, histogram=None):
 def get_optim(config, model_params):
     if (config['model'] == 'gan'):
         return gan_optim(config, model_params)
-    elif (config['model'] == 'ae'):
+    elif (config['model'] == 'ae') or (config['model'] == 'conv_ae'):
         return ae_optim(config, model_params)
     elif (config['model'] == 'ewm'):
         return ewm_optim(config, model_params)

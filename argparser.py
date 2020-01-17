@@ -29,9 +29,9 @@ def train_parser():
 
     # model: string that selects the type of model to be trained
     #        options: GAN, AE, EWM
-    parser.add_argument('--model', type=str, default='gan',
+    parser.add_argument('--model', type=str, default='',
                         help='String that selects the model - options: \
-                            gan, ae, ewm | (default: &(default)s)')
+                            gan, ae, conv_ae, ewm | (default: &(default)s)')
     # checkpoint: string path to saved model checkpoint. If used with
     #             train function, model will resume training from checkpoint
     #             If used with deploy function, model will used saved weights.
@@ -168,6 +168,10 @@ def train_parser():
     parser.add_argument('--ae_lr', type=float, default=1e-4,
                         help='Autoencoder learning rate \
                             | (default: &(default)s)')
+    parser.add_argument('--depth', type=int, default=32,
+                        help='Depth of the feature maps in an instance of a \
+                        Convolutional AutoEncoder -- must be divisible by 4 \
+                        | (default: &(default)s)')
 
     ######################################################
     ## EWM Model

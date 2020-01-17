@@ -63,10 +63,6 @@ class AutoEncoder(nn.Module):
         self.encoder = Encoder(self.enc_sizes, l_dim)
         self.decoder = Decoder(self.dec_sizes, im_size)
 
-    def weights_init(self):
-        self.encoder.weights_init()
-        self.decoder.weights_init()
-
     def forward(self, x):
         x = self.encoder(x)
         x = self.decoder(x)
@@ -109,11 +105,13 @@ class ConvDecoder(nn.Module):
 
 class ConvAutoEncoder(nn.Module):
     '''
-        Convolutional AutoEncoder model
+        Convolutional AutoEncoder model.
+        This model assumes the use of 1-channel images. If using 3-channels,
+        modify each instance of [1] to [3].
     '''
-    def __init__(self, depth):                 # Examples:
-        self.enc_features = [1] + depth        # [1, 4, 8, 16, 32]
-        self.dec_features = depth[::-1] + [1]  # [32, 16, 8, 4, 1]
+    def __init__(self, enc_depth, dec_depth):      # Examples:
+        self.enc_features = [1] + enc_depth        # [1, 4, 8, 16, 32]
+        self.dec_features = dec_depth + [1]        # [32, 16, 8, 4, 1]
         self.encoder = ConvEncoder(self.enc_features)
         self.decoder = ConvDecoder(self.dec_features)
 
