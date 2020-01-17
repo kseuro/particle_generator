@@ -1,3 +1,10 @@
+# Torch Imports
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+import torchvision
+
 def enc_block(in_f, out_f):
     '''
         Using LeakyReLU in the encoder portion generates much 'cleaner'
