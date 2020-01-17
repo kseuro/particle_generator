@@ -372,7 +372,10 @@ def Conv_AE_train_fn(AE, AE_optim, loss_fn, config):
         # Make sure model is in training mode
         AE.train()
 
-        # Forward pass -- no need to flatten the images
+        # Move input to gpu -- no need to flatten
+        x = x.to(config['gpu'])
+
+        # Forward pass 
         output = AE(x)
 
         # Compare output to real data
