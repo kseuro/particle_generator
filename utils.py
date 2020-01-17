@@ -229,6 +229,8 @@ def save_train_hist(history, config, times=None, histogram=None):
     # Save times - arrays must all be the same length,
     # otherwise Pandas will thrown an error!
     if times is not None:
+        # This is bad coding, but only the gan and ae models save the training
+        # times, and will therefore supply a list to this conditional.
         times_csv = config['save_dir'] + '/times.csv'
         DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
         # Save losses
