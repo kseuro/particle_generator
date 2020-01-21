@@ -48,10 +48,10 @@ class ConvAutoEncoder(nn.Module):
         This model assumes the use of 1-channel images. If using 3-channels,
         modify each instance of [1] to [3].
     '''
-    def __init__(self, enc_depth, dec_depth):
-        super().__init__()                         # Examples:
-        self.enc_features = [1] + enc_depth        # [1, 4, 8, 16, 32]
-        self.dec_features = dec_depth + [1]        # [32, 16, 8, 4, 1]
+    def __init__(self, enc_depth, dec_depth, l_dim):
+        super().__init__()             # Computed in setup_model.py
+        self.enc_features = enc_depth  # [1] + [4, 8, 16, 32] + [4]
+        self.dec_features = dec_depth  # [4] + [32, 16, 8, 4, 1] + [1]
         self.encoder = ConvEncoder(self.enc_features)
         self.decoder = ConvDecoder(self.dec_features)
 

@@ -72,13 +72,14 @@ def gan(model, config):
 def get_ae_kwargs(config):
     kwargs = {}
 
+    l_dim = config['l_dim']                 # Latent vector dimension
+
     # Check if MNIST - set image size
     if (config['MNIST']):
         config['dataset'] = 28
     if config['model'] == 'ae':
         im_size = config['dataset']**2          # Input dimension
         base = [128 if im_size <= 784 else 256] # Layer base dimension
-        l_dim = config['l_dim']                 # Latent vector dimension
         # Compute encoder sizes
         # Example output structure: [32*1, 32*2, ... , 32*(2^(n-1))]
         sizes = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
@@ -98,12 +99,13 @@ def get_ae_kwargs(config):
             raise ValueError("WARNING: The depth of the feature maps must be divisible by 4")
         depth   = [config['depth']] * config['n_layers'] # [32, 32, 32, 32]
         divisor = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
-        depth   = [a//b for a,b in zip(depth, [*divisor()])][::-1]
-
+        depth   = [a//b for a,b in zip(depth, [*divisor()])][::-1] # [4, 8, 16, 32]
+        
         # Update kwarg dicts
         # Decoder is the reverse of the encoder
-        kwargs.update({'enc_depth' : depth,
-                       'dec_depth' : depth[::-1]})
+        kwargs.update({'enc_depth' : [1] + depth + [l_dim],
+                       'dec_depth' : [l_dim] + depth[::-1] + [1],
+                       'l_dim'     : l_dim})
     else:
         raise ValueError('Valid AutoEncoder model not selected!')
     return kwargs, config

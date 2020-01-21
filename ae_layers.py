@@ -28,7 +28,7 @@ def conv_block(in_f, out_f):
         map dimension by a factor of 2.
     '''
     return nn.Sequential(
-        nn.Conv2d(in_f, out_f, 3, padding=1),
+        nn.Conv2d(in_f, out_f, kernel_size = 3, padding = 1),
         nn.LeakyReLU(0.2),
         nn.MaxPool2d(2,2)
     )
@@ -39,6 +39,6 @@ def deconv_blocks(in_f, out_f):
         in_f -> out_f. This sizing pattern is the opposite of the Conv_Blocks.
     '''
     return nn.Sequential(
-        nn.ConvTranspose2d(in_f, out_f, 2, stride=2),
+        nn.ConvTranspose2d(in_f, out_f, 2, stride = 2),
         nn.LeakyReLU(0.2)
     )
