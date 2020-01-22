@@ -100,12 +100,12 @@ def get_ae_kwargs(config):
         depth   = [config['depth']] * config['n_layers'] # [32, 32, 32, 32]
         divisor = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
         depth   = [a//b for a,b in zip(depth, [*divisor()])][::-1] # [4, 8, 16, 32]
-        
+
         # Update kwarg dicts
         # Decoder is the reverse of the encoder
-        kwargs.update({'enc_depth' : [1] + depth + [l_dim],
+        kwargs.update({'enc_depth' : [1] + depth,
                        'dec_depth' : [l_dim] + depth[::-1] + [1],
-                       'l_dim'     : l_dim})
+                       'l_dim'     : l_dim })
     else:
         raise ValueError('Valid AutoEncoder model not selected!')
     return kwargs, config
