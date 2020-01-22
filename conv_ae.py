@@ -36,7 +36,7 @@ class ConvDecoder(nn.Module):
                                 See ConvEncoder for example of list, which is
                                 reversed in the Decoder model.
     '''
-    def __init__(self, depth):
+    def __init__(self, depth, l_dim):
         super().__init__()
         self.deconv_blocks = nn.Sequential(*[deconv_blocks(in_f, out_f) for in_f, out_f
                                               in zip(depth, depth[1:])])
@@ -52,11 +52,11 @@ class ConvAutoEncoder(nn.Module):
     '''
     def __init__(self, enc_depth, dec_depth, l_dim):
         super().__init__()
-        self.l_dim        = l_dim      # Computed in setup_model.py
-        self.enc_features = enc_depth  # [1] + [4, 8, 16, 32]
-        self.dec_features = dec_depth  # [32, 16, 8, 4] + [1]
+        self.l_dim        = l_dim                # Computed in setup_model.py
+        self.enc_features = enc_depth            # [1] + [4, 8, 16, 32]
+        self.dec_features = [l_dim] + dec_depth  # [l_dim] + [32, 16, 8] + [1]
         self.encoder = ConvEncoder(self.enc_features, self.l_dim)
-        self.decoder = ConvDecoder(self.dec_features)
+        self.decoder = ConvDecoder(self.dec_features, self.l_dim)
 
     def forward(self, x):
         x = self.encoder(x)
