@@ -62,7 +62,12 @@ def directories(config):
 
     if config['model'] != 'ewm':
         label = 'MNIST' if config['MNIST'] else 'LArCV'
-        config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
+        if 'ae' in config['model']:
+            config['exp_label'] += '_{}_{}_dataset_{}_l-dim/'.format(label,
+                                                                    config['dataset'],
+                                                                    config['l_dim'])
+        else:
+            config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
     else:
         label = 'Code_Vectors_{}_{}'.format(config['dataset'], config['l_dim'])
         config['exp_label'] += '_{}/'.format(label)
