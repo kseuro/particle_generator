@@ -22,7 +22,7 @@ class ConvEncoder(nn.Module):
         super().__init__()
         self.conv_blocks = nn.Sequential(*[conv_block(in_f, out_f) for in_f, out_f
                                            in zip(depth, depth[1:])])
-        self.last = nn.Conv2d(depth[-1], l_dim, kernel_size=(2,2), padding=(1,1))
+        self.last = nn.Conv2d(depth[-1], l_dim, kernel_size=(2,2))
 
     def forward(self, x):
         return self.last(self.conv_blocks(x))
