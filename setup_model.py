@@ -71,9 +71,7 @@ def gan(model, config):
 #####################
 def get_ae_kwargs(config):
     kwargs = {}
-
     l_dim = config['l_dim']                 # Latent vector dimension
-
     # Check if MNIST - set image size
     if (config['MNIST']):
         config['dataset'] = 28
@@ -85,7 +83,6 @@ def get_ae_kwargs(config):
         sizes = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
         enc_sizes = base * config['n_layers']
         enc_sizes = [a*b for a,b in zip(enc_sizes, [*sizes()])][::-1]
-
         # Update kwarg dicts
         # Decoder is the reverse of the encoder
         kwargs.update({'enc_sizes' : enc_sizes,
@@ -93,19 +90,24 @@ def get_ae_kwargs(config):
                        'im_size'   : im_size,
                        'dec_sizes' : enc_sizes[::-1]})
     elif config['model'] == 'conv_ae':
-        # Compute the depth of the feature maps, based on the number of
-        # specified layers. If depth is not divisibe by 4, warn
-        if config['depth'] % 4 != 0:
-            raise ValueError("WARNING: The depth of the feature maps must be divisible by 4")
-        depth   = [config['depth']] * config['n_layers'] # [32, 32, 32, 32]
-        divisor = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
-        depth   = [a//b for a,b in zip(depth, [*divisor()])][::-1] # [4, 8, 16, 32]
+        if not config['MNIST']:
+            # Compute the depth of the feature maps, based on the number of
+            # specified layers. If depth is not divisibe by 4, warn
+            if config['depth'] % 4 != 0:
+                raise ValueError("WARNING: The depth of the feature maps must be divisible by 4")
+            depth   = [config['depth']] * config['n_layers'] # [32, 32, 32, 32]
+            divisor = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
+            depth   = [a//b for a,b in zip(depth, [*divisor()])][::-1] # [4, 8, 16, 32]
+            # Update kwarg dicts
+            # Decoder is the reverse of the encoder
+            kwargs.update({'enc_depth' : [1] + depth,
+                           'dec_depth' : depth[1:len(depth)][::-1] + [1],
+                           'l_dim'     : l_dim })
+        else: # Manually set the values for the MNIST experiment
+            kwargs.update( { 'enc_depth': [1, 16, 4],
+                             'dec_depth': [16, 1],
+                             'l_dim'    : 4})
 
-        # Update kwarg dicts
-        # Decoder is the reverse of the encoder
-        kwargs.update({'enc_depth' : [1] + depth,
-                       'dec_depth' : depth[1:len(depth)][::-1] + [1],
-                       'l_dim'     : l_dim })
     else:
         raise ValueError('Valid AutoEncoder model not selected!')
     return kwargs, config
