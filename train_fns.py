@@ -127,7 +127,7 @@ def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         tr_loop_start = time.time()
 
         metrics = train_fn(x, itr, epoch)
-        history, best_stat, best = utils.train_logger(history, best_stat, metrics)
+        history, best_stat = utils.train_logger(history, best_stat, metrics)
 
         # Save checkpoint periodically
         if (itr % 1000 == 0):
@@ -375,7 +375,7 @@ def Conv_AE_train_fn(AE, AE_optim, loss_fn, config):
         # Move input to gpu -- no need to flatten
         x = x.to(config['gpu'])
 
-        # Forward pass 
+        # Forward pass
         output = AE(x)
 
         # Compare output to real data
