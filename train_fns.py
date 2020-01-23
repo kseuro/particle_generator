@@ -129,11 +129,6 @@ def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         metrics = train_fn(x, itr, epoch)
         history, best_stat = utils.train_logger(history, best_stat, metrics)
 
-        # Save checkpoint periodically
-        if (itr % 1000 == 0):
-            chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
-            utils.save_checkpoint(chkpt_AE, config)
-
         # Log the time at the end of training loop
         times['tr_loop_times'].append(time.time() - tr_loop_start)
 
