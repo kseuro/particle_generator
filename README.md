@@ -53,7 +53,10 @@ The ArgParser requirements for each respective experiment are listed below:
 - GAN Model:
     - <pre><code> --n_hidden --g_lr --g_opt --z_dim --d_lr --d_opt </code></pre>
 - AutoEncoder Model:
-    - <pre><code> --l_dim --ae_opt --ae_lr </code></pre>
+    - Both MLP and Convolutional:
+        - <pre><code> --l_dim --ae_opt --ae_lr </code></pre>
+    - Additional args for convolutional model:
+        - <pre><code> --depth </code></pre>
 - EWM Training Routing
     - <pre><code> --g_lr --g_opt --n_hidden --psi_lr --mem_size </code></pre>
 
