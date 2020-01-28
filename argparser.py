@@ -179,7 +179,11 @@ def train_parser():
     parser.add_argument('--mem_size', type=int, default=5000,
                         help='Size of memory arrays used in OTS computation \
                         | (default: %(default)s)')
-
+    parser.add_argument('--ewm_target', type=str, default='',
+                        help='Set the AE model type that produced the code vector \
+                        targets on which you wish to train the EWM model. For conv \
+                        targets, set the l-dim to the product of the AE model code \
+                        volume. e.g. l-dim: 12x4x4 = 192 | (default: %(default)s)')
     return parser
 
 # Deploy model argument parser function

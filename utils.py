@@ -330,7 +330,12 @@ def select_dataset(config):
         structure expected by the torch ImageFolder class.
     '''
     if config['model'] == 'ewm':
-        config['data_root'] += 'code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
+        if config['ewm_target'] == 'mlp':
+            config['data_root'] += 'mlp_ae/code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
+        elif config['ewm_target'] == 'conv':
+            config['data_root'] += 'conv_ae/code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
+        else:
+            raise Exception('No EWM target selected -- unable to set data_root')
         return config
     if (config['dataset'] == 512):
         config['data_root'] += 'larcv_png_512/'
@@ -343,7 +348,7 @@ def select_dataset(config):
     elif (config['dataset'] == 32):
         config['data_root'] += 'larcv_png_32/'
     else:
-        raise Exception('Dataset not specified -- unable to set data_root')
+        raise Exception('LArCV dataset not specified -- unable to set data_root')
     return config
 
 def MNIST(config):

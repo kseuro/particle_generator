@@ -142,7 +142,7 @@ def ewm_kwargs(config):
     if config['MNIST']:
         raise Exception("EWM model is not set up to train on MNIST data")
     code_size = config['l_dim']
-
+    
     # Creat list of sizes corresponding to the individual
     # fully connected layers in the model
     # e.g. n_hidden = 10, nlayers = 4, fc_sizes = [10,10,10,10]
