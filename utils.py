@@ -358,6 +358,8 @@ def select_dataset(config):
     return config
 
 def select_test_vecs(config):
+    print(config['ewm_target'])
+    input(...)
     if 'emw_target' not in config:
         raise Exception('EWM Target not specified -- cannot select test vectors')
     elif 'vec_root' not in config:
