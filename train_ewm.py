@@ -121,6 +121,8 @@ def train(config):
     stop_criterion = []
     test_loader = utils.get_test_loader(config)
     for _, test_vecs in enumerate(test_loader):
+        print(test_vecs.shape, test_vecs.size)
+        input(...)
         stop_criterion.append(my_ops.l1_t(test_vecs, dataloader))
     del test_loader
     stop_criterion = (np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion))
