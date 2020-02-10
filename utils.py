@@ -358,17 +358,12 @@ def select_dataset(config):
     return config
 
 def select_test_vecs(config):
-    print(config['ewm_target'])
-    input(...)
-    if 'emw_target' not in config:
-        raise Exception('EWM Target not specified -- cannot select test vectors')
-    elif 'vec_root' not in config:
-        raise Exception('Path to test vectors not specified')
-
     if config['ewm_target'] == 'conv':
         config['vec_root'] += 'conv_ae/'
-    else:
+    elif config['ewm_target'] == 'mlp':
         config['vec_root'] += 'mlp/'
+    else:
+        raise Exception('EWM Target not specified -- unable to select test vectors')
     config['vec_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
     return config
 
