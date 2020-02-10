@@ -358,11 +358,14 @@ def select_test_vecs(config):
         raise Exception('EWM Target not specified -- cannot select test vectors')
     elif 'vec_root' not in config:
         raise Exception('Path to test vectors not specified')
+
     if config['ewm_target'] == 'conv':
         config['vec_root'] += 'conv_ae/'
     else:
         config['vec_root'] += 'mlp/'
     config['vec_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
+    print(config['vec_root'])
+    input(...)
     return config
 
 def MNIST(config):
