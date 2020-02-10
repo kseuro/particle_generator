@@ -124,10 +124,8 @@ def train(config):
         test_vecs = test_vecs.view(config['batch_size'], -1).to(device)
         stop_criterion.append(my_ops.l1_t(test_vecs, dataloader).cpu().detach().numpy())
     del test_loader
-    stop_criterion = (np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion))
-    print('Stop Criterion: min_{}, mean_{}, max_{}'.format(round(stop_criterion[0], 3),
-                                                           round(stop_criterion[1], 3),
-                                                           round(stop_criterion[2], 3)))
+    stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
+    print('Stop Criterion: min_{}, mean_{}, max_{}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
     input(...)
 
     # Set up stats logging
@@ -185,6 +183,12 @@ def train(config):
                 hist_dict, stop = utils.update_histogram(transfer, history, config)
                 # Emperical stopping criterion
                 if stop:
+                    break
+
+            if epoch > 2:
+                if np.mean(history['losses']['ot_loss']) <= stop_min:
+                    break
+                elif np.mean(history['losses']['ot_loss']) <= stop_min * (stop_mean / stop_min):
                     break
 
         # Compute the Optimal Fitting Transport Plan
