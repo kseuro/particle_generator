@@ -187,7 +187,7 @@ def train_parser():
     parser.add_argument('--mem_size', type=int, default=5000,
                         help='Size of memory arrays used in OTS computation \
                         | (default: %(default)s)')
-    parser.add_argument('ewm_target', type=str, default='',
+    parser.add_argument('--ewm_target', type=str, default='',
                         help='Specify the model type from which the EWM targets \
                         were produced: conv or mlp | (default: %(default)s)')
 
