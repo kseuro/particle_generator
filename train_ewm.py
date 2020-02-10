@@ -119,7 +119,7 @@ def train(config):
     # Compute the stopping criterion using set of test vectors
     # and computing the 'ideal' loss between the test/target.
     stop_criterion = []
-    test_loader = utils.get_test_loader(config):
+    test_loader = utils.get_test_loader(config)
     for _, test_vecs in enumerate(test_loader):
         stop_criterion.append(my_ops.l1_t(test_vecs, dataloader))
     del test_loader
