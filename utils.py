@@ -337,6 +337,10 @@ def select_dataset(config):
         structure expected by the torch ImageFolder class.
     '''
     if config['model'] == 'ewm':
+        if config['ewm_target'] == 'conv':
+            config['data_root'] += 'conv_ae/'
+        else:
+            config['data_root'] += 'mlp/'
         config['data_root'] += 'code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
         return config
     if (config['dataset'] == 512):
@@ -364,8 +368,6 @@ def select_test_vecs(config):
     else:
         config['vec_root'] += 'mlp/'
     config['vec_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
-    print(config['vec_root'])
-    input(...)
     return config
 
 def MNIST(config):
