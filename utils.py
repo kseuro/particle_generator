@@ -353,6 +353,18 @@ def select_dataset(config):
         raise Exception('Dataset not specified -- unable to set data_root')
     return config
 
+def select_test_vecs(config):
+    if 'emw_target' not in config:
+        raise Exception('EWM Target not specified -- cannot select test vectors')
+    elif 'vec_root' not in config:
+        raise Exception('Path to test vectors not specified')
+    if config['ewm_target'] == 'conv':
+        config['vec_root'] += 'conv_ae/'
+    else:
+        config['vec_root'] += 'mlp/'
+    config['vec_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
+    return config
+
 def MNIST(config):
     transform = transforms.Compose( [transforms.ToTensor(),
                                      transforms.Normalize([0.5],[0.5])])
@@ -412,9 +424,17 @@ def get_dataloader(config):
             raise Exception("EWM model is not set up to train on MNIST data")
         return MNIST(config)
     elif (config['model'] != 'ewm'):
-        return get_LArCV_dataloader(config)
+        return get_LArCV_dataloader(config) # Train Conv or MLP AE or GAN
     else:
-        return get_full_dataloader(config)
+        return get_full_dataloader(config) # Train EWM Generator
+
+def get_test_loader(config):
+    config = select_test_vecs(config)
+    loader_kwargs = get_loader_kwargs(config)
+    train_transform = transforms.Compose([ transforms.ToTensor() ])
+    test_dataset = BottleLoader(root=config['vec_root'], transforms=train_transform)
+    dataloader = DataLoader(test_dataset, **loader_kwargs)
+    return dataloader
 
 #####################
 # EWM Functionality #

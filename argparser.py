@@ -62,6 +62,10 @@ def train_parser():
     parser.add_argument('--dataset', type=int, default=256,
                         help='Which crop size of the LArCV1 dataset to use, or \
                             | (default: &(default)s)')
+    parser.add_argument('--vec_root', type=str, default='',
+                        help='Full path to test vectors data folder used to compute \
+                             the early stopping criterion for the ewm model training \
+                            | (default: &(default)s)')
     #########################################
     ## Torch DataLoader Key Word Arguments ##
     #########################################
@@ -183,6 +187,9 @@ def train_parser():
     parser.add_argument('--mem_size', type=int, default=5000,
                         help='Size of memory arrays used in OTS computation \
                         | (default: %(default)s)')
+    parser.add_argument('ewm_target', type=str, default='',
+                        help='Specify the model type from which the EWM targets \
+                        were produced: conv or mlp | (default: %(default)s)')
 
     return parser
 

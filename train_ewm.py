@@ -116,12 +116,22 @@ def train(config):
     # Set up dict for saving checkpoints
     checkpoint_kwargs = {'G':G, 'G_optim':G_optim}
 
+    # Compute the stopping criterion using set of test vectors
+    # and computing the 'ideal' loss between the test/target.
+    stop_criterion = []
+    test_loader = utils.get_test_loader(config):
+    for _, test_vecs in enumerate(test_loader):
+        stop_criterion.append(my_ops.l1_t(test_vecs, dataloader))
+    stop_criterion = (min(stop_criterion), max(stop_criterion))
+    print('Stop Criterion: {}, {}'.format(stop_criterion[0],stop_criterion[1]))
+    input(...)
+
     # Set up stats logging
     hist_dict = {'hist_min':[], 'hist_max':[], 'ot_loss':[]}
     losses    = {'ot_loss': [], 'fit_loss': []}
     history   = {'dset_size': dset_size, 'epoch': 0, 'iter': 0,
-                 'losses':losses, 'hist_dict': hist_dict}
-    config['early_end'] = (200, 320) # Expirical stopping criterion
+                 'losses'   : losses, 'hist_dict': hist_dict}
+    config['early_end'] = (200, 320) # Empirical stopping criterion from EWM author
 
     # Training Loop
     for epoch, _ in enumerate(epoch_bar):
