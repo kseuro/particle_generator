@@ -122,7 +122,7 @@ def train(config):
     test_loader = utils.get_test_loader(config)
     for _, test_vecs in enumerate(test_loader):
         test_vecs = test_vecs.view(config['batch_size'], -1).to(device)
-        stop_criterion.append(my_ops.l1_t(test_vecs, dataloader).cpu.numpy())
+        stop_criterion.append(my_ops.l1_t(test_vecs, dataloader).cpu().detach().numpy())
     del test_loader
     stop_criterion = (np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion))
     print('Stop Criterion: min_{}, mean_{}, max_{}'.format(round(stop_criterion[0], 3),
