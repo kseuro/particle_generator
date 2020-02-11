@@ -121,8 +121,10 @@ def train(config):
     stop_criterion = []
     test_loader = utils.get_test_loader(config)
     for _, test_vecs in enumerate(test_loader):
-        test_vecs = test_vecs.view(config['batch_size'], -1).to(device)
-        stop_criterion.append(my_ops.l1_t(test_vecs, dataloader).cpu().detach().numpy())
+        test_vecs = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
+        stop_score = my_ops.l1_t(test_vecs, dataloader)
+        stop_loss = -torch.mean(stop_score)
+        stop_criterion.append(stop_loss.cpu().detach().numpy())
     del test_loader
     stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
     print('Stop Criterion: min_{}, mean_{}, max_{}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
