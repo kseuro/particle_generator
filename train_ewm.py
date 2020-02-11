@@ -128,7 +128,6 @@ def train(config):
     del test_loader
     stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
     print('Stop Criterion: min_{}, mean_{}, max_{}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
-    input(...)
 
     # Set up stats logging
     hist_dict = {'hist_min':[], 'hist_max':[], 'ot_loss':[]}
@@ -187,10 +186,8 @@ def train(config):
                 if stop:
                     break
 
-            if epoch > 2:
-                if np.mean(history['losses']['ot_loss']) <= stop_min:
-                    break
-                elif np.mean(history['losses']['ot_loss']) <= stop_min * (stop_mean / stop_min):
+            if epoch > 2: # min and max are swapped beacause loss is negative value
+                if stop_max <= np.mean(history['losses']['ot_loss']) <= stop_min:
                     break
 
         # Compute the Optimal Fitting Transport Plan
