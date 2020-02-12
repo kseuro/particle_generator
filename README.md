@@ -58,10 +58,14 @@ The ArgParser requirements for each respective experiment are listed below:
     - Additional args for convolutional model:
         - <pre><code> --depth </code></pre>
 - EWM Training Routing
-    - <pre><code> --g_lr --g_opt --n_hidden --psi_lr --mem_size </code></pre>
+    - For training on the outputs of both MLP and Convolutional AutoEncoder:
+        - <pre><code> --g_lr --g_opt --n_hidden --psi_lr --l_dim --mem_size --vec_root </code></pre>
+        - **Note:** <pre><code>--vec_root </code></pre> specifies the location of a set of code vectors produced by the AutoEncoder using the TRAINING data. This set of vectors is used only to compute the stopping criterion in the EWM training routine.
+    - Additional arguments for training on the output of a Convolutional AutoEncoder:
+        - <pre><code> --ewm_target </code></pre>
 
 ### Software and Hardware Requirements:
 - Python version 3.5 or later
 - PyTorch version 1.0 or later
 - CUDA version 9.2 or later
-- One CUDA enabled GPU with at least 3GB of memory
+- One CUDA enabled GPU with **at least** 3GB of memory
