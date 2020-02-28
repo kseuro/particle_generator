@@ -36,7 +36,7 @@ import time
 import errno
 import shutil
 from tqdm import tqdm, trange
-from   datetime import datetime
+from datetime import datetime
 
 # Python
 import numpy as np
@@ -75,9 +75,6 @@ def train(config):
                              "W1_extension/my_ops_kernel.cu"],
                   verbose = False)
     import my_ops
-
-    # # Update the config data_root to point to desired set of code vectors
-    # config['data_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
 
     # Set up GPU device ordinal
     device = torch.device(config['gpu'])
@@ -118,6 +115,9 @@ def train(config):
 
     # Compute the stopping criterion using set of test vectors
     # and computing the 'ideal' loss between the test/target.
+    print("----------------------------")
+    print("Computing stopping criterion")
+    print("----------------------------")
     stop_criterion = []
     test_loader = utils.get_test_loader(config)
     for _, test_vecs in enumerate(test_loader):
@@ -127,7 +127,9 @@ def train(config):
         stop_criterion.append(stop_loss.cpu().detach().numpy())
     del test_loader
     stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
-    print('Stop Criterion: min_{}, mean_{}, max_{}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
+    print("----------------------------")
+    print('Stop Criterion: min: {}, mean: {}, max: {}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
+    print("----------------------------")
 
     # Set up stats logging
     hist_dict = {'hist_min':[], 'hist_max':[], 'ot_loss':[]}
@@ -135,7 +137,9 @@ def train(config):
     history   = {'dset_size': dset_size, 'epoch': 0, 'iter': 0,
                  'losses'   : losses, 'hist_dict': hist_dict}
     config['early_end'] = (200, 320) # Empirical stopping criterion from EWM author
-
+    
+    stop_counter = 0
+    
     # Training Loop
     for epoch, _ in enumerate(epoch_bar):
 
@@ -146,8 +150,8 @@ def train(config):
         transfer = torch.zeros(config['mem_size'], config['batch_size'], dtype=torch.long)
         mem_idx = 0
 
-        # Compute the Optimal Transport Solver over every training example
-        for iter in range(dset_size):
+        # Compute the Optimal Transport Solver
+        for iter in range(1, dset_size//3):
 
             history['iter'] = iter
 
@@ -162,10 +166,19 @@ def train(config):
 
             phi, hit = torch.max(score, 1)
 
-            loss = -torch.mean(psi[hit]) # equiv. to loss
+#             loss = -(torch.mean(phi) + torch.mean(psi[hit])) # Nonsense loss 3
+            
+            # nonsense2 produces same result as nonsense1
+#             loss = -(torch.mean(phi) - torch.mean(psi[hit])) # Nonsense loss 2
+
+            loss = (torch.mean(phi) + torch.mean(psi)) - torch.mean(psi[hit]) # Nonsense1 loss
+
+#             loss = torch.mean(phi) + torch.mean(psi) # Alternative loss computation
+
+#             loss = -torch.mean(psi[hit]) # Standard loss computation
 
             # Backprop
-            loss.backward() # Gradient ascent
+            loss.backward()
             psi_optim.step()
 
             # Update memory tensors
@@ -178,7 +191,7 @@ def train(config):
 
             if (iter % 500 == 0):
                 avg_loss = np.mean(history['losses']['ot_loss'])
-                print('OTS Iteration {} | Epoch {} | Avg Loss Value: {}'.format(iter, epoch, avg_loss))
+                print('OTS Iteration {} | Epoch {} | Avg Loss Value: {}'.format(iter,epoch,round(avg_loss, 3)))
             if (iter % 2000 == 0):
                 # Display histogram stats
                 hist_dict, stop = utils.update_histogram(transfer, history, config)
@@ -188,6 +201,7 @@ def train(config):
 
             if epoch > 2: # min and max are swapped beacause loss is negative value
                 if stop_max <= np.mean(history['losses']['ot_loss']) <= stop_min:
+                    stop_counter += 1
                     break
 
         # Compute the Optimal Fitting Transport Plan
@@ -224,7 +238,7 @@ def train(config):
 
             if (fit_iter % 500 == 0):
                 avg_loss = np.mean(history['losses']['fit_loss'])
-                print('FIT Iteration {} | Epoch {} | Avg Loss Value: {}'.format(fit_iter, epoch, avg_loss))
+                print('FIT Iteration {} | Epoch {} | Avg Loss Value: {}'.format(fit_iter, epoch, round(avg_loss,3)))
 
     # Save a checkpoint at end of training
     checkpoint = utils.get_checkpoint(history['epoch'], checkpoint_kwargs, config)
@@ -232,7 +246,8 @@ def train(config):
 
     # Save training data to csv's after training end
     utils.save_train_hist(history, config, times=None, histogram=history['hist_dict'])
-
+    print("Stop Counter Triggered {} Times".format(stop_counter))
+    
     # For Aiur
     print("I see you have an appetite for destruction.")
     print("And you have learned to use your illusion.")
