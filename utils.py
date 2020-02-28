@@ -267,11 +267,11 @@ def save_train_hist(history, config, times=None, histogram=None):
 # Optimizer selection functions #
 #################################
 def get_optim(config, model_params):
-    if (config['model'] == 'gan'):
+    if 'gan' in config['model']::
         return gan_optim(config, model_params)
-    elif (config['model'] == 'ae') or (config['model'] == 'conv_ae'):
+    elif 'ae' in config['model']::
         return ae_optim(config, model_params)
-    elif (config['model'] == 'ewm'):
+    elif 'ewm' in config['model']:
         return ewm_optim(config, model_params)
 
 def gan_optim(config, model_params):
@@ -400,35 +400,35 @@ def get_BottleLoader(config, loader_kwargs=None):
                cast to Torch Tensors, as we wish to perserve their structure.
     '''
     train_transform = transforms.Compose([ transforms.ToTensor() ])
-
-    # Select the code_vector dataset and add its length to the loader_kwargs
-    config = select_dataset(config)
-    loader_kwargs.update({'batch_size': get_dset_size(config['data_root'])})
     train_dataset = BottleLoader(root=config['data_root'], transforms=train_transform)
     dataloader = DataLoader(train_dataset, **loader_kwargs)
-
     return dataloader
 
 def get_full_dataloader(config):
     '''
         Returns a dataloader containing full set of code_vector examples.
-        10000 is safe to load onto a Nvidia Titan 1080x with a single model.
+        Be careful not to overload the GPU memory.
     '''
     loader_kwargs = get_loader_kwargs(config)
-    dataloader = get_BottleLoader(config, loader_kwargs=loader_kwargs)
+    config = select_dataset(config)
+    loader_kwargs.update({'batch_size': get_dset_size(config['data_root'])})
+    if 'conv' in config['model']:
+        dataloader = get_LArCV_dataloader(config, loader_kwargs=loader_kwargs)
+    else:
+        dataloader = get_BottleLoader(config, loader_kwargs=loader_kwargs)
     for data in dataloader:
         print('Returning full dataloader with {} training examples'.format(loader_kwargs['batch_size']))
         return data
 
 def get_dataloader(config):
     if (config['MNIST']):
-        if (config['model'] == 'ewm'):
+        if 'ewm' in config['model']:
             raise Exception("EWM model is not set up to train on MNIST data")
         return MNIST(config)
-    elif (config['model'] != 'ewm'):
-        return get_LArCV_dataloader(config) # Train Conv or MLP AE or GAN
-    else:
+    elif 'ewm' in config['model']:
         return get_full_dataloader(config) # Train EWM Generator
+    else
+        return get_LArCV_dataloader(config) # Train Conv or MLP AE or GAN
 
 def get_test_loader(config):
     config = select_test_vecs(config)

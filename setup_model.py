@@ -162,15 +162,22 @@ def ewm_kwargs(config):
     '''
     ewm_kwargs = {}
     if config['MNIST']:
-        raise Exception("EWM model is not set up to train on MNIST data")
+        raise Exception("EWM model is not set up to train on MNIST data ... sorry")
     code_size = config['l_dim']
+    if config['model'] == 'ewm_conv':
+        depth   = [config['depth']] * config['n_layers'] # [32, 32, 32, 32]
+        divisor = lambda: [ (yield 2**i) for i in range(config['n_layers']) ]
+        depth   = [a//b for a,b in zip(depth, [*divisor()])][::-1] # [4, 8, 16, 32]
+        ewm_kwargs.update( { 'l_dim'     : code_size,
+                             'dec_sizes' : depth[1:len(depth)][::-1] + [1],
+                             'im_size'   : config['dataset'] } )
+    else:
+        # Creat list of sizes corresponding to the individual
+        # fully connected layers in the model
+        # e.g. n_hidden = 10, nlayers = 4, fc_sizes = [10,10,10,10]
+        fc_sizes = [config['n_hidden']] * config['n_layers']
 
-    # Creat list of sizes corresponding to the individual
-    # fully connected layers in the model
-    # e.g. n_hidden = 10, nlayers = 4, fc_sizes = [10,10,10,10]
-    fc_sizes = [config['n_hidden']] * config['n_layers']
-
-    ewm_kwargs.update({ 'z_dim'      : config['z_dim'],
-                        'fc_sizes'   : fc_sizes,
-                        'n_out'      : code_size })
+        ewm_kwargs.update({ 'z_dim'      : config['z_dim'],
+                            'fc_sizes'   : fc_sizes,
+                            'n_out'      : code_size })
     return ewm_kwargs

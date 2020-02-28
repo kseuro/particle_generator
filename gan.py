@@ -46,6 +46,17 @@ def D_out(in_f, out_f):
         nn.Linear(in_f, out_f),
         nn.Sigmoid()
     )
+
+def DeconvBlock(in_f, out_f):
+    '''
+        ConvTranspose blocks decrease the depth of the feature maps from
+        in_f -> out_f.
+    '''
+    return nn.Sequential(
+        nn.ConvTranspose2d(in_f, out_f, 2, stride = 2),
+        nn.LeakyReLU(0.2)
+    )
+
 ############################
 #       Model Classes      #
 ############################

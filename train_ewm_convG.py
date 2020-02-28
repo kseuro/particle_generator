@@ -56,7 +56,7 @@ from   torchvision      import transforms
 from   torchvision      import datasets as dset
 
 # My stuff
-from ewm import ewm_G
+import ewm
 import utils
 import argparser
 import setup_model
@@ -79,15 +79,54 @@ def train(config):
     # Set up GPU device ordinal
     device = torch.device(config['gpu'])
 
-    # Get model kwargs
+    # Get model kwargs for convolutional generator
+    config['model'] == 'ewm_conv'
     emw_kwargs = setup_model.ewm_kwargs(config)
 
-    # Setup model on GPU
-    G = ewm_G(**emw_kwargs).to(device)
-    G.weights_init()
+    # Setup convolutional generator model on GPU
+    G = ewm.ewm_convG(**emw_kwargs).to(device)
 
+    # Setup source of structured noise on GPU
+    # TODO: Compute the path to the ewm experiment that pertains to this
+    #       experiment.
+    config_csv = EWM_path + "config.csv"
+    config_df = pd.read_csv(config_csv, delimiter = ",")
+
+    # Get the model architecture from config df
+    n_layers = int(config_df[config_df['Unnamed: 0'].str.contains("n_layers")==True]['0'].values.item())
+    n_hidden = int(config_df[config_df['Unnamed: 0'].str.contains("n_hidden")==True]['0'].values.item())
+    l_dim    = int(config_df[config_df['Unnamed: 0'].str.contains("l_dim")==True]['0'].values.item())
+    im_size  = int(config_df[config_df['Unnamed: 0'].str.contains("dataset")==True]['0'].values.item())
+    z_dim    = int(config_df[config_df['Unnamed: 0'].str.contains("z_dim")==True]['0'].values.item())
+
+    # Model kwargs
+    # TODO: Figure out how n_out should be computed
+    ewm_kwargs = { 'z_dim': z_dim, 'fc_sizes': [n_hidden] * n_layers, 'n_out': l_dim*8*8 }
+    Gz = ewm.ewm_G(**ewm_kwargs).to(device)
+
+    # Load the model checkpoint
+    # Get checkpoint name(s)
+    EWM_checkpoint_path  = EWM_path + weights_dir
+    EWM_checkpoint_names = []
+    for file in os.listdir(EWM_checkpoint_path):
+        EWM_checkpoint_names.append(os.path.join(EWM_checkpoint_path, file))
+    print("-"*60)
+    for i in range(len(EWM_checkpoint_names)):
+        name = EWM_checkpoint_names[i].split('/')[-1]
+        print("\n {} :".format(str(i)), name, '\n')
+        print("-"*60)
+    file = input("Select a checkpoint file (enter integer)")
+    EWM_checkpoint = EWM_checkpoint_names[file]
+    # Load the model checkpoint
+    # Keys: ['state_dict', 'epoch', 'optimizer']
+    checkpoint = torch.load(EWM_checkpoint)
+    # Load the model's state dictionary
+    Gz.load_state_dict(checkpoint['state_dict'])
+
+    # Use the model in evaluation mode -- no need to compute gradients
+    Gz.eval()
     print(G)
-    input('Press any key to launch')
+    input('Press any key to launch -- good luck out there')
 
     # Setup model optimizer
     model_params = {'g_params': G.parameters()}
@@ -112,24 +151,6 @@ def train(config):
 
     # Set up dict for saving checkpoints
     checkpoint_kwargs = {'G':G, 'G_optim':G_optim}
-
-    # Compute the stopping criterion using set of test vectors
-    # and computing the 'ideal' loss between the test/target.
-    print("----------------------------")
-    print("Computing stopping criterion")
-    print("----------------------------")
-    stop_criterion = []
-    test_loader = utils.get_test_loader(config)
-    for _, test_vecs in enumerate(test_loader):
-        test_vecs = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
-        stop_score = my_ops.l1_t(test_vecs, dataloader)
-        stop_loss = -torch.mean(stop_score)
-        stop_criterion.append(stop_loss.cpu().detach().numpy())
-    del test_loader
-    stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
-    print("----------------------------")
-    print('Stop Criterion: min: {}, mean: {}, max: {}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
-    print("----------------------------")
 
     # Set up stats logging
     hist_dict = {'hist_min':[], 'hist_max':[], 'ot_loss':[]}
@@ -157,9 +178,12 @@ def train(config):
 
             psi_optim.zero_grad()
 
-            # Generate samples from feed-forward distribution
+            # Generate samples from distribution captured by Gz model
             z_batch = torch.randn(config['batch_size'], config['z_dim']).to(device)
-            y_fake  = G(z_batch) # [B, dset_size]
+            z_batch = Gz(z_batch)
+
+            # Push structured noise vector through convolutional Generator
+            y_fake  = G(z_batch)
 
             # Compute the W1 distance between the model output and the target distribution
             score = my_ops.l1_t(y_fake, dataloader) - psi
@@ -242,7 +266,5 @@ def train(config):
     utils.save_train_hist(history, config, times=None, histogram=history['hist_dict'])
     print("Stop Counter Triggered {} Times".format(stop_counter))
 
-    # For Aiur
-    print("I see you have an appetite for destruction.")
-    print("And you have learned to use your illusion.")
-    print("But I find your lack of control disturbing.")
+    # For Spike
+    print("See you, Space Cowboy")
