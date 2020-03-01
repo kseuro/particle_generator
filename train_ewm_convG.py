@@ -89,6 +89,16 @@ def train(config):
     # Setup source of structured noise on GPU
     # TODO: Compute the path to the ewm experiment that pertains to this
     #       experiment.
+    # Add these configs to the experiment source file
+    if not config['ewm_root']:
+        config['ewm_root'] = config['save_root']
+        if not config['ewm_target']:
+            raise Exception('EWM target must be specified in order to compute path to experiment folder.')
+        if 'conv' in config['ewm_target']:
+            config['ewm_root'] += 'ewm_models/conv_ewm/'
+        else
+            config['ewm_root'] += 'ewm_models/mlp_ewm/'
+
     config_csv = EWM_path + "config.csv"
     config_df = pd.read_csv(config_csv, delimiter = ",")
 
@@ -100,13 +110,17 @@ def train(config):
     z_dim    = int(config_df[config_df['Unnamed: 0'].str.contains("z_dim")==True]['0'].values.item())
 
     # Model kwargs
-    # TODO: Figure out how n_out should be computed
-    ewm_kwargs = { 'z_dim': z_dim, 'fc_sizes': [n_hidden] * n_layers, 'n_out': l_dim*8*8 }
+    # Height and Width of the bottleneck tensor depend on the number of times the
+    # dim of the input data image has been reduced by half.
+    H = W = config['dataset'] // n_layers
+    ewm_kwargs = { 'z_dim': z_dim, 'fc_sizes': [n_hidden]*n_layers, 'n_out': l_dim*H*W }
+
+    # Send model to GPU
     Gz = ewm.ewm_G(**ewm_kwargs).to(device)
 
     # Load the model checkpoint
     # Get checkpoint name(s)
-    EWM_checkpoint_path  = EWM_path + weights_dir
+    EWM_checkpoint_path  = config['ewm_root'] + 'weights/'
     EWM_checkpoint_names = []
     for file in os.listdir(EWM_checkpoint_path):
         EWM_checkpoint_names.append(os.path.join(EWM_checkpoint_path, file))
@@ -115,15 +129,17 @@ def train(config):
         name = EWM_checkpoint_names[i].split('/')[-1]
         print("\n {} :".format(str(i)), name, '\n')
         print("-"*60)
-    file = input("Select a checkpoint file (enter integer)")
-    EWM_checkpoint = EWM_checkpoint_names[file]
+    file_num = input("Select a checkpoint file (enter integer)")
+    EWM_checkpoint = EWM_checkpoint_names[int(file_num)]
+
     # Load the model checkpoint
     # Keys: ['state_dict', 'epoch', 'optimizer']
     checkpoint = torch.load(EWM_checkpoint)
+
     # Load the model's state dictionary
     Gz.load_state_dict(checkpoint['state_dict'])
 
-    # Use the model in evaluation mode -- no need to compute gradients
+    # Use the code_vector model in evaluation mode -- no need for gradients here
     Gz.eval()
     print(G)
     input('Press any key to launch -- good luck out there')
@@ -178,12 +194,12 @@ def train(config):
 
             psi_optim.zero_grad()
 
-            # Generate samples from distribution captured by Gz model
+            # Generate samples from cove_vector distribution
             z_batch = torch.randn(config['batch_size'], config['z_dim']).to(device)
             z_batch = Gz(z_batch)
 
-            # Push structured noise vector through convolutional Generator
-            y_fake  = G(z_batch)
+            # Push structured noise vector through convolutional generator
+            y_fake = G(z_batch)
 
             # Compute the W1 distance between the model output and the target distribution
             score = my_ops.l1_t(y_fake, dataloader) - psi

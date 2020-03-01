@@ -66,6 +66,9 @@ def train_parser():
                         help='Full path to test vectors data folder used to compute \
                              the early stopping criterion for the ewm model training \
                             | (default: &(default)s)')
+    parser.add_argument('--ewm_root', type=str, default='',
+                        help='Full path to set of trained EWM models \
+                            | (default: &(default)s)')
     #########################################
     ## Torch DataLoader Key Word Arguments ##
     #########################################
