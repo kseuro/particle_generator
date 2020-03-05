@@ -115,21 +115,21 @@ def train(config):
 
     # Compute the stopping criterion using set of test vectors
     # and computing the 'ideal' loss between the test/target.
-    print("----------------------------")
-    print("Computing stopping criterion")
-    print("----------------------------")
-    stop_criterion = []
-    test_loader = utils.get_test_loader(config)
-    for _, test_vecs in enumerate(test_loader):
-        test_vecs = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
-        stop_score = my_ops.l1_t(test_vecs, dataloader)
-        stop_loss = -torch.mean(stop_score)
-        stop_criterion.append(stop_loss.cpu().detach().numpy())
-    del test_loader
-    stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
-    print("----------------------------")
-    print('Stop Criterion: min: {}, mean: {}, max: {}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
-    print("----------------------------")
+#     print("----------------------------")
+#     print("Computing stopping criterion")
+#     print("----------------------------")
+#     stop_criterion = []
+#     test_loader = utils.get_test_loader(config)
+#     for _, test_vecs in enumerate(test_loader):
+#         test_vecs = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
+#         stop_score = my_ops.l1_t(test_vecs, dataloader)
+#         stop_loss = -torch.mean(stop_score)
+#         stop_criterion.append(stop_loss.cpu().detach().numpy())
+#     del test_loader
+#     stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
+#     print("----------------------------")
+#     print('Stop Criterion: min: {}, mean: {}, max: {}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
+#     print("----------------------------")
 
     # Set up stats logging
     hist_dict = {'hist_min':[], 'hist_max':[], 'ot_loss':[]}
@@ -146,8 +146,8 @@ def train(config):
         history['epoch'] = epoch
 
         # Set up memory tensors: simple feed-forward distribution, transfer plan
-        mu = torch.zeros(config['mem_size'], config['batch_size'], config['z_dim'])
-        transfer = torch.zeros(config['mem_size'], config['batch_size'], dtype=torch.long)
+        mu = [0] * config['mem_size']
+        transfer = [0] * config['mem_size']
         mem_idx = 0
 
         # Compute the Optimal Transport Solver
@@ -176,8 +176,8 @@ def train(config):
             psi_optim.step()
 
             # Update memory tensors
-            mu[mem_idx] = z_batch
-            transfer[mem_idx] = hit
+            mu[mem_idx] = z_batch.data.cpu().numpy().tolist()
+            transfer[mem_idx] = hit.data.cpu().numpy().tolist()
             mem_idx = (mem_idx + 1) % config['mem_size']
 
             # Update losses
@@ -186,29 +186,29 @@ def train(config):
             if (iter % 500 == 0):
                 avg_loss = np.mean(history['losses']['ot_loss'])
                 print('OTS Iteration {} | Epoch {} | Avg Loss Value: {}'.format(iter,epoch,round(avg_loss, 3)))
-            if (iter % 2000 == 0):
-                # Display histogram stats
-                hist_dict, stop = utils.update_histogram(transfer, history, config)
-                # Emperical stopping criterion
-                if stop:
-                    break
+#             if (iter % 2000 == 0):
+#                 # Display histogram stats
+#                 hist_dict, stop = utils.update_histogram(transfer, history, config)
+#                 # Emperical stopping criterion
+#                 if stop:
+#                     break
 
-            if epoch > 2: # min and max are swapped beacause loss is negative value
-                if stop_max <= np.mean(history['losses']['ot_loss']) <= stop_min:
-                    stop_counter += 1
-                    break
+#             if epoch > 2: # min and max are swapped beacause loss is negative value
+#                 if stop_max <= np.mean(history['losses']['ot_loss']) <= stop_min:
+#                     stop_counter += 1
+#                     break
 
         # Compute the Optimal Fitting Transport Plan
         for fit_iter in range(config['mem_size']):
-
             G_optim.zero_grad()
 
             # Retrieve stored batch of generated samples
-            z_batch = mu[fit_iter].to(device)
+            z_batch = torch.tensor(mu[fit_iter]).to(device)
             y_fake  = G(z_batch) # G'(z)
 
             # Get Transfer plan from OTS: T(G_{t-1}(z))
-            y0_hit = dataloader[transfer[fit_iter]].to(device)
+            t_plan = torch.tensor(transfer[fit_iter]).to(device)
+            y0_hit = dataloader[t_plan].to(device)
 
             # Compute Wasserstein distance between G and T
             G_loss = torch.mean(torch.abs(y0_hit - y_fake)) * config['l_dim']

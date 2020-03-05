@@ -178,12 +178,10 @@ def save_sample(sample, epoch, iter, save_dir):
     '''
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
-        nrow = 2
-        torchvision.utils.save_image(sample[0], im_out, nrow = nrow)
     else:
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
-        nrow = (sample.size(0)//4) if (sample.size(0) % 4) == 0 else 2
-        torchvision.utils.save_image(sample, im_out, nrow = nrow)
+    nrow = (sample.size(0)//4) if (sample.size(0) % 4) == 0 else 2
+    torchvision.utils.save_image(sample, im_out, nrow = nrow)
 
 def shrink_lists(dict):
     '''
@@ -231,11 +229,10 @@ def save_train_hist(history, config, times=None, histogram=None):
                                           histogram values representing the probability
                                           density distribution of the generator function.
     '''
-    # Save times - arrays must all be the same length,
-    # otherwise Pandas will thrown an error!
+    # Save times - arrays must all be the same length, otherwise Pandas will thrown an error!
     if times is not None:
         # This is bad coding, but only the gan and ae models save the training
-        # times, and will therefore supply a list to this conditional.
+        # times and will therefore supply a list to this conditional.
         times_csv = config['save_dir'] + '/times.csv'
         DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
         # Save losses
@@ -267,9 +264,9 @@ def save_train_hist(history, config, times=None, histogram=None):
 # Optimizer selection functions #
 #################################
 def get_optim(config, model_params):
-    if 'gan' in config['model']::
+    if 'gan' in config['model']:
         return gan_optim(config, model_params)
-    elif 'ae' in config['model']::
+    elif 'ae' in config['model']:
         return ae_optim(config, model_params)
     elif 'ewm' in config['model']:
         return ewm_optim(config, model_params)
@@ -382,9 +379,6 @@ def get_LArCV_dataloader(config, loader_kwargs=None):
     train_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
                                           transforms.ToTensor(),
                                           transforms.Normalize([0.5],[0.5])])
-    # Select the appropriate dataset
-    config = select_dataset(config)
-
     train_dataset = LArCV_loader(root=config['data_root'], transforms=train_transform)
     if loader_kwargs is None:
         dataloader = DataLoader(train_dataset, **(get_loader_kwargs(config)))
@@ -406,13 +400,12 @@ def get_BottleLoader(config, loader_kwargs=None):
 
 def get_full_dataloader(config):
     '''
-        Returns a dataloader containing full set of code_vector examples.
-        Be careful not to overload the GPU memory.
+        Returns a dataloader containing full set of code_vector examples, or full set
+        of LArCV_[nxn] images. Be careful not to overload the GPU memory.
     '''
     loader_kwargs = get_loader_kwargs(config)
-    config = select_dataset(config)
     loader_kwargs.update({'batch_size': get_dset_size(config['data_root'])})
-    if 'conv' in config['model']:
+    if config['model'] == 'ewm_conv':
         dataloader = get_LArCV_dataloader(config, loader_kwargs=loader_kwargs)
     else:
         dataloader = get_BottleLoader(config, loader_kwargs=loader_kwargs)
@@ -421,13 +414,14 @@ def get_full_dataloader(config):
         return data
 
 def get_dataloader(config):
+    config = select_dataset(config)
     if (config['MNIST']):
         if 'ewm' in config['model']:
             raise Exception("EWM model is not set up to train on MNIST data")
         return MNIST(config)
     elif 'ewm' in config['model']:
         return get_full_dataloader(config) # Train EWM Generator
-    else
+    else:
         return get_LArCV_dataloader(config) # Train Conv or MLP AE or GAN
 
 def get_test_loader(config):

@@ -33,12 +33,25 @@ def conv_block(in_f, out_f):
         nn.MaxPool2d(2,2)
     )
 
+# def deconv_blocks(in_f, out_f):
+#     '''
+#         ConvTranspose blocks decrease the depth of the feature maps from
+#         in_f -> out_f. This sizing pattern is the opposite of the Conv_Blocks.
+#     '''
+#     return nn.Sequential(
+#         nn.ConvTranspose2d(in_f, out_f, kernel_size=2, stride=2),
+#         nn.LeakyReLU(0.2)
+#     )
+
 def deconv_blocks(in_f, out_f):
     '''
         ConvTranspose blocks decrease the depth of the feature maps from
         in_f -> out_f. This sizing pattern is the opposite of the Conv_Blocks.
     '''
     return nn.Sequential(
-        nn.ConvTranspose2d(in_f, out_f, 2, stride = 2),
+        nn.Upsample(scale_factor=2, mode='bilinear'),
+        nn.ReflectionPad2d(1),
+        nn.Conv2d(in_f, out_f, kernel_size=3, stride=1, padding=0),
         nn.LeakyReLU(0.2)
     )
+

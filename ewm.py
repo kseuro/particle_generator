@@ -16,7 +16,19 @@ import torchvision.utils
 from gan import Print
 from gan import FullyConnected
 from gan import DeconvBlock
+from gan import DeconvBlockLast
 
+############################
+# Weight initialization Fn #
+############################
+def weights_init(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(m.weight.data, 1.0, 0.02)
+        nn.init.constant_(m.bias.data, 0)
+        
 ############################
 # Layer creation functions #
 ############################
@@ -43,7 +55,7 @@ class ewm_G(nn.Module):
         super(ewm_G, self).__init__()
         # Set size of input layer and unpack middle layer sizes as list
         self.fc_sizes = [z_dim, *fc_sizes]
-        self.fc = nn.Sequential(*[FullyConnected(in_f, out_f)
+        self.fc = nn.Sequential(*[FullyConnected_ReLU(in_f, out_f)
                                   for in_f, out_f in zip(self.fc_sizes, self.fc_sizes[1:])])
         ## Output layer
         self.out = G_out(self.fc_sizes[-1], n_out)
@@ -126,7 +138,8 @@ class ewm_convG(nn.Module):
         super(ewm_convG, self).__init__()
         self.deconv_sizes = [l_dim] + [*dec_sizes]
         self.main = nn.Sequential(*[DeconvBlock(in_f, out_f)
-                                  for in_f, out_f in zip(self.deconv_sizes, self.deconv_sizes[1:])]
+                                  for in_f, out_f in zip(self.deconv_sizes, self.deconv_sizes[1:-1])]
         )
+        self.last = DeconvBlockLast(self.deconv_sizes[-2], self.deconv_sizes[-1])
     def forward(self, z_h):
-        return self.main(z_h)
+        return self.last(self.main(z_h))
