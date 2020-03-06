@@ -52,6 +52,5 @@ def deconv_blocks(in_f, out_f):
         nn.Upsample(scale_factor=2, mode='bilinear'),
         nn.ReflectionPad2d(1),
         nn.Conv2d(in_f, out_f, kernel_size=3, stride=1, padding=0),
-        nn.LeakyReLU(0.2)
+        nn.LeakyReLU(0.5)
     )
-

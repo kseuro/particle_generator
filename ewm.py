@@ -28,7 +28,7 @@ def weights_init(m):
     elif classname.find('BatchNorm') != -1:
         nn.init.normal_(m.weight.data, 1.0, 0.02)
         nn.init.constant_(m.bias.data, 0)
-        
+
 ############################
 # Layer creation functions #
 ############################
@@ -55,7 +55,7 @@ class ewm_G(nn.Module):
         super(ewm_G, self).__init__()
         # Set size of input layer and unpack middle layer sizes as list
         self.fc_sizes = [z_dim, *fc_sizes]
-        self.fc = nn.Sequential(*[FullyConnected_ReLU(in_f, out_f)
+        self.fc = nn.Sequential(*[FullyConnected(in_f, out_f)
                                   for in_f, out_f in zip(self.fc_sizes, self.fc_sizes[1:])])
         ## Output layer
         self.out = G_out(self.fc_sizes[-1], n_out)
