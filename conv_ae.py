@@ -5,7 +5,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision
 
-from ae_layers import *
+from layers import *
 
 class ConvEncoder(nn.Module):
     '''
@@ -38,7 +38,7 @@ class ConvDecoder(nn.Module):
     '''
     def __init__(self, depth, l_dim):
         super().__init__()
-        self.deconv_blocks = nn.Sequential(*[deconv_blocks(in_f, out_f) for in_f, out_f
+        self.deconv_blocks = nn.Sequential(*[deconv_block(in_f, out_f) for in_f, out_f
                                               in zip(depth, depth[1:])])
         self.activation = nn.Tanh()
     def forward(self, x):
