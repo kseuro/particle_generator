@@ -17,57 +17,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision
 
-############################
-# Layer creation functions #
-############################
-def FullyConnected(in_f, out_f):
-    '''
-        Fully connected layers used by both G and D
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.LeakyReLU(0.5)
-    )
-
-def G_out(in_f, out_f):
-    '''
-        Output layer of the generator model
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.Tanh()
-    )
-
-def D_out(in_f, out_f):
-    '''
-        Output layer of the discriminator model
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.Sigmoid()
-    )
-
-def DeconvBlock(in_f, out_f):
-    '''
-        ConvTranspose blocks decrease the depth of the feature maps from
-        in_f -> out_f. This sizing pattern is the opposite of the Conv_Blocks.
-    '''
-    return nn.Sequential(
-        nn.Upsample(scale_factor=2, mode='bilinear'),
-        nn.ReflectionPad2d(1),
-        nn.Conv2d(in_f, out_f, kernel_size=3, stride=1, padding=0),
-        nn.LeakyReLU(0.2)
-    )
-
-def DeconvBlockLast(in_f, out_f):
-    '''
-        ConvTranspose blocks decrease the depth of the feature maps from
-        in_f -> out_f.
-    '''
-    return nn.Sequential(
-        nn.ConvTranspose2d(in_f, out_f, 2, stride = 2),
-        nn.Tanh()
-    )
+from layers import *
 
 ############################
 #       Model Classes      #
