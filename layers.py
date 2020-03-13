@@ -46,7 +46,7 @@ def D_out(in_f, out_f):
 ########################
 # Convolutional Layers #
 ########################
-def conv_block(in_f, out_f):
+def ConvBlock(in_f, out_f):
     '''
         Convolutional blocks increase the depth of the feature maps from
         in_f -> out_f. The MaxPool2d funtion then reduces the feature
@@ -66,10 +66,10 @@ def DeconvBlock(in_f, out_f):
         1 in order to maintain the image dimension after upsampling.
     '''
     return nn.Sequential(
-        nn.Upsample(scale_factor=2, mode='bilinear'),
+        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
         nn.ReflectionPad2d(1),
         nn.Conv2d(in_f, out_f, kernel_size=3, stride=1, padding=0),
-        nn.LeakyReLU(0.5)
+        nn.LeakyReLU(0.2)
     )
 
 def DeconvBlockLast(in_f, out_f):

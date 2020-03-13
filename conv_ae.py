@@ -20,7 +20,7 @@ class ConvEncoder(nn.Module):
     '''
     def __init__(self, depth, l_dim):
         super().__init__()
-        self.conv_blocks = nn.Sequential(*[conv_block(in_f, out_f) for in_f, out_f
+        self.conv_blocks = nn.Sequential(*[ConvBlock(in_f, out_f) for in_f, out_f
                                            in zip(depth, depth[1:])])
         self.last = nn.Conv2d(depth[-1], l_dim, kernel_size = 3, padding = 1)
 
@@ -38,7 +38,7 @@ class ConvDecoder(nn.Module):
     '''
     def __init__(self, depth, l_dim):
         super().__init__()
-        self.deconv_blocks = nn.Sequential(*[deconv_block(in_f, out_f) for in_f, out_f
+        self.deconv_blocks = nn.Sequential(*[DeconvBlock(in_f, out_f) for in_f, out_f
                                               in zip(depth, depth[1:])])
         self.activation = nn.Tanh()
     def forward(self, x):

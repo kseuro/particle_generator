@@ -1,6 +1,6 @@
 ############################################################################
 # argparser.py
-# Author: Kai Kharpertian
+# Author: Kai Stewart
 # Organization: Tufts University
 # Department: Physics
 # Date: 10.08.2019
@@ -193,6 +193,8 @@ def train_parser():
     parser.add_argument('--ewm_target', type=str, default='',
                         help='Specify the model type from which the EWM targets \
                         were produced: conv or mlp | (default: %(default)s)')
+    parser.add_argument('--tess_var', type=float, default=0.5,
+                        help='Tessellation vector variance | (default: %(default)s)')
 
     return parser
 

@@ -92,6 +92,9 @@ def train(config):
     model_params = {'g_params': G.parameters()}
     G_optim = utils.get_optim(config, model_params)
     
+    # Testing: MSE loss for conv_generator reconstruction
+    loss_fn = nn.MSELoss().to(device)
+    
     # Print G -- make sure it's right before continuing
     print(G)
     input('Press any key to continue')
@@ -188,7 +191,7 @@ def train(config):
     stop_counter = 0
 
     # Compute how the input vectors need to be reshaped, based on conv_G input layer
-    in_f  = G.main[0][0].in_channels; out_f = G.main[0][0].out_channels
+    in_f  = G.main[0][2].in_channels; out_f = G.main[0][2].out_channels
     
     # Set the height and width of the feature maps. Note: Manually setting this to 8 is
     # hackish, but computing the actualy value requires knowing the number of layers in
@@ -291,7 +294,8 @@ def train(config):
             y0_hit = dataloader[t_plan].to(device)
 
             # Compute Wasserstein distance between G and T
-            G_loss = torch.mean(torch.abs(y0_hit - y_fake)) * l_dim
+#             G_loss = torch.mean(torch.abs(y0_hit - y_fake)) * l_dim
+            G_loss = loss_fn(y_fake, y0_hit)
             
             # Backprop
             G_loss.backward() # Gradient descent
