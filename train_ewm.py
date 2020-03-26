@@ -63,6 +63,8 @@ import argparser
 import setup_model
 
 # torch.backends.cudnn.benchmark = True
+def line(length):
+    return '-'*length
 
 def train(config):
     '''
@@ -116,29 +118,29 @@ def train(config):
     
     # Compute the stopping criterion using set of test vectors
     # and computing the 'ideal' loss between the test/target.
-    print("----------------------------")
+    print(line(60))
     print("Computing stopping criterion")
-    print("----------------------------")
+    print(line(60))
     stop_criterion = []
     test_loader = utils.get_test_loader(config)
     for _, test_vecs in enumerate(test_loader):
         # Add Gaussian noise to test_vectors
-        test_vecs    = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
+        test_vecs = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
         t1 = tess_var*torch.randn(test_vecs.shape[0], test_vecs.shape[1]).to(device)
         test_vecs += t1
         # Add Gaussian noise to target data
         t2 = tess_var*torch.randn(dataloader.shape[0], dataloader.shape[1]).to(device)
         test_target  = dataloader + t2
         # Compute the stop score
-        stop_score   = my_ops.l1_t(test_vecs, test_target)
-        stop_loss    = -torch.mean(stop_score)
+        stop_score = my_ops.l1_t(test_vecs, test_target)
+        stop_loss = -torch.mean(stop_score)
         stop_criterion.append(stop_loss.cpu().detach().numpy())
     del test_loader
     # Set stopping criterion variables
     stop_min, stop_mean, stop_max = np.min(stop_criterion), np.mean(stop_criterion), np.max(stop_criterion)
-    print("----------------------------")
+    print(line(60))
     print('Stop Criterion: min: {}, mean: {}, max: {}'.format(round(stop_min, 3), round(stop_mean, 3), round(stop_max, 3)))
-    print("----------------------------")
+    print(line(60))
 
     # Set up stats logging
     hist_dict = {'hist_min':[], 'hist_max':[], 'ot_loss':[]}
@@ -180,13 +182,16 @@ def train(config):
             t2 = tess_var*torch.randn(dataloader.shape[0], dataloader.shape[1]).to(device)
             
             y_fake  += t1
-            y_target = dataloader + t2
-            y_target = y_target.to(device)
+            dataloader += t2
+            dataloader = dataloader.to(device)
             
             # Compute the W1 distance between the model output and the target distribution
-            score = my_ops.l1_t(y_fake, y_target) - psi
+            score = my_ops.l1_t(y_fake, dataloader) - psi
             phi, hit = torch.max(score, 1)
 
+            # Remove the tesselation from the dataloader
+            dataloader -= t2
+            
             # Standard loss computation
             # This loss defines the sample mean of the marginal distribution
             # of the dataset. This is the only computation that generalizes.
@@ -231,8 +236,7 @@ def train(config):
             t_plan = torch.tensor(transfer[fit_iter]).to(device)
             y0_hit = dataloader[t_plan].to(device)
             
-            # Add Gaussian noise to the output of the generator function and to the data
-            # Tessellation vectors
+            # Tesselate the output of the generator function and the data
             t1 = tess_var*torch.randn(y_fake.shape[0], y_fake.shape[1]).to(device)
             t2 = tess_var*torch.randn(y0_hit.shape[0], y0_hit.shape[1]).to(device)
             
@@ -253,7 +257,7 @@ def train(config):
             if 'best_loss' not in history:
                 history.update({ 'best_loss' : G_loss.item() })
 
-            best = G_loss.item() < (history['best_loss'] * 0.5)
+            best = G_loss.item() < (history['best_loss'] * 0.8)
             if best:
                 history['best_loss'] = G_loss.item()
                 checkpoint = utils.get_checkpoint(history['epoch'], checkpoint_kwargs, config)
