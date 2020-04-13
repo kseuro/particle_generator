@@ -127,10 +127,10 @@ def train(config):
         # Add Gaussian noise to test_vectors
         test_vecs = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
         t1 = tess_var*torch.randn(test_vecs.shape[0], test_vecs.shape[1]).to(device)
-        test_vecs += t1
+        test_vecs *= t1
         # Add Gaussian noise to target data
         t2 = tess_var*torch.randn(dataloader.shape[0], dataloader.shape[1]).to(device)
-        test_target  = dataloader + t2
+        test_target  = dataloader * t2
         # Compute the stop score
         stop_score = my_ops.l1_t(test_vecs, test_target)
         stop_loss = -torch.mean(stop_score)
@@ -181,8 +181,8 @@ def train(config):
             t1 = tess_var*torch.randn(y_fake.shape[0], y_fake.shape[1]).to(device)
             t2 = tess_var*torch.randn(dataloader.shape[0], dataloader.shape[1]).to(device)
             
-            y_fake  += t1
-            dataloader += t2
+            y_fake  *= t1
+            dataloader *= t2
             dataloader = dataloader.to(device)
             
             # Compute the W1 distance between the model output and the target distribution
@@ -190,7 +190,7 @@ def train(config):
             phi, hit = torch.max(score, 1)
 
             # Remove the tesselation from the dataloader
-            dataloader -= t2
+            dataloader /= t2
             
             # Standard loss computation
             # This loss defines the sample mean of the marginal distribution
@@ -240,8 +240,8 @@ def train(config):
             t1 = tess_var*torch.randn(y_fake.shape[0], y_fake.shape[1]).to(device)
             t2 = tess_var*torch.randn(y0_hit.shape[0], y0_hit.shape[1]).to(device)
             
-            y_fake += t1
-            y0_hit += t2
+            y_fake *= t1
+            y0_hit *= t2
             
             # Compute Wasserstein distance between G and T
             G_loss = torch.mean(torch.abs(y0_hit - y_fake)) * config['l_dim']
