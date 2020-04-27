@@ -127,10 +127,10 @@ def train(config):
         # Add Gaussian noise to test_vectors
         test_vecs = test_vecs.view(config['batch_size'], -1).to(device) # 'Perfect' generator model
         t1 = tess_var*torch.randn(test_vecs.shape[0], test_vecs.shape[1]).to(device)
-        test_vecs *= t1
+        test_vecs += t1
         # Add Gaussian noise to target data
         t2 = tess_var*torch.randn(dataloader.shape[0], dataloader.shape[1]).to(device)
-        test_target  = dataloader * t2
+        test_target  = dataloader + t2
         # Compute the stop score
         stop_score = my_ops.l1_t(test_vecs, test_target)
         stop_loss = -torch.mean(stop_score)
@@ -177,20 +177,19 @@ def train(config):
             z_batch = torch.randn(config['batch_size'], config['z_dim']).to(device)
             y_fake  = G(z_batch) # [B, dset_size]
             
-            # Add Gaussian noise to the output of the generator function and to the data with tessellation vectors
+#             # Add Gaussian noise to the output of the generator function and to the data with tessellation vectors
             t1 = tess_var*torch.randn(y_fake.shape[0], y_fake.shape[1]).to(device)
             t2 = tess_var*torch.randn(dataloader.shape[0], dataloader.shape[1]).to(device)
             
-            y_fake  *= t1
-            dataloader *= t2
-            dataloader = dataloader.to(device)
+            y_fake  += t1
+            dataloader += t2
             
             # Compute the W1 distance between the model output and the target distribution
             score = my_ops.l1_t(y_fake, dataloader) - psi
             phi, hit = torch.max(score, 1)
 
             # Remove the tesselation from the dataloader
-            dataloader /= t2
+            dataloader -= t2
             
             # Standard loss computation
             # This loss defines the sample mean of the marginal distribution
@@ -236,12 +235,12 @@ def train(config):
             t_plan = torch.tensor(transfer[fit_iter]).to(device)
             y0_hit = dataloader[t_plan].to(device)
             
-            # Tesselate the output of the generator function and the data
-            t1 = tess_var*torch.randn(y_fake.shape[0], y_fake.shape[1]).to(device)
-            t2 = tess_var*torch.randn(y0_hit.shape[0], y0_hit.shape[1]).to(device)
+#            Tesselate the output of the generator function and the data
+#             t1 = tess_var*torch.randn(y_fake.shape[0], y_fake.shape[1]).to(device)
+#             t2 = tess_var*torch.randn(y0_hit.shape[0], y0_hit.shape[1]).to(device)
             
-            y_fake *= t1
-            y0_hit *= t2
+#             y_fake *= t1
+#             y0_hit *= t1
             
             # Compute Wasserstein distance between G and T
             G_loss = torch.mean(torch.abs(y0_hit - y_fake)) * config['l_dim']
@@ -257,7 +256,7 @@ def train(config):
             if 'best_loss' not in history:
                 history.update({ 'best_loss' : G_loss.item() })
 
-            best = G_loss.item() < (history['best_loss'] * 0.8)
+            best = G_loss.item() < (history['best_loss'] * 0.70)
             if best:
                 history['best_loss'] = G_loss.item()
                 checkpoint = utils.get_checkpoint(history['epoch'], checkpoint_kwargs, config)

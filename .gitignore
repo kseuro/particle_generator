@@ -17,6 +17,7 @@ data/*
 test_scripts/data/*
 /dataset_analysis/data/*
 /dataset_analysis/*.png
+/dataset_analysis/MNIST/
 /deploy_analysis/*.png
 
 
