@@ -46,7 +46,8 @@ In order to produce trained AutoEncoder and Generative models capable of functio
     - The trained Generator model can now be used as input to a trained Decoder model in order to generate images.
 
 ### Experiment Requirements
-The ArgParser requirements for each respective experiment are listed below:
+The ArgParser requirements for each respective experiment are listed below:  
+See the [argparser file](https://github.com/kseuro/particle_generator/blob/master/argparser.py) for more detailed descriptions of each flag.
 - All Models:
     - Dataloader kwargs: <pre><code>--data_root --save_root --dataset --batch_size --num_epochs --sample_size --gpu --shuffle --drop_last --num_workers </code></pre>
     - Model and optim specs: <pre><code>  --n_layers --beta --p </code></pre>
@@ -59,8 +60,9 @@ The ArgParser requirements for each respective experiment are listed below:
         - <pre><code> --depth </code></pre>
 - EWM Training Routing
     - For training on the outputs of both MLP and Convolutional AutoEncoder:
-        - <pre><code> --g_lr --g_opt --n_hidden --psi_lr --l_dim --mem_size --ewm_target --vec_root </code></pre>
+        - <pre><code> --g_lr --g_opt --n_hidden --psi_lr --l_dim --mem_size --ewm_target --ewm_root --vec_root </code></pre>
         - **Note:** <pre><code>--vec_root </code></pre> specifies the location of a set of code vectors produced by the AutoEncoder using the TRAINING data. This set of vectors is used only to compute the stopping criterion in the EWM training routine.
+        - **Note:** <pre><code>--ewm_root </code></pre> needs to be specified if an EWM trained model is to be used as input to another model during a training routine.
 
 ### Software and Hardware Requirements:
 - Python version 3.5 or later
