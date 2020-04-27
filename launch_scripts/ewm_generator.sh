@@ -1,0 +1,23 @@
+#!/bin/bash
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python train.py \
+--gpu 0 \
+--batch_size 250 \
+--num_epochs 100 \
+--shuffle True \
+--drop_last True \
+--num_workers 8 \
+--model ewm \
+--n_hidden 512 \
+--n_layers 4 \
+--g_lr 1e-4 \
+--g_opt adam \
+--psi_lr 1e-1 \
+--mem_size 5000 \
+--dataset 64 \
+--l_dim 384 \
+--beta 0.5 \
+--tess_var 0.75 \
+--ewm_target conv \
+--data_root /media/hdd1/kai/particle_generator/code_vectors_target/ \
+--save_root /media/hdd1/kai/particle_generator/experiments/ \
+--vec_root /media/hdd1/kai/particle_generator/code_vectors_test/

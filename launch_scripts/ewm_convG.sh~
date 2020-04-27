@@ -1,0 +1,23 @@
+#!/bin/bash
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0,1 python train_ewm_convG.py \
+--gpu 0 \
+--batch_size 64 \
+--num_epochs 10 \
+--shuffle True \
+--drop_last True \
+--sample_size 16 \
+--num_workers 8 \
+--model ewm_conv \
+--n_hidden 512 \
+--n_layers 3 \
+--g_lr 1e-4 \
+--g_opt adam \
+--psi_lr 1e-1 \
+--mem_size 5000 \
+--dataset 64 \
+--l_dim 6 \
+--beta 0.5 \
+--ewm_target conv \
+--data_root /media/hdd1/kai/particle_generator/larcv_data/train/ \
+--save_root /media/hdd1/kai/particle_generator/experiments/ \
+--ewm_root /media/hdd1/kai/particle_generator/experiments/ewm_models/conv_ewm/evaluated_models/ \
