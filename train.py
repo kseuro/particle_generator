@@ -32,6 +32,9 @@ def train(config):
         Args: config (dictionary): config dict of parsed command line args
         Returns: Nothing
     '''
+    if not config['model']:
+        raise ValueError('Model must be specified!')
+
     # Import the selected model
     model = __import__(config['model']) # GAN, AE, or EWM
 
@@ -74,7 +77,7 @@ def train(config):
     # The variable 'best' will keep track of the previous best_stat and
     # be updated only once the best_stat changes to a new, lower value.
     best = None
-    
+
     # Train model for specified number of epochs
     for epoch, _ in enumerate(epoch_bar):
 

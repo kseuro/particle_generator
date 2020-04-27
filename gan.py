@@ -17,35 +17,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision
 
-############################
-# Layer creation functions #
-############################
-def FullyConnected(in_f, out_f):
-    '''
-        Fully connected layers used by both G and D
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.LeakyReLU(0.2)
-    )
+from layers import *
 
-def G_out(in_f, out_f):
-    '''
-        Output layer of the generator model
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.Tanh()
-    )
-
-def D_out(in_f, out_f):
-    '''
-        Output layer of the discriminator model
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.Sigmoid()
-    )
 ############################
 #       Model Classes      #
 ############################

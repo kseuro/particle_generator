@@ -1,6 +1,6 @@
 ############################################################################
 # argparser.py
-# Author: Kai Kharpertian
+# Author: Kai Stewart
 # Organization: Tufts University
 # Department: Physics
 # Date: 10.08.2019
@@ -29,9 +29,9 @@ def train_parser():
 
     # model: string that selects the type of model to be trained
     #        options: GAN, AE, EWM
-    parser.add_argument('--model', type=str, default='gan',
+    parser.add_argument('--model', type=str, default='',
                         help='String that selects the model - options: \
-                            gan, ae, ewm | (default: &(default)s)')
+                            gan, ae, conv_ae, ewm, ewm_conv | (default: &(default)s)')
     # checkpoint: string path to saved model checkpoint. If used with
     #             train function, model will resume training from checkpoint
     #             If used with deploy function, model will used saved weights.
@@ -61,6 +61,13 @@ def train_parser():
     # dataset: - which LArCV1 dataset to use (512, 256, 128, 64, 32)
     parser.add_argument('--dataset', type=int, default=256,
                         help='Which crop size of the LArCV1 dataset to use, or \
+                            | (default: &(default)s)')
+    parser.add_argument('--vec_root', type=str, default='',
+                        help='Full path to test vectors data folder used to compute \
+                             the early stopping criterion for the ewm model training \
+                            | (default: &(default)s)')
+    parser.add_argument('--ewm_root', type=str, default='',
+                        help='Full path to set of trained EWM models \
                             | (default: &(default)s)')
     #########################################
     ## Torch DataLoader Key Word Arguments ##
@@ -168,6 +175,10 @@ def train_parser():
     parser.add_argument('--ae_lr', type=float, default=1e-4,
                         help='Autoencoder learning rate \
                             | (default: &(default)s)')
+    parser.add_argument('--depth', type=int, default=32,
+                        help='Depth of the feature maps in an instance of a \
+                        Convolutional AutoEncoder -- must be divisible by 4 \
+                        | (default: &(default)s)')
 
     ######################################################
     ## EWM Model
@@ -180,10 +191,11 @@ def train_parser():
                         help='Size of memory arrays used in OTS computation \
                         | (default: %(default)s)')
     parser.add_argument('--ewm_target', type=str, default='',
-                        help='Set the AE model type that produced the code vector \
-                        targets on which you wish to train the EWM model. For conv \
-                        targets, set the l-dim to the product of the AE model code \
-                        volume. e.g. l-dim: 12x4x4 = 192 | (default: %(default)s)')
+                        help='Specify the model type from which the EWM targets \
+                        were produced: conv or mlp | (default: %(default)s)')
+    parser.add_argument('--tess_var', type=float, default=0.5,
+                        help='Tessellation vector variance | (default: %(default)s)')
+
     return parser
 
 # Deploy model argument parser function

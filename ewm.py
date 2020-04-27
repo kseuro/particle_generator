@@ -1,6 +1,6 @@
 ################################################################################
 # ewm.py
-# Author: Kai Kharpertian
+# Author: Kai Stewart
 # Organization: Tufts University
 # Department: Physics
 # Date: 10.23.2019
@@ -13,19 +13,18 @@ import torch
 import torch.nn as nn
 import torchvision.utils
 
-from gan import Print
-from gan import FullyConnected
+from layers import *
 
 ############################
-# Layer creation functions #
+# Weight initialization Fn #
 ############################
-def G_out(in_f, out_f):
-    '''
-        Output layer of the ewm generator model - does not include tanh()
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-    )
+def weights_init(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(m.weight.data, 1.0, 0.02)
+        nn.init.constant_(m.bias.data, 0)
 
 class ewm_G(nn.Module):
     '''
@@ -45,7 +44,7 @@ class ewm_G(nn.Module):
         self.fc = nn.Sequential(*[FullyConnected(in_f, out_f)
                                   for in_f, out_f in zip(self.fc_sizes, self.fc_sizes[1:])])
         ## Output layer
-        self.out = G_out(self.fc_sizes[-1], n_out)
+        self.out = G_out_no_actv(self.fc_sizes[-1], n_out)
 
     # Initialize the weights
     def weights_init(self):
@@ -62,3 +61,17 @@ class ewm_G(nn.Module):
 
     def forward(self, x):
         return self.out(self.fc(x))
+
+class ewm_convG(nn.Module):
+    """
+        Convolutional generator model.
+    """
+    def __init__(self, l_dim, dec_sizes, im_size):
+        super(ewm_convG, self).__init__()
+        self.deconv_sizes = [l_dim] + [*dec_sizes]
+        self.main = nn.Sequential(*[DeconvBlock(in_f, out_f)
+                                  for in_f, out_f in zip(self.deconv_sizes, self.deconv_sizes[1:-1])]
+        )
+        self.last = DeconvBlockLast(self.deconv_sizes[-2], self.deconv_sizes[-1])
+    def forward(self, z_h):
+        return self.last(self.main(z_h))

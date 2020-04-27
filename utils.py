@@ -62,7 +62,12 @@ def directories(config):
 
     if config['model'] != 'ewm':
         label = 'MNIST' if config['MNIST'] else 'LArCV'
-        config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
+        if 'ae' in config['model']:
+            config['exp_label'] += '_{}_{}_dataset_{}_l-dim/'.format(label,
+                                                                    config['dataset'],
+                                                                    config['l_dim'])
+        else:
+            config['exp_label'] += '_{}_{}_dataset/'.format(label, config['dataset'])
     else:
         label = 'Code_Vectors_{}_{}'.format(config['dataset'], config['l_dim'])
         config['exp_label'] += '_{}/'.format(label)
@@ -173,12 +178,10 @@ def save_sample(sample, epoch, iter, save_dir):
     '''
     if 'fixed' in save_dir:
         im_out = save_dir + 'fixed_sample_{}.png'.format(epoch)
-        nrow = 2
-        torchvision.utils.save_image(sample[0], im_out, nrow = nrow)
     else:
         im_out = save_dir + 'random_sample_{}_{}.png'.format(epoch, iter)
-        nrow = (sample.size(0)//4) if (sample.size(0) % 4) == 0 else 2
-        torchvision.utils.save_image(sample, im_out, nrow = nrow)
+    nrow = (sample.size(0)//4) if (sample.size(0) % 4) == 0 else 2
+    torchvision.utils.save_image(sample, im_out, nrow = nrow)
 
 def shrink_lists(dict):
     '''
@@ -226,9 +229,10 @@ def save_train_hist(history, config, times=None, histogram=None):
                                           histogram values representing the probability
                                           density distribution of the generator function.
     '''
-    # Save times - arrays must all be the same length,
-    # otherwise Pandas will thrown an error!
+    # Save times - arrays must all be the same length, otherwise Pandas will thrown an error!
     if times is not None:
+        # This is bad coding, but only the gan and ae models save the training
+        # times and will therefore supply a list to this conditional.
         times_csv = config['save_dir'] + '/times.csv'
         DataFrame(shrink_lists(times)).to_csv(times_csv, header=True, index=False)
         # Save losses
@@ -260,11 +264,11 @@ def save_train_hist(history, config, times=None, histogram=None):
 # Optimizer selection functions #
 #################################
 def get_optim(config, model_params):
-    if (config['model'] == 'gan'):
+    if 'gan' in config['model']:
         return gan_optim(config, model_params)
-    elif (config['model'] == 'ae'):
+    elif 'ae' in config['model']:
         return ae_optim(config, model_params)
-    elif (config['model'] == 'ewm'):
+    elif 'ewm' in config['model']:
         return ewm_optim(config, model_params)
 
 def gan_optim(config, model_params):
@@ -330,12 +334,11 @@ def select_dataset(config):
         structure expected by the torch ImageFolder class.
     '''
     if config['model'] == 'ewm':
-        if config['ewm_target'] == 'mlp':
-            config['data_root'] += 'mlp_ae/code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
-        elif config['ewm_target'] == 'conv':
-            config['data_root'] += 'conv_ae/code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
+        if config['ewm_target'] == 'conv':
+            config['data_root'] += 'conv_ae/'
         else:
-            raise Exception('No EWM target selected -- unable to set data_root')
+            config['data_root'] += 'mlp/'
+        config['data_root'] += 'code_vectors_{}_{}/'.format(config['dataset'], config['l_dim'])
         return config
     if (config['dataset'] == 512):
         config['data_root'] += 'larcv_png_512/'
@@ -348,7 +351,17 @@ def select_dataset(config):
     elif (config['dataset'] == 32):
         config['data_root'] += 'larcv_png_32/'
     else:
-        raise Exception('LArCV dataset not specified -- unable to set data_root')
+        raise Exception('Dataset not specified -- unable to set data_root')
+    return config
+
+def select_test_vecs(config):
+    if config['ewm_target'] == 'conv':
+        config['vec_root'] += 'conv_ae/'
+    elif config['ewm_target'] == 'mlp':
+        config['vec_root'] += 'mlp/'
+    else:
+        raise Exception('EWM Target not specified -- unable to select test vectors')
+    config['vec_root'] += "code_vectors_{}_{}/".format(config['dataset'], config['l_dim'])
     return config
 
 def MNIST(config):
@@ -366,9 +379,6 @@ def get_LArCV_dataloader(config, loader_kwargs=None):
     train_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
                                           transforms.ToTensor(),
                                           transforms.Normalize([0.5],[0.5])])
-    # Select the appropriate dataset
-    config = select_dataset(config)
-
     train_dataset = LArCV_loader(root=config['data_root'], transforms=train_transform)
     if loader_kwargs is None:
         dataloader = DataLoader(train_dataset, **(get_loader_kwargs(config)))
@@ -384,35 +394,43 @@ def get_BottleLoader(config, loader_kwargs=None):
                cast to Torch Tensors, as we wish to perserve their structure.
     '''
     train_transform = transforms.Compose([ transforms.ToTensor() ])
-
-    # Select the code_vector dataset and add its length to the loader_kwargs
-    config = select_dataset(config)
-    loader_kwargs.update({'batch_size': get_dset_size(config['data_root'])})
     train_dataset = BottleLoader(root=config['data_root'], transforms=train_transform)
     dataloader = DataLoader(train_dataset, **loader_kwargs)
-
     return dataloader
 
 def get_full_dataloader(config):
     '''
-        Returns a dataloader containing full set of code_vector examples.
-        10000 is safe to load onto a Nvidia Titan 1080x with a single model.
+        Returns a dataloader containing full set of code_vector examples, or full set
+        of LArCV_[nxn] images. Be careful not to overload the GPU memory.
     '''
     loader_kwargs = get_loader_kwargs(config)
-    dataloader = get_BottleLoader(config, loader_kwargs=loader_kwargs)
+    loader_kwargs.update({'batch_size': get_dset_size(config['data_root'])})
+    if config['model'] == 'ewm_conv':
+        dataloader = get_LArCV_dataloader(config, loader_kwargs=loader_kwargs)
+    else:
+        dataloader = get_BottleLoader(config, loader_kwargs=loader_kwargs)
     for data in dataloader:
         print('Returning full dataloader with {} training examples'.format(loader_kwargs['batch_size']))
         return data
 
 def get_dataloader(config):
+    config = select_dataset(config)
     if (config['MNIST']):
-        if (config['model'] == 'ewm'):
+        if 'ewm' in config['model']:
             raise Exception("EWM model is not set up to train on MNIST data")
         return MNIST(config)
-    elif (config['model'] != 'ewm'):
-        return get_LArCV_dataloader(config)
+    elif 'ewm' in config['model']:
+        return get_full_dataloader(config) # Train EWM Generator
     else:
-        return get_full_dataloader(config)
+        return get_LArCV_dataloader(config) # Train Conv or MLP AE or GAN
+
+def get_test_loader(config):
+    config = select_test_vecs(config)
+    loader_kwargs = get_loader_kwargs(config)
+    train_transform = transforms.Compose([ transforms.ToTensor() ])
+    test_dataset = BottleLoader(root=config['vec_root'], transforms=train_transform)
+    dataloader = DataLoader(test_dataset, **loader_kwargs)
+    return dataloader
 
 #####################
 # EWM Functionality #

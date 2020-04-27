@@ -17,26 +17,12 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision
 
-def enc_block(in_f, out_f):
-    '''
-        Using LeakyReLU in the encoder portion generates much 'cleaner'
-        looking digits during MNIST PoC.
-    '''
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.LeakyReLU(0.2)
-    )
-
-def dec_block(in_f, out_f):
-    return nn.Sequential(
-        nn.Linear(in_f, out_f),
-        nn.LeakyReLU(0.2)
-    )
+from layers import *
 
 class Encoder(nn.Module):
     def __init__(self, enc_sizes, l_dim):
         super().__init__()
-        self.fc_blocks = nn.Sequential(*[enc_block(in_f, out_f) for in_f, out_f
+        self.fc_blocks = nn.Sequential(*[FullyConnected(in_f, out_f) for in_f, out_f
                                         in zip(enc_sizes, enc_sizes[1:])])
         self.last = nn.Linear(enc_sizes[-1], l_dim)
 
@@ -54,7 +40,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, dec_sizes, im_size):
         super().__init__()
-        self.fc_blocks = nn.Sequential(*[dec_block(in_f, out_f) for in_f, out_f
+        self.fc_blocks = nn.Sequential(*[FullyConnected(in_f, out_f) for in_f, out_f
                                         in zip(dec_sizes, dec_sizes[1:])])
         self.last = nn.Sequential(nn.Linear(dec_sizes[-1], im_size), nn.Tanh())
 
@@ -76,10 +62,6 @@ class AutoEncoder(nn.Module):
         self.dec_sizes = [l_dim] + [*dec_sizes]
         self.encoder = Encoder(self.enc_sizes, l_dim)
         self.decoder = Decoder(self.dec_sizes, im_size)
-
-    def weights_init(self):
-        self.encoder.weights_init()
-        self.decoder.weights_init()
 
     def forward(self, x):
         x = self.encoder(x)

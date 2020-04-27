@@ -127,12 +127,7 @@ def MNIST_AE(epoch, epoch_start, AE, AE_optim, dataloader, train_fn, history,
         tr_loop_start = time.time()
 
         metrics = train_fn(x, itr, epoch)
-        history, best_stat, best = utils.train_logger(history, best_stat, metrics)
-
-        # Save checkpoint periodically
-        if (itr % 1000 == 0):
-            chkpt_AE = utils.get_checkpoint(itr, epoch, AE, AE_optim)
-            utils.save_checkpoint(chkpt_AE, best, 'AE', config['weights_save'])
+        history, best_stat = utils.train_logger(history, best_stat, metrics)
 
         # Log the time at the end of training loop
         times['tr_loop_times'].append(time.time() - tr_loop_start)
@@ -332,6 +327,61 @@ def AE_train_fn(AE, AE_optim, loss_fn, config):
         loss.backward()
         AE_optim.step()
 
+        # Save output periodically - concatenate the model outputs with the
+        # images it was supposed to reconstruct in order to visualize the
+        # model evolution during training.
+        if itr % 20 == 0:
+            # Arrange training data and model outputs on
+            # alternating rows for easy visual comparison.
+            row1 = x[0:config['sample_size']//2, :]
+            row2 = output[0:config['sample_size']//2, :]
+            row3 = x[config['sample_size']//2:config['sample_size'], :]
+            row4 = output[config['sample_size']//2:config['sample_size'], :]
+            sample = torch.cat([row1, row2, row3, row4])
+            sample = sample.view(sample.size(0), 1,
+                                 config['dataset'], config['dataset'])
+            utils.save_sample(sample, epoch, itr, config['random_samples'])
+
+        # Return training metrics
+        metrics = { 'ae_loss' : float(loss.item()) }
+
+        return metrics
+    return train
+
+def Conv_AE_train_fn(AE, AE_optim, loss_fn, config):
+    '''
+        Convolutional AE training function
+        Does: Initializes the training function for the AE model.
+        Args: - AE (Torch neural network): Convolutional Autoencoder Model
+              - AE_optim (Torch optimizer function): AE optimizer (Adam or SGD)
+              - loss_fn (Torch loss function): AE loss function
+              - config (dict): config dictionary of parameters
+    '''
+    def train(x, itr, epoch):
+        '''
+            AE training function
+            Does: Trains the AE model
+            Args: x (Torch tensor): Real data input image
+            Returns: list of training metrics
+        '''
+        # Make sure model is in training mode
+        AE.train()
+
+        # Move input to gpu -- no need to flatten
+        x = x.to(config['gpu'])
+
+        # Forward pass
+        output = AE(x)
+
+        # Compare output to real data
+        loss = loss_fn(output, x)
+
+        # Backprop and update weights
+        AE_optim.zero_grad()
+        loss.backward()
+        AE_optim.step()
+
+        # TODO: check that the samples are saving correctly
         # Save output periodically - concatenate the model outputs with the
         # images it was supposed to reconstruct in order to visualize the
         # model evolution during training.
