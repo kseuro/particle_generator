@@ -1,6 +1,6 @@
 ###############################################################################
 # utils.py
-# Author: Kai Kharpertian
+# Author: Kai Stewart
 # Organization: Tufts University
 # Department: Physics
 # Date: 10.16.2019

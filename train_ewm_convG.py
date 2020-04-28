@@ -1,6 +1,6 @@
 ############################################################################
 # train.py
-# Author: Kai Kharpertian
+# Author: Kai Stewart
 # Tufts University - Department of Physics
 # 01.08.2020
 # - This script instantiates G as a multi-layer perceptron and computes
@@ -87,18 +87,18 @@ def train(config):
     G = ewm.ewm_convG(**emw_kwargs).to(device)
 #     ewm.weights_init(G)
     G.train()
-    
+
     # Setup model optimizer
     model_params = {'g_params': G.parameters()}
     G_optim = utils.get_optim(config, model_params)
-    
+
     # Testing: MSE loss for conv_generator reconstruction
     loss_fn = nn.MSELoss().to(device)
-    
+
     # Print G -- make sure it's right before continuing
     print(G)
     input('Press any key to continue')
-    
+
     # Setup source of structured noise on GPU (Trained EWM_MLP_Generator Model)
     # Add these configs to the experiment source file
     if not config['ewm_root']:
@@ -113,15 +113,15 @@ def train(config):
         EWM_name = EWM_paths[i].split('/')[-1]
         print("\n Exp_{}:".format(str(i)), EWM_name, '\n')
         print("-"*60)
-    
+
     # Select the trained model
     model_num = input('Select EWM_MLP model (enter integer): ')
     EWM_dir = EWM_paths[int(model_num)]
-    
+
     # Create the full path to the EWM model
     EWM_path = os.path.join(EWM_root, EWM_dir) + '/'
     print("Path to EWM Generator Model set as: \n{}".format(EWM_path))
-    
+
     config_csv = EWM_path + "config.csv"
     config_df = pd.read_csv(config_csv, delimiter = ",")
 
@@ -137,7 +137,7 @@ def train(config):
 
     # Send model to GPU
     Gz = ewm.ewm_G(**ewm_kwargs).to(device)
- 
+
     # Load the model checkpoint
     # Get checkpoint name(s)
     EWM_checkpoint_path  = EWM_path + 'weights/'
@@ -192,15 +192,15 @@ def train(config):
 
     # Compute how the input vectors need to be reshaped, based on conv_G input layer
     in_f  = G.main[0][2].in_channels; out_f = G.main[0][2].out_channels
-    
+
     # Set the height and width of the feature maps. Note: Manually setting this to 8 is
     # hackish, but computing the actualy value requires knowing the number of layers in
     # the AutoEncoder whose code layer was used to train the generator model being loaded
-    # here. I'm avoiding loading multiple paths and dataframes by simply setting it to 8, 
+    # here. I'm avoiding loading multiple paths and dataframes by simply setting it to 8,
     # but maybe you can do better than I did...
     H = W = 8
     print('Vectors will be reshaped as: [{}] --> [{},{},{}]'.format(l_dim, in_f, H, W))
-    
+
     # Set a fixed feature tensor for testing
     noise  = torch.randn(config['sample_size'], config['z_dim']).to(device)
     z_fixed = Gz(noise).view(-1, in_f, H, W).to(device)
@@ -214,10 +214,10 @@ def train(config):
 
         history['epoch'] = epoch
 
-        # Set up memory lists: 
-        #     - mu: simple feed-forward distribution 
+        # Set up memory lists:
+        #     - mu: simple feed-forward distribution
         #     - transfer: transfer plan given by lists of indices
-        # Rule-of-thumb: do not save the tensors themselves: instead, save the 
+        # Rule-of-thumb: do not save the tensors themselves: instead, save the
         #                data as a list and covert it to a tensor as needed.
         mu = [0] * config['mem_size']
         transfer = [0] * config['mem_size']
@@ -238,7 +238,7 @@ def train(config):
             # Push structured noise vector through convolutional generator
 #             y_fake = G(z_batch).view(config['batch_size'], -1) # Flatten the output to match dataloader
             y_fake = G(z_batch)
-            
+
             # Compute the W1 distance between the model output and the target distribution
             score = my_ops.l1_t(y_fake, dataloader) - psi
 
@@ -268,7 +268,7 @@ def train(config):
                 # Occasionally save a random sample from the generator during OTS
                 sample = y_fake[0:config['sample_size']].view(-1, 1, config['dataset'], config['dataset'])
                 utils.save_sample(sample, epoch, ots_iter, config['random_samples'])
-                
+
 #                 # Display histogram stats
 #                 hist_dict, stop = utils.update_histogram(transfer, history, config)
 #                 # Emperical stopping criterion
@@ -280,15 +280,15 @@ def train(config):
         fit_bar  = tqdm([i for i in range(config['mem_size'])])
         for fit_iter, _ in enumerate(fit_bar):
             G_optim.zero_grad()
-            
+
             # Retrieve stored batch of generated samples
 #             z_batch = torch.tensor(mu[fit_iter]).view(-1, in_f, H, W).to(device)
             z_batch = torch.tensor(mu[fit_iter]).to(device)
-            
+
             # Flatten the model output to match dataloader
 #             y_fake = G(z_batch).view(config['batch_size'], -1)
             y_fake = G(z_batch)
-            
+
             # Get Transfer plan from OTS: T(G_{t-1}(Gz))
             t_plan = torch.tensor(transfer[fit_iter])
             y0_hit = dataloader[t_plan].to(device)
@@ -296,7 +296,7 @@ def train(config):
             # Compute Wasserstein distance between G and T
 #             G_loss = torch.mean(torch.abs(y0_hit - y_fake)) * l_dim
             G_loss = loss_fn(y_fake, y0_hit)
-            
+
             # Backprop
             G_loss.backward() # Gradient descent
             G_optim.step()
@@ -317,7 +317,7 @@ def train(config):
             if (fit_iter % 50 == 0):
                 avg_loss = np.mean(history['losses']['fit_loss'])
 #                 print('FIT Iteration {} | Epoch {} | Avg Loss Value: {}'.format(fit_iter, epoch, round(avg_loss,3)))
-         
+
         # Save a fixed sample of the generator's output at the end of FIT
         sample = G(z_fixed).view(-1, 1, config['dataset'], config['dataset'])
         utils.save_sample(sample, epoch, fit_iter, config['fixed_samples'])

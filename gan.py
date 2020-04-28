@@ -1,6 +1,6 @@
 ################################################################################
 # gan.py
-# Author: Kai Kharpertian
+# Author: Kai Stewart
 # Organization: Tufts University
 # Department: Physics
 # Date: 10.08.2019
