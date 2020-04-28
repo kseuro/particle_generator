@@ -51,11 +51,16 @@ def ConvBlock(in_f, out_f):
         Convolutional blocks increase the depth of the feature maps from
         in_f -> out_f. The MaxPool2d funtion then reduces the feature
         map dimension by a factor of 2.
+        - Note that ReLU + MaxPool and MaxPool + ReLU are equivalent operations,
+            with the second option being 37.5% more efficient
+            (numel + numel in first case numel + numel/4 in the second case,
+            where numel is the number of elements in the tensor)
     '''
     return nn.Sequential(
         nn.Conv2d(in_f, out_f, kernel_size = 3, padding = 1),
-        nn.LeakyReLU(0.2),
-        nn.MaxPool2d(2,2)
+        nn.BatchNorm2d(out_f),
+        nn.MaxPool2d(2,2),
+        nn.LeakyReLU(0.2)
     )
 
 def DeconvBlock(in_f, out_f):
